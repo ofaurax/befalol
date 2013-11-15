@@ -1,8 +1,9 @@
 <?php 
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-require_once __DIR__.'/vendor/autoload.php';
-require_once ('./eventshandler.php');
+set_include_path('./php/:'.get_include_path());
+//require_once __DIR__.'/vendor/autoload.php';
+require_once('eventshandler.php');
 
 $Aldeen = new Member ('001', 'Aldeen', date(DATE_RFC2822));
 $Olivier = new Member ('002', 'Olivier', date(DATE_RFC2822));
