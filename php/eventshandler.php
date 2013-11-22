@@ -8,10 +8,10 @@ require_once ('usershandler.php');
 // 'id'=> string, 
 // 'location' => string,
 // 'type' => string, 
-// 'StartingDate' => date,  
-// 'EndingDate' => date, 
+// 'starting_date' => date,  
+// 'ending_date' => date, 
 // 'holder' => Member,
-// 'MaxNbParticipants' => integer, 
+// 'max_nb_participants' => integer, 
 // 'Participants' => array (MemberX, MemberY, MemberW,..)
 // 'languages' => string or array of strings, 
 // 'description' => string )
@@ -19,26 +19,26 @@ require_once ('usershandler.php');
 Class Event {
 	
 	// Internal variables
-	protected $parameterslist;
+	protected $_parameters_list;
 	protected $_id = 0;
 	protected $_location = '';
 	protected $_type = '';
-	protected $_StartingDate = '';
-	protected $_EndingDate = '';
+	protected $_starting_date = '';
+	protected $_ending_date = '';
 	protected $_holder = '';
-	protected $_MaxNbParticipants = 0;
+	protected $_max_nb_participants = 0;
 	protected $_participants = array();
 	protected $_languages = array();
 	protected $_description = '';
 	// Define different types of events allowed
-	private $_TypeRange = array('Visits', 'Activities', 'Journeys', 'Parties');
+	static public $_type_range = array('Visits', 'Activities', 'Journeys', 'Parties');
 	
 	// constructor requires all parameters
 	function __construct($parameters)
     {
-		if (($this->SetUp() == 0) && (is_array($parameters)))
+		if (($this->set_up() == 0) && (is_array($parameters)))
 		{	
-			foreach ($this->parameterslist as $key)
+			foreach ($this->_parameters_list as $key)
 			{
 				//echo $key. '<br />';
 				if (!array_key_exists ($key , $parameters))
@@ -61,17 +61,17 @@ Class Event {
 					case 'type':
 						$this->set_type ($value);
 						break;
-					case 'StartingDate':
-						$this->set_StartingDate ($value);
+					case 'starting_date':
+						$this->set_starting_date ($value);
 						break;
-					case 'EndingDate':
-						$this->set_EndingDate ($value);
+					case 'ending_date':
+						$this->set_ending_date ($value);
 						break;
 					case 'holder':
 						$this->set_holder ($value);
 						break;
-					case 'MaxNbParticipants':
-						$this->set_MaxNbParticipants ($value);
+					case 'max_nb_participants':
+						$this->set_max_nb_participants ($value);
 						break;
 					case 'languages':
 						$this->set_languages ($value);
@@ -97,10 +97,10 @@ Class Event {
 	Set the parameterlist defaut value
 	// Check Mandatory Input values (Participants is not mandatory)
 	******/
-	public function SetUp()
+	public function set_up()
 	{
-		$this->parameterslist = array ('id','location','type', 'StartingDate', 'EndingDate',
-		'MaxNbParticipants', 'holder', 'languages', 'description');
+		$this->_parameters_list = array ('id','location','type', 'starting_date', 'ending_date',
+		'max_nb_participants', 'holder', 'languages', 'description');
 	}
 	
 	/***** 
@@ -181,10 +181,10 @@ Class Event {
 	******/
 	public  function set_type ($type)
 	{
-		if (!in_array ($type, $this->_TypeRange))
+		if (!in_array ($type, self::$_type_range))
 		{
 			trigger_error('The Type parameter of the '.get_class($this) 
-			.' must be matching one of the following values ' .$this->_TypeRange, E_USER_ERROR);
+			.' must be matching one of the following values ' .self::$_type_range, E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 		else
@@ -200,10 +200,10 @@ Class Event {
 	******/
 	public  function get_type ()
 	{
-		if (!in_array ($this->_type, $this->_TypeRange))
+		if (!in_array ($this->_type, self::$_type_range))
 		{
 			trigger_error('The Type parameter of the '.get_class($this) 
-			.' should be matching one of the following values ' .$this->_TypeRange, E_USER_ERROR);
+			.' should be matching one of the following values ' .self::$_type_range, E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 		else
@@ -214,70 +214,70 @@ Class Event {
 	}
 	
 	/***** 
-	Set the StartingDate parameter
+	Set the starting_date parameter
 	******/
-	public  function set_StartingDate ($StartingDate)
+	public  function set_starting_date ($starting_date)
 	{
-		if ($StartingDate && (IsDate($StartingDate)))
+		if ($starting_date && (IsDate($starting_date)))
 		{
-			$this->_StartingDate = $StartingDate;
+			$this->_starting_date = $starting_date;
 			return 0;
 		}
 		else 
 		{
-			trigger_error('The StartingDate parameter of the '.get_class($this) 
+			trigger_error('The starting_date parameter of the '.get_class($this) 
 			.' must be a Date format', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
 	/******
-	// get the StartingDate parameter
+	// get the starting_date parameter
 	******/
-	public  function get_StartingDate ()
+	public  function get_starting_date ()
 	{
-		if ($this->_StartingDate && (IsDate($this->_StartingDate)))
+		if ($this->_starting_date && (IsDate($this->_starting_date)))
 		{
-			return $this->_StartingDate;
+			return $this->_starting_date;
 		}
 		else 
 		{
-			trigger_error('The StartingDate parameter of the '.get_class($this) 
+			trigger_error('The starting_date parameter of the '.get_class($this) 
 			.' should have been a Date format', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
 	/******
-	Set the Ending parameter
+	Set the ending parameter
 	******/
-	public  function set_EndingDate ($EndingDate)
+	public  function set_ending_date ($ending_date)
 	{
-		if ($EndingDate && (IsDate($EndingDate)))
+		if ($ending_date && (IsDate($ending_date)))
 		{
-			$this->_EndingDate = $EndingDate;
+			$this->_ending_date = $ending_date;
 			return 0;
 		}
 		else 
 		{
-			trigger_error('The EndingDate parameter of the '.get_class($this) 
+			trigger_error('The ending_date parameter of the '.get_class($this) 
 			.' must be a Date format', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
 	/******
-	Get the EndingDate parameter
+	Get the ending_date parameter
 	******/
-	public  function get_EndingDate ()
+	public  function get_ending_date ()
 	{
-		if ($this->_EndingDate && (IsDate($this->_EndingDate)))
+		if ($this->_ending_date && (IsDate($this->_ending_date)))
 		{
-			return $this->_EndingDate;
+			return $this->_ending_date;
 		}
 		else 
 		{
-			trigger_error('The EndingDate parameter of the '.get_class($this) 
+			trigger_error('The ending_date parameter of the '.get_class($this) 
 			.' should have been a Date format', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
@@ -321,16 +321,16 @@ Class Event {
 	/******
 	// set the maximal number of participants parameter
 	******/
-	public  function set_MaxNbParticipants ($MaxNbParticipants)
+	public  function set_max_nb_participants ($max_nb_participants)
 	{
-		if (is_numeric($MaxNbParticipants))
+		if (is_numeric($max_nb_participants))
 		{
-			$this->_MaxNbParticipants = $MaxNbParticipants;
+			$this->_max_nb_participants = $max_nb_participants;
 			return 0;
 		}
 		else 
 		{
-			trigger_error('The MaxNbParticipants parameter of the '
+			trigger_error('The max_nb_participants parameter of the '
 			.get_class($this) .' must be a digit', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
@@ -339,15 +339,15 @@ Class Event {
 	/******
 	Get the maximal number of participants parameter
 	******/
-	public  function get_MaxNbParticipants ()
+	public  function get_max_nb_participants ()
 	{
-		if (is_numeric($this->_MaxNbParticipants))
+		if (is_numeric($this->_max_nb_participants))
 		{
-			return $this->_MaxNbParticipants;
+			return $this->_max_nb_participants;
 		}
 		else 
 		{
-			trigger_error('The MaxNbParticipants parameter of the'.get_class($this) 
+			trigger_error('The max_nb_participants parameter of the'.get_class($this) 
 			.'should have been a digit', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
@@ -356,20 +356,20 @@ Class Event {
 	/******
 	Register members to the event (so they will become participant) 
 	******/
-	public  function set_participants ($ParticipantsList)
+	public  function set_participants ($participants_list)
 	{
 		$participant = '';
-		// if ParticipantsList does not exist
-		if (!$ParticipantsList)
+		// if participants_list does not exist
+		if (!$participants_list)
 		{
 			trigger_error('The participants parameter of the '.get_class($this) .' must either be 
 			an \'Member\' typed object or an array of \'Member\' typed objects', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 		// but if Participantlist exists and it's an array, treat it like an array
-		elseif (is_array($ParticipantsList))
+		elseif (is_array($participants_list))
 		{
-			foreach ($ParticipantsList as $participant)		
+			foreach ($participants_list as $participant)		
 			{
 				if (get_class($participant) == 'Member')
 				{
@@ -387,7 +387,7 @@ Class Event {
 		// and if it's not an array, treat it like it's not
 		else
 		{
-			$participant = $ParticipantsList;
+			$participant = $participants_list;
 			if (get_class($participant) == 'Member')
 			{
 				array_push ($this->_participants, $participant);
@@ -521,10 +521,10 @@ Class Event {
 		$r .= 'Id: '. $this->get_id() . '<br />';
 		$r .= 'Location: '. $this->get_location() . '<br />';
 		$r .= 'Type: '. $this->get_type() . '<br />';
-		$r .= 'StartingDate: '. $this->get_StartingDate() . '<br />';
-		$r .= 'EndingDate: '. $this->get_EndingDate() . '<br />';
+		$r .= 'starting_date: '. $this->get_starting_date() . '<br />';
+		$r .= 'ending_date: '. $this->get_ending_date() . '<br />';
 		$r .= 'Holder: '. $this->get_holder()->get_name() . '<br />';
-		$r .= 'MaxNbParticipants: '. $this->get_MaxNbParticipants() . '<br />';
+		$r .= 'max_nb_participants: '. $this->get_max_nb_participants() . '<br />';
 		$r .= 'description: '. $this->get_description() . '<br />';
 		$r .= 'participants: ';
 		if (is_array ($this->get_participants()))

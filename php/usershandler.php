@@ -5,16 +5,16 @@ Class Member {
 	protected $_id = 0;
 	protected $_name = '';
 	protected $_email = '';
-	protected $_BirthdayDate = '';
-	protected $_Nationality = '';
+	protected $_birthday_date = '';
+	protected $_nationality = '';
 	
-	function __construct($id, $name, $BirthdayDate,$email='x.gilbert@martine.net', $Nationality='French')
+	function __construct($id, $name, $birthday_date,$email='x.gilbert@martine.net', $nationality='French')
 	{
     	$this->_id = $id;
 	 	$this->_name = $name;
 	 	$this->_email = $email;
-	 	$this->_BirthdayDate = $BirthdayDate;
-		$this->_Nationality = $Nationality;
+	 	$this->_birthday_date = $birthday_date;
+		$this->_nationality = $nationality;
 
 	}
 	

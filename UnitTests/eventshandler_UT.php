@@ -1,5 +1,5 @@
 <?php
-require_once ('./eventshandler.php');
+require_once ('./php/eventshandler.php');
 date_default_timezone_set('Europe/Paris');
 
 
