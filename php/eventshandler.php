@@ -1,21 +1,25 @@
 <?php
 require_once ('basicerrorhandling.php');
-require_once ('usershandler.php');
 	 
 
-/*Class allowing to handle an event
-// @Input : variable type (key=>Value) ; array(
-// 'id'=> string, 
-// 'location' => string,
-// 'type' => string, 
-// 'starting_date' => date,  
-// 'ending_date' => date, 
-// 'holder' => Member,
-// 'max_nb_participants' => integer, 
-// 'Participants' => array (MemberX, MemberY, MemberW,..)
-// 'languages' => string or array of strings, 
-// 'description' => string )
-*/
+/**
+ * 
+ * 
+ * Class allowing to handle an event
+ * @input : variable type (key=>Value) ; array(
+ * 'id'=> string, 
+ * 'location' => string,
+ * 'type' => string, 
+ * 'starting_date' => date,  
+ * 'ending_date' => date, 
+ * 'holder' => Member,
+ * 'max_nb_participants' => integer, 
+ * 'Participants' => array (UserX, UserY, UserW,..)
+ * 'languages' => string or array of strings, 
+ * 'description' => string )
+ * @author Aldeen Berluti
+ *
+ */
 Class Event {
 	
 	// Internal variables
@@ -33,25 +37,19 @@ Class Event {
 	// Define different types of events allowed
 	static public $_type_range = array('Visits', 'Activities', 'Journeys', 'Parties');
 	
-	// constructor requires all parameters
-	function __construct($parameters)
-    {
-		if (($this->set_up() == 0) && (is_array($parameters)))
-		{	
-			foreach ($this->_parameters_list as $key)
-			{
+	
+	function __construct($parameters) {
+		if (($this->set_up() == 0) && (is_array($parameters))) {	
+			foreach ($this->_parameters_list as $key) {
 				//echo $key. '<br />';
-				if (!array_key_exists ($key , $parameters))
-				{
+				if (!array_key_exists ($key , $parameters))	{
 					trigger_error('Input '.$key .' parameter is missing to instanciate'
 					.get_class($this) .' object', E_USER_ERROR);
 					return E_USER_ERROR;
 				}
 			}
-			foreach ($parameters as $key=>$value)
-			{
-				switch ($key)
-				{
+			foreach ($parameters as $key=>$value) {
+				switch ($key){
 					case 'id':
 						$this->set_id($value);
 						break;
@@ -82,75 +80,67 @@ Class Event {
 					case 'participants':
 						$this->set_participants ($value);
 						break;
+					default:
+       					echo "This parameter $key does not exist";
 				}
 			}
-		}
-		else
-		{
+		} else {
 			trigger_error('The input parameters of the '.get_class($this) 
 			.' must be an array', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
     }
 	
-	/***** 
-	Set the parameterlist defaut value
-	// Check Mandatory Input values (Participants is not mandatory)
-	******/
-	public function set_up()
-	{
+	/**
+	 * 
+	 * Set the parameterlist defaut value
+	 */
+	public function set_up() {
 		$this->_parameters_list = array ('id','location','type', 'starting_date', 'ending_date',
 		'max_nb_participants', 'holder', 'languages', 'description');
 	}
 	
-	/***** 
-	Set the id parameter
-	******/
-	public function set_id ($id)
-	{
-		if (is_string($id))
-		{
+	/**
+	 * 
+	 * Set the id parameter
+	 * @param integer $id
+	 */
+	public function set_id ($id) {
+		if (is_string($id))	{
 			$this->_id = $id;
-			return 0;
-		}
-		else 
-		{
+			return False;
+		} else {
 			trigger_error('The Id parameter of the '.get_class($this) 
 			.' must be a string', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
-	/***** 
-	Get the id parameter
-	******/
-	public  function get_id ()
-	{
-		if (is_string($this->_id))
-		{
+	/**
+	 * 
+	 * Get the id parameter
+	 */
+	public  function get_id () {
+		if (is_string($this->_id)) {
 			return $this->_id;
-		}
-		else 
-		{
+		} else {
 			trigger_error('The Id parameter of the '.get_class($this) 
 			.' should have been a string', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
-	/***** 
-	Set the location parameter
-	******/
-	public  function set_location ($location)
-	{
+	/**
+	 * 
+	 * Set the location parameter
+	 * @param string $location
+	 */
+	public  function set_location ($location) {
 		// HERE : Check if it's really a location and not bullshit
-		if (is_string($location))
-		{
+		if (is_string($location)) {
 			$this->_location = $location;
-			return 0;
-		}
-		else 
-		{
+			return False;
+		} else {
 			trigger_error('The location parameter of the '.get_class($this) 
 			.' must be a string', E_USER_ERROR);
 			return E_USER_ERROR;
@@ -158,365 +148,317 @@ Class Event {
 		
 	}
 	
-	/***** 
-	Get the location parameter
-	******/
+	/**
+	 * 
+	 * Get the location parameter
+	 */
 	public  function get_location ()
 	{
 		// HERE : Check if it's really a location and not bullshit
-		if (is_string($this->_location))
-		{
+		if (is_string($this->_location)) {
 			return $this->_location;
-		}
-		else 
-		{
+		} else {
 			trigger_error('The location parameter of the '.get_class($this) 
 			.' should have been a string', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
-	/***** 
-	Set the type parameter
-	******/
-	public  function set_type ($type)
-	{
-		if (!in_array ($type, self::$_type_range))
-		{
+	/**
+	 * 
+	 * Set the type parameter
+	 * @param string $type
+	 */
+	public  function set_type ($type) {
+		if (!in_array ($type, self::$_type_range)) {
 			trigger_error('The Type parameter of the '.get_class($this) 
 			.' must be matching one of the following values ' .self::$_type_range, E_USER_ERROR);
 			return E_USER_ERROR;
-		}
-		else
-		{
+		} else {
 			$this->_type = $type;
-			return 0;
+			return False;
 		}
-		
 	}
 	
-	/***** 
-	Get the type parameter
-	******/
-	public  function get_type ()
-	{
-		if (!in_array ($this->_type, self::$_type_range))
-		{
+	/** 
+	 * 
+	 * Get the type parameter
+	 */
+	public  function get_type () {
+		if (!in_array ($this->_type, self::$_type_range)) {
 			trigger_error('The Type parameter of the '.get_class($this) 
 			.' should be matching one of the following values ' .self::$_type_range, E_USER_ERROR);
 			return E_USER_ERROR;
-		}
-		else
-		{
+		} else {
 			return $this->_type;
 		}
 		
 	}
 	
-	/***** 
-	Set the starting_date parameter
-	******/
-	public  function set_starting_date ($starting_date)
-	{
-		if ($starting_date && (IsDate($starting_date)))
-		{
+	/** 
+	 * 
+	 * Set the starting_date parameter
+	 * @param date $starting_date
+	 */
+	public  function set_starting_date ($starting_date) {
+		if ($starting_date && (IsDate($starting_date)))	{
 			$this->_starting_date = $starting_date;
-			return 0;
-		}
-		else 
-		{
+			return False;
+		} else {
 			trigger_error('The starting_date parameter of the '.get_class($this) 
 			.' must be a Date format', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
-	/******
-	// get the starting_date parameter
-	******/
-	public  function get_starting_date ()
-	{
-		if ($this->_starting_date && (IsDate($this->_starting_date)))
-		{
+	
+	/**
+	 * 
+	 * get the starting_date parameter
+	 */
+	public  function get_starting_date () {
+		if ($this->_starting_date && (IsDate($this->_starting_date))) {
 			return $this->_starting_date;
-		}
-		else 
-		{
+		} else {
 			trigger_error('The starting_date parameter of the '.get_class($this) 
 			.' should have been a Date format', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
-	/******
-	Set the ending parameter
-	******/
-	public  function set_ending_date ($ending_date)
-	{
-		if ($ending_date && (IsDate($ending_date)))
-		{
+	/**
+	 * 
+	 * Set the ending parameter
+	 * @param date $ending_date
+	 */
+	public  function set_ending_date ($ending_date) {
+		if ($ending_date && (IsDate($ending_date))) {
 			$this->_ending_date = $ending_date;
-			return 0;
-		}
-		else 
-		{
+			return False;
+		} else {
 			trigger_error('The ending_date parameter of the '.get_class($this) 
 			.' must be a Date format', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
-	/******
-	Get the ending_date parameter
-	******/
-	public  function get_ending_date ()
-	{
-		if ($this->_ending_date && (IsDate($this->_ending_date)))
-		{
+	/**
+	 * 
+	 * Get the ending_date parameter
+	 */
+	public  function get_ending_date () {
+		if ($this->_ending_date && (IsDate($this->_ending_date))) {
 			return $this->_ending_date;
-		}
-		else 
-		{
+		} else {
 			trigger_error('The ending_date parameter of the '.get_class($this) 
 			.' should have been a Date format', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
-	/******
-	Set the holder parameter
-	******/
-	public  function set_holder($holder)
-	{
-		if ($holder && (get_class($holder) == 'Member'))
-		{
-			$this->_holder = $holder;
-			return 0;
-		}
-		else 
-		{
-			trigger_error('The holder parameter of the '.get_class($this) 
-			.' must be Member typed object', E_USER_ERROR);
+	/**
+	 * 
+	 * Set the holder id parameter
+	 * @param integer $holder_id
+	 */
+	public  function set_holder_id($holder_id) {
+		if (!empty($holder_id) && is_int($holder_id)) {
+			$this->_holder_id = $holder_id;
+			return False;
+		} else {
+			trigger_error('The holder id parameter of the '.get_class($this) 
+			.' must be an integer', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
-	/******
-	Get the holder parameter
-	******/
-	public  function get_holder ()
-	{
-		if ($this->_holder && (get_class($this->_holder) == 'Member'))
-		{
-			return $this->_holder;
-		}
-		else 
-		{
+	/**
+	 * 
+	 * Get the holder parameter
+	 */
+	public  function get_holder_id () {
+		if ($this->_holder_id && is_int($holder_id)) {
+			return $this->_holder_id;
+		} else {
 			trigger_error('The holder parameter of the '.get_class($this) 
-			.' should have been a Member typed object', E_USER_ERROR);
+			.' should have been an integer', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
-	/******
-	// set the maximal number of participants parameter
-	******/
-	public  function set_max_nb_participants ($max_nb_participants)
-	{
-		if (is_numeric($max_nb_participants))
-		{
+	/**
+	 * 
+	 * set the maximal number of participants parameter
+	 * @param integer $max_nb_participants
+	 */
+	public  function set_max_nb_participants ($max_nb_participants)	{
+		if (is_int($max_nb_participants)) {
 			$this->_max_nb_participants = $max_nb_participants;
-			return 0;
-		}
-		else 
-		{
+			return False; 
+		} else {
 			trigger_error('The max_nb_participants parameter of the '
 			.get_class($this) .' must be a digit', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
-	/******
-	Get the maximal number of participants parameter
-	******/
-	public  function get_max_nb_participants ()
-	{
-		if (is_numeric($this->_max_nb_participants))
-		{
+	/**
+	 * 
+	 * Get the maximal number of participants parameter
+	 */
+	public  function get_max_nb_participants ()	{
+		if (is_numeric($this->_max_nb_participants)) {
 			return $this->_max_nb_participants;
-		}
-		else 
-		{
+		} else {
 			trigger_error('The max_nb_participants parameter of the'.get_class($this) 
 			.'should have been a digit', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
-	/******
-	Register members to the event (so they will become participant) 
-	******/
-	public  function set_participants ($participants_list)
-	{
+	/**
+	 * 
+	 * Register members to the event (so they will become participants) 
+	 * @param array of participants $participants_list
+	 */
+	public  function set_participants ($participants_list) {
 		$participant = '';
 		// if participants_list does not exist
-		if (!$participants_list)
-		{
-			trigger_error('The participants parameter of the '.get_class($this) .' must either be 
-			an \'Member\' typed object or an array of \'Member\' typed objects', E_USER_ERROR);
+		if (!$participants_list) {
+			trigger_error('The participants parameter of the '.get_class($this)
+				 .' must either be a \'Member\' typed object or an array of 
+				 \'Member\' typed objects', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 		// but if Participantlist exists and it's an array, treat it like an array
-		elseif (is_array($participants_list))
-		{
-			foreach ($participants_list as $participant)		
-			{
-				if (get_class($participant) == 'Member')
-				{
+		elseif (is_array($participants_list)) {
+			foreach ($participants_list as $participant) {
+				if (get_class($participant) == 'Member') {
 					array_push ($this->_participants, $participant);
-				}
-				else 
-				{
-					trigger_error('The participants parameter of the '.get_class($this) .' must either be 
-					an \'Member\' typed object or an array of \'Member\' typed object', E_USER_ERROR);
+				} else {
+					trigger_error('The participants parameter of the 
+						'.get_class($this) .' must either be a \'Member\' typed 
+						object or an array of \'Member\' typed object',
+						E_USER_ERROR);
 					return E_USER_ERROR;
 				}
 			}
-			return 0;
+			return FALSE;
 		}
 		// and if it's not an array, treat it like it's not
-		else
-		{
+		else {
 			$participant = $participants_list;
-			if (get_class($participant) == 'Member')
-			{
+			if (get_class($participant) == 'Member') {
 				array_push ($this->_participants, $participant);
-				return 0;
-			}
-			else 
-			{
-				trigger_error('The Participants parameter of the '.get_class($this) .' must either be 
-				an \'Member\' typed object or an array of \'Member\' typed objects', E_USER_ERROR);
+				return False;
+			} else {
+				trigger_error('The Participants parameter of the '.get_class($this) .'
+				 	must either be	an \'Member\' typed object or an array of
+					\'Member\' typed objects', E_USER_ERROR);
 				return E_USER_ERROR;
 			}
 		}
 	}
 	
-	/******
-	Get members registered to the event
-	******/
-	public  function get_participants ()
-	{
-		if ($this->_participants == 0)
-		{
-			return 0;
-		}
-		{
+	/**
+	 * 
+	 * Get members registered to the event
+	 */
+	public  function get_participants () {
+		if ($this->_participants == 0) {
+			return False;
+		} else {
 			return $this->_participants;
 		}
 	} 
 
-	/******
-	Set spoken languages for the event  
-	******/
-	public  function set_languages ($languages)
-	{
+	/**
+	 * 
+	 * Set spoken languages for the event
+	 * @param array of languages $languages
+	 */
+	public  function set_languages ($languages) {
 		$language = '';
 		// if languages does not exist
-		if (!$languages)
-		{
-			trigger_error('The languages parameter of the '.get_class($this) .' must either be 
-			a string or an array of strings', E_USER_ERROR);
+		if (!$languages){
+			trigger_error('The languages parameter of the '.get_class($this) .' 
+			must either be a string or an array of strings', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 		// but if languages exists and it's an array, treat it like an array
-		elseif (is_array($languages))
-		{
-			foreach ($languages as $language)		
-			{
-				if (is_string($language))
-				{
+		elseif (is_array($languages)){
+			foreach ($languages as $language){
+				if (is_string($language)){
 					array_push ($this->_languages, $language);
-				}
-				else 
-				{
+				}else {
 					trigger_error('The languages parameter of the '.get_class($this) .
 					' must either be an array of strings', E_USER_ERROR);
 					return E_USER_ERROR;
 				}
 			}
-			return 0;
+			return False;
 		}
 		// and if it's not an array, treat it like it's not
-		else
-		{
+		else{
 			$language = $languages;
-			if (is_string($language))
-			{
+			if (is_string($language)) {
 				array_push ($this->_languages, $language);
-				return 0;
-			}
-			else 
-			{
-				trigger_error('The languages parameter of the '.get_class($this) .' must either be 
-				a string or an array of strings', E_USER_ERROR);
+				return False;
+			} else {
+				trigger_error('The languages parameter of the '.get_class($this) 
+				.' must either be a string or an array of strings', E_USER_ERROR);
 				return E_USER_ERROR;
 			}
 		}
 	}
 	
-	/******
-	Get members registered to the event
-	******/
-	public  function get_languages ()
-	{
-		if ($this->_languages == 0)
-		{
-			return 0;
-		}
-		{
+	/**
+	 * 
+	 * Get members registered to the event
+	 */
+	public  function get_languages (){
+		if ($this->_languages == 0)	{
+			return False;
+		}else{
 			return $this->_languages;
 		}
 	} 
 	
-	/***** 
-	Set the description parameter
-	******/
-	public function set_description($description)
-	{
-		if (is_string($description))
-		{
+	/**
+	 * 
+	 * Set the description parameter
+	 * @param string $description
+	 */ 
+	public function set_description($description) {
+		if (is_string($description)) {
 			$this->_description = $description;
-			return 0;
-		}
-		else 
-		{
+			return False;
+		}else {
 			trigger_error('The description parameter of the '.get_class($this) 
 			.' must be a string', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
-	/***** 
-	Get the description parameter
-	******/
-	public  function get_description ()
-	{
-		if (is_string($this->_description))
-		{
+	/**
+	 * 
+	 * Get the description parameter
+	 */
+	public  function get_description () {
+		if (is_string($this->_description))	{
 			return $this->_description;
-		}
-		else 
-		{
+		} else {
 			trigger_error('The description parameter of the '.get_class($this) 
 			.' should have been a string', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
 	
-	// Return a string containing all the informations related to the event
-	public  function render ()
-	{
+	/**
+	 * 
+	 * Return a string containing all the informations related to the event
+	 */
+	public  function render () {
 		$r = '<br />';
 		$r .= 'Id: '. $this->get_id() . '<br />';
 		$r .= 'Location: '. $this->get_location() . '<br />';
@@ -527,48 +469,124 @@ Class Event {
 		$r .= 'max_nb_participants: '. $this->get_max_nb_participants() . '<br />';
 		$r .= 'description: '. $this->get_description() . '<br />';
 		$r .= 'participants: ';
-		if (is_array ($this->get_participants()))
-		{
-			foreach ($this->get_participants() as $Participant)
-			{
+		if (is_array ($this->get_participants())) {
+			foreach ($this->get_participants() as $Participant)	{
 				$r .= $Participant->get_name() . ', ';
 			}
-		}
-		else
-		{
+		} else {
 			$r .= $this->get_participants()->get_name() . ', ';
 		}
 		$r.= '<br />';
 			
 		$r .= 'languages: ';
-		if (is_array ($this->get_languages()))
-		{
-			foreach ($this->get_languages() as $language)
-			{
+		if (is_array ($this->get_languages())) {
+			foreach ($this->get_languages() as $language) {
 				$r .= $language. ', ';
 			}
 		}
-		else
-		{
+		else {
 			$r .= $this->get_language(). ', ';
 		}
 		$r.= '<br />';
 		return $r;
 	}
-
-
-}
-
-
 	
-function IsDate( $Str )
-{
-  $Stamp = strtotime( $Str );
-  $Month = date( 'm', $Stamp );
-  $Day   = date( 'd', $Stamp );
-  $Year  = date( 'Y', $Stamp );
-
-  return checkdate( $Month, $Day, $Year );
+	/**
+	 * 
+	 * Select all event types in databse and return them as an array
+	 */
+	static public function select_all_event_types(){
+		$dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+		if (empty($dbhandler)) {
+			echo 'Impossible to initiate communication with database </br>';
+			return false;
+		}
+		
+		// Look for all event types in the event types table
+		$sql = 'SELECT * FROM event_types';
+		$query = $dbhandler->_db_connection->prepare($sql);
+		if ($query) {
+			$query->execute();
+			$results = $query->fetchall(PDO::FETCH_COLUMN);
+			if ($results) {
+				$event_types = array();
+				foreach ($results as $key=>$value) {
+					array_push ($event_types, html_entity_decode($value));
+					}
+				return $event_types;
+			} else {
+				echo "There is no event types in the 'event_types' table.<br/>";
+				return false;
+			}
+		} else {
+			echo "The database request for selecting event types in the 
+			'event_types' table could not be prepared.<br/>";
+			return false;
+		}
+	}
+	
+	
+	/**
+	 * 
+	 * Insert a new event in the table, return false if failure or rowid of the 
+	 * event if success
+	 */
+	public function insert_new_event (){
+		$dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+		if (empty($dbhandler)) {
+			echo 'Impossible to initiate communication with database </br>';
+			return false;
+		}
+		$event_name = htmlentities($this->_name, ENT_QUOTES);
+		$event_location = htmlentities($this->_location, ENT_QUOTES);
+		$event_type = htmlentities($this->_type, ENT_QUOTES);
+		$event_checkin = htmlentities($this->_starting_date, ENT_QUOTES);
+		$event_checkout = htmlentities($this->_ending_date, ENT_QUOTES);
+		$event_holder = htmlentities($this->_holder, ENT_QUOTES);
+		$event_max_nb_participants = htmlentities($this->_max_nb_participants, ENT_QUOTES);
+		$event_description = htmlentities($this->_description, ENT_QUOTES);
+		$event_participants = htmlentities($this->_participants, ENT_QUOTES);
+		
+		
+		$sql = 'INSERT INTO event (event_name, event_type, event_location, 
+		event_holder_id, event_max_nb_of_participants, event_starting_date, 
+		event_ending_date) VALUES(:event_name, :event_type, :event_location, 
+		:event_holder, :event_max_nb_of_participants, :event_starting_date, 
+		:event_ending_date)';
+		$query = $dbhandler->_db_connection->prepare($sql);
+		if ($query) {
+			$query->bindValue(':event_name', $event_name, PDO::PARAM_STR);
+			$query->bindValue(':event_type', $event_type, PDO::PARAM_STR);
+			$query->bindValue(':event_location', $event_location, PDO::PARAM_STR);
+			$query->bindValue(':event_checkin', $event_checkin, PDO::PARAM_STR);
+			$query->bindValue(':event_checkout', $event_checkout, PDO::PARAM_STR);
+			$query->bindValue(':event_holder', $event_holder, PDO::PARAM_STR);
+			$query->bindValue(':event_max_nb_of_participants', 
+			$event_max_nb_of_participants, PDO::PARAM_STR);
+			$query->bindValue(':event_description', $event_description, PDO::PARAM_STR);
+			// PDO's execute() gives back TRUE when successful, 
+			// false when not
+			$registration_success_state = $query->execute();
+			if ($registration_success_state) {
+				//TODO Check that participants are in the user table and insert
+				// them into the participants event table
+				// return the event id back ( needed for the particpants)	
+				echo "$event_name has been successfuly inserted in the 
+				'event' table. <br/>";
+				return true;
+			} else {
+				echo "$event_name failed to be inserted in the 
+				'events' table. <br/>";
+				//print_r ($query);
+				return false;
+			}
+		} else {
+			echo "The database request for inserting $event_name 
+			in the 'events' table could not be prepared.<br/>";
+			return false;
+		}
+	}
+	
 }
 
 ?>

@@ -272,7 +272,7 @@ class Login
                 	'user_nationality' => $result_row->user_nationality,
                 	'user_lastname' => $result_row->user_lastname,
                 	'user_firstname' => $result_row->user_firstname);
-				$user = New user ($parameters);
+				$user = New User ($parameters);
                 $_SESSION['user'] = $user;
                 //$_SESSION['user_email'] = $result_row->user_email;
                 $_SESSION['user_is_logged_in'] = true;
@@ -404,7 +404,6 @@ class Login
         if ($this->feedback) {
             echo $this->feedback . "<br/><br/>";
         }
-		//echo $user->get_string_attribute('name');
         echo 'Hello ' . $_SESSION['user']->get_string_attribute('user_name') . ', you are logged in.<br/><br/>';
         echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=setpersonalinfo">Personal informations</a>'.'<br/>';
         echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=createnewevent">Post a new Event</a>'.'<br/>';

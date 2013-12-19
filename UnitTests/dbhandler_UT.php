@@ -14,12 +14,12 @@ define ('_SERVER_DIR', '/Users/aldeen/Desktop/Projet/Site');
 define ('_INI_FILE_DIR', _SERVER_DIR."/befalol/database/config.ini" );
 
 
-Class SqliteDbHanlderUT extends PHPUnit_Framework_TestCase {
+Class SqliteDbTableHanlderUT extends PHPUnit_Framework_TestCase {
 	
 	public $_db = NULL;
 
 	function SetUp () {
-		$this->_db = new SqliteDbHanlder(db_parser (_INI_FILE_DIR,_SERVER_DIR));
+		$this->_db = new SqliteDbTableHanlder(db_parser (_INI_FILE_DIR,_SERVER_DIR));
 	}
 	
 	// Test if return values are correct when attempt to create table is possible without 
