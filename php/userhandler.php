@@ -1,6 +1,11 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+
+/**
+ * 
+ * Enter description here ...
+ * @author Aldeen Berluti
+ *
+ */
 Class User {
 	
 	protected $_user_id = 0;
