@@ -151,7 +151,7 @@ Class User {
 	 */
 	public function set_user_birthday ($birthday)
 	{
-		if (!empty($birthday) && IsDate ($birthday)){
+		if (!empty($birthday) && check_and_valid_date ($birthday, true)){
 			$this->_user_birthday = $birthday;
 			return True;
 		}
@@ -270,22 +270,74 @@ Class User {
 		}
 	}	
 	
-	
+	/**
+	 * 
+	 * Select and return an array of user events
+	 */
+	 public function select_user_events () {
+		// Get the database connection if it's not the case yet
+		$dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+		if (empty($dbhandler)) {
+			echo 'Impossible to initiate communication with database </br>';
+			return false;
+		}
+		// Look for events held by the event holder id in the events table
+		$sql = 'SELECT * FROM events WHERE event_holder_id = :event_holder_id';
+		$query = $dbhandler->_db_connection->prepare($sql);
+		if ($query) {
+			$query->bindValue(':event_holder_id', $this->_user_id, PDO::PARAM_INT);
+			$query->execute();
+			$events = array();
+			$results = $query->fetchall();
+			foreach ($results as $result_row) {
+				//then look for the languages spoken at this event 
+				$sql = 'SELECT language_name FROM languages_event 
+					WHERE event_id = :event_id';
+				$query = $dbhandler->_db_connection->prepare($sql);
+				if ($query) {
+					$query->bindValue(':event_id', $result_row['event_id'], 
+					PDO::PARAM_INT);
+					$query->execute();
+					$languages_res = $query->fetchall(PDO::FETCH_COLUMN);
+					if ($languages_res) {
+						$languages = array();
+						foreach ($languages_res as $key=>$value) {
+							array_push ($languages, html_entity_decode($value));
+						}
+					} else {
+						echo 'There is no language spoken at this event <br/>';
+						return false;
+					}						
+				}else {
+					echo "The request for selecting spoken languages could not 
+					be prepared. <br/>";
+					return false;
+				}
+				// bundle all input parameters
+				$parameters = array ('event_id' => intval($result_row['event_id']),
+				'event_name' => html_entity_decode($result_row['event_name']), 
+				'event_location' => html_entity_decode($result_row['event_location']), 
+				'event_type' => html_entity_decode($result_row['event_type']), 
+				'event_starting_date' => html_entity_decode($result_row['event_starting_date']),
+		    	'event_ending_date'=> html_entity_decode($result_row['event_ending_date']), 
+		    	'event_max_nb_participants' => intval($result_row['event_max_nb_of_participants']), 
+		    	'event_holder_id' => intval($result_row['event_holder_id']), 
+		    	'event_description' => html_entity_decode( $result_row['event_description']),
+				'event_languages' => $languages);
+				// create new object event with input parameters
+				$event = new Event ($parameters);
+				if (!empty($event)) {
+					// create an array of event objects
+					array_push ($events, $event);
+				}
+			}
+			// return the array of events objects;
+			return $events;
+		} else {
+			echo "The database request for selecting users in the 
+			'users'	table could not be prepared.<br/>";
+			return false;
+		}
+	}
 }
-
-/*$user = new User(array('user_name' => 'Aldeen', 
-					   'user_email' => 'aldeen@email.com',
-					   'user_firstname' => 'Aldeen',
-					   'user_lastname' => 'Berluti',
-					   'user_nationality' => 'French',
-					   'user_birthday' => '24/11/1987')
-						);
-echo $user->get_string_attribute('user_name').'<br/>';
-echo $user->get_string_attribute('user_email').'<br/>';
-echo $user->get_string_attribute('user_lastname').'<br/>';
-echo $user->get_string_attribute('user_firstname').'<br/>';
-echo $user->get_string_attribute('user_nationality').'<br/>';
-echo $user->get_string_attribute('user_birthday').'<br/>';
-						*/
-
 ?>

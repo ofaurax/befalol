@@ -85,24 +85,39 @@ function check_and_valid_date ($date, $actionforempty) {
  		//then failing happens
  		return false;
 	}else if (!empty($date)) {
-		 if (!preg_match( '`^\d{1,2}/\d{1,2}/\d{4}$`' , $date)) {
-			return false;
-		} else {
-			// check if month is correct
-			preg_match( '`^\d{1,2}/(\d{1,2})/\d{4}$`' , $date, $buffer);
-			if ((intval($buffer[1]) > 31) || (intval($buffer[1]) <= 0 )) {
+		 if (preg_match( '`^\d{1,2}/\d{1,2}/\d{4}$`' , $date)) {
+		 	// check if month is correct
+			preg_match( '`^\d{1,2}/(\d{1,2})/\d{4}$`' , $date, $day);
+			if ((intval($day[1]) > 31) || (intval($day[1]) <= 0 )) {
 				return false;
 			}
 			// check if day is correct too
-			preg_match( '`^(\d{1,2})/\d{1,2}/\d{4}$`' , $date, $buffer);
-			if ((intval($buffer[1]) > 12) || (intval($buffer[1]) <= 0 )) {
+			preg_match( '`^(\d{1,2})/\d{1,2}/\d{4}$`' , $date, $month);
+			if ((intval($month[1]) > 12) || (intval($month[1]) <= 0 )) {
 				return false;
 			}
+			// check if day is correct too
+			preg_match( '`^\d{1,2}/\d{1,2}/(\d{4})$`' , $date, $year);
 			// check if the date is valid
-			if (!IsDate($date)) {
+			return checkdate( intval($month[1]), intval($day[1]), intval($year[1]));
+		}elseif (preg_match( '`^\d{1,2}/\d{1,2}/\d{4}\s\d{1,2}:\d{1,2}$`' , $date)){
+			// check if month is correct
+			preg_match( '`^\d{1,2}/(\d{1,2})/\d{4}\s\d{1,2}:\d{1,2}$`' , $date, $day);
+			if ((intval($day[1]) > 31) || (intval($day[1]) <= 0 )) {
 				return false;
 			}
-			return true;
+			// check if day is correct too
+			preg_match( '`^(\d{1,2})/\d{1,2}/\d{4}\s\d{1,2}:\d{1,2}$`' , $date, $month);
+			if ((intval($month[1]) > 12) || (intval($month[1]) <= 0 )) {
+				return false;
+			}
+			// check if day is correct too
+			preg_match( '`^\d{1,2}/\d{1,2}/(\d{4})\s\d{1,2}:\d{1,2}$`' , $date, $year);
+			// check if the date is valid
+			return checkdate( intval($month[1]), intval($day[1]), intval($year[1]));
+		}	
+		else {
+			return false;
 		}
 	} else {
 		return true;
@@ -161,11 +176,14 @@ function is_it_futur ($string_date) {
  */
 function IsDate( $Str )
 {
+	//TODO does not work for february
   $Stamp = strtotime( $Str );
-  $Month = date( 'm', $Stamp );
-  $Day   = date( 'd', $Stamp );
-  $Year  = date( 'Y', $Stamp );
-
+  $Month = date( 'mm', $Stamp );
+  $Day   = date( 'dd', $Stamp );
+  $Year  = date( 'YYYY', $Stamp );
+  echo $Month.'<br/>';
+  echo $Day.'<br/>';
+  echo $Year.'<br/>';
   return checkdate( $Month, $Day, $Year );
 }
 

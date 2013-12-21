@@ -241,7 +241,7 @@ Class Event {
 	 * @param date $starting_date
 	 */
 	protected  function set_starting_date ($starting_date) {
-		if ($starting_date && (IsDate($starting_date)))	{
+		if ($starting_date && (check_and_valid_date($starting_date, true)))	{
 			$this->_starting_date = $starting_date;
 			return False;
 		} else {
@@ -257,7 +257,7 @@ Class Event {
 	 * get the starting_date parameter
 	 */
 	public  function get_starting_date () {
-		if ($this->_starting_date && (IsDate($this->_starting_date))) {
+		if ($this->_starting_date && (check_and_valid_date($this->_starting_date, true))) {
 			return $this->_starting_date;
 		} else {
 			trigger_error('The starting_date parameter of the '.get_class($this) 
@@ -272,7 +272,7 @@ Class Event {
 	 * @param date $ending_date
 	 */
 	protected  function set_ending_date ($ending_date) {
-		if ($ending_date && (IsDate($ending_date))) {
+		if ($ending_date && (check_and_valid_date($ending_date, true))) {
 			$this->_ending_date = $ending_date;
 			return False;
 		} else {
@@ -287,7 +287,7 @@ Class Event {
 	 * Get the ending_date parameter
 	 */
 	public  function get_ending_date () {
-		if ($this->_ending_date && (IsDate($this->_ending_date))) {
+		if ($this->_ending_date && (check_and_valid_date($this->_ending_date, true))) {
 			return $this->_ending_date;
 		} else {
 			trigger_error('The ending_date parameter of the '.get_class($this) 
@@ -585,15 +585,12 @@ Class Event {
 		$event_holder_id = htmlentities($this->_holder_id, ENT_QUOTES);
 		$event_max_nb_participants = $this->_max_nb_participants;
 		$event_description = htmlentities($this->_description, ENT_QUOTES);
-		//$event_participants = htmlentities($this->_participants, ENT_QUOTES);
-		//$event_languages = htmlentities($this->_languages, ENT_QUOTES);
-		
 		
 		$sql = 'INSERT INTO events (event_name, event_type, event_location, 
 		event_holder_id, event_max_nb_of_participants, event_starting_date, 
-		event_ending_date, event_description) VALUES(:event_name, :event_type, :event_location, 
-		:event_holder_id, :event_max_nb_participants, :event_starting_date, 
-		:event_ending_date, :event_description)';
+		event_ending_date, event_description) VALUES(:event_name, :event_type, 
+		:event_location, :event_holder_id, :event_max_nb_participants, 
+		:event_starting_date, :event_ending_date, :event_description)';
 		$query = $dbhandler->_db_connection->prepare($sql);
 		if ($query) {
 			$query->bindValue(':event_name', $event_name, PDO::PARAM_STR);
@@ -633,8 +630,7 @@ Class Event {
 			in the 'events' table could not be prepared.<br/>";
 			return false;
 		}
-	}
-	
+	}	
 	
 /**
 	 * 

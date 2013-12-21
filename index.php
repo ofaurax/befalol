@@ -22,6 +22,7 @@ session_start();
 <!DOCTYPE html>
 <html>
 <head>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
   <title>Befalol Index</title>
 </head>
 <h1>Welcome to Befalol!</h1>

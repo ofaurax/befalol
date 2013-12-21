@@ -9,6 +9,17 @@ function display_row ($RowTitle, $RowHTMLInput)
 	return $r;	
 }
 
+function display_advanced_row ($RowHTMLInputs)
+{
+	$r = '';
+	$r .= '<tr>';
+	foreach ($RowHTMLInputs as $RowHTMLInput) {
+		$r .= '<td>'.$RowHTMLInput .'<td>' ;	
+	}
+	$r .= '<tr>';
+	return $r;	
+}
+
 
 function display_dropdownlist ($SelectParameters, $InputValues, $DefaultValue)
 {

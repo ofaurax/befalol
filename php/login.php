@@ -126,6 +126,14 @@ class Login
 		            	case 'seeallusers':
 		            		echo 'Below is the list of all website members <br/>';
 		            		$this->ShowPageAllUsers();
+		            		break;
+		            	case 'seeyourevents':
+		            		echo 'Below is the list of all your events <br/>';
+		            		$this->ShowPageYourEvents();
+		            		break;
+		            	case 'seeevent':
+		            		$this->ShowPageEventInformation();
+		            		break;	
 		            	default:
 		            		echo 'This is an unknown action';
 		            		break;
@@ -275,7 +283,9 @@ class Login
                 	'user_firstname' => $result_row->user_firstname);
 				$user = New User ($parameters);
                 $_SESSION['user'] = $user;
-                //$_SESSION['user_email'] = $result_row->user_email;
+                //load user events;
+                $events = $user->select_user_events();
+				$_SESSION['events'] = $events;
                 $_SESSION['user_is_logged_in'] = true;
                 $this->user_is_logged_in = true;
                 return true;
@@ -406,9 +416,10 @@ class Login
             echo $this->feedback . "<br/><br/>";
         }
         echo 'Hello ' . $_SESSION['user']->get_string_attribute('user_name') . ', you are logged in.<br/><br/>';
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=setpersonalinfo">Personal informations</a>'.'<br/>';
+        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=setpersonalinfo">Your personal informations</a>'.'<br/>';
         echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=createnewevent">Post a new Event</a>'.'<br/>';
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeallusers">See other members</a>'.'<br/>';
+        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeyourevents">List of your events</a>'.'<br/>';
+        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeallusers">List of members</a>'.'<br/>';
         echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=logout">Log out</a><br/>';
     }
 
@@ -513,6 +524,42 @@ class Login
     
 	/**
 	  * 
+	  * Show the Event information
+	  */
+    private function ShowPageEventInformation ()
+    {
+     	if ($this->feedback) {
+            echo $this->feedback . "<br/><br/>";
+        }
+    	if (isset($_GET['id']) && (isset($_SESSION['events']))) {
+    		foreach ($_SESSION['events'] as $event) {
+    			if ($event->get_id() == $_GET['id']) {	
+			        $r = '<h2>'.$event->get_name().'</h2>';
+					//build it
+					$r .= '<table>';
+					$r .= display_row('Type', $event->get_type() );
+					$r .= display_row('Location:', $event->get_location());
+					$r .= display_row('Check in:', $event->get_starting_date());
+					$r .= display_row('Check out date:', $event->get_ending_date());
+					$r .= display_row('Maximal number of participants:', 
+						$event->get_max_nb_participants());
+					$r .= display_row('Languages spoken :', 
+						display_dropdownlist('', $event->get_languages(), 0));
+					$r .= display_row('Description:', $event->get_description());
+					$r .= display_row('Participants:', display_dropdownlist('', 
+					$event->get_participants(), 0));
+					$r .= '<table/>';
+					echo $r;
+					break;
+    			}
+    		}
+    	} else {
+    		$this->feedback = 'Impossible to retrieve event informations'.'<br/>';
+    	}
+    }
+    
+	/**
+	  * 
 	  * Show the user form for event creation
 	  */
     private function ShowPageEventCreation ()
@@ -597,9 +644,85 @@ class Login
 				$r .= '</table>';
 				echo $r;
 				echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
-    		}//else {
-    	//	$this->feedback = "The form could not have been loaded";
-    	//	}
+    		}else {
+    			$this->feedback = "There are no members, so who are you? 
+    			(please advise the webmaster if you face this message)";
+    		}
+    	}
+    }
+    
+    
+	/**
+	 * 
+	 * Show all the user events
+	 */
+    private function ShowPageYourEvents ()
+    {
+     	if ($this->feedback) {
+            echo $this->feedback . "<br/><br/>";
+        }
+    	if (isset($_SESSION))
+    	{
+    		if (isset($_SESSION['user']) && (!empty($_SESSION['user']))) {
+		        $r = '<h2>Your events</h2>';
+		        //retrieve the user from session
+				$user = $_SESSION['user'];
+				$events = NULL;
+				if (!isset($_SESSION['events'])) {
+					$events = $user->select_user_events();
+					$_SESSION['events'] = $events;
+				}else {
+					$events = $_SESSION['events'];
+				}
+				if (!empty($events)) {
+					$event_types = Event::select_all_event_types();
+					$r .= '<table>';
+					$r .= display_advanced_row( array ('<label for="event_type">'
+					.$event_types[0].'</label>',
+					'<label for="event_type">'.$event_types[1].'</label>',
+					'<label for="event_type">'.$event_types[2].'</label>',
+					'<label for="event_type">'.$event_types[3].'</label>'));
+					foreach ($events as $event) {
+						echo $event->get_name();
+						switch ($event->get_type()) {
+							case $event_types[0]:
+								$r .= display_advanced_row( array (
+								'<a href="' . $_SERVER['SCRIPT_NAME'] . 
+								'?action=seeevent&id=' . $event->get_id() . '">'
+								.$event->get_name().'</a>'));
+								break;
+							case $event_types[1]:
+								$r .= display_advanced_row(array('', '<a href="' . $_SERVER['SCRIPT_NAME'] . 
+								'?action=seeevent&id=' . $event->get_id() . '">'
+								.$event->get_name().'</a>'));
+								break;
+							case $event_types[2]:
+								$r .= display_advanced_row( array ('', '',
+								'<a href="' . $_SERVER['SCRIPT_NAME'] . 
+								'?action=seeevent&id=' . $event->get_id() . '">'
+								.$event->get_name().'</a>'));
+								break;
+							case $event_types[3]:
+								$r .= display_advanced_row( array ('', '', '',
+								'<a href="' . $_SERVER['SCRIPT_NAME'] . 
+								'?action=seeevent&id=' . $event->get_id() . '">'
+								.$event->get_name().'</a>'));
+								break;
+							default:
+								echo 'This event has an invalid event type <br/>';
+							break;
+						}
+					}
+					$r .= '</table>';
+					echo $r;
+					echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
+	    		}else {
+	    			$this->feedback = "You have never created any event.";
+	    		}	
+    		}else {
+    			$this->feedback = "You must log in to access this function.";
+    			return false;
+    		}
     	}
     }
     
@@ -748,7 +871,7 @@ class Login
        		$this->feedback = "Event check out cannot be empty";
         } elseif (empty($_POST['event_description'])) {            
        		$this->feedback = "Event description cannot be empty";
-        } elseif (empty($_POST['event_languages_spoken'])) {            
+        } elseif (empty($_POST['event_spoken_languages'])) {
        		$this->feedback = "Event languages spoken cannot be empty";
         } elseif (empty($_POST['event_starting_time'])) {            
        		$this->feedback = "Event check in time cannot be empty";
@@ -769,10 +892,10 @@ class Login
 			requirements";
         } elseif (!check_and_valid_date($_POST['event_starting_date'], true)){
 			$this->feedback = "The event check in date doesn't match the field 
-			requirements (MM/DD/YYYY)";
+			requirements (MM/DD/YYYY) or is not a valid date";
         } elseif (!check_and_valid_date($_POST['event_ending_date'], true)){
 			$this->feedback = "The event check out date doesn't match the field 
-			requirements (MM/DD/YYYY)";
+			requirements (MM/DD/YYYY) or is not a valid date";
         } elseif (!check_and_valid_time($_POST['event_starting_time'], true)){
 			$this->feedback = "The event check in time doesn't match the field 
 			requirements (HH/MM)";
