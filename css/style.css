@@ -1,8 +1,9 @@
 table {
- border-width:1px; 
+	border-width: 1px;
 }
-td { 
- border-width:thin medium thick 10px;
- border-style:groove;
- border-color:green; 
- }
+
+td {
+	border-width: thin medium thick 10px;
+	border-style: groove;
+	border-color: green;
+}

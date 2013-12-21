@@ -19,7 +19,7 @@
 class Login
 {
     /**
-     * @var string Type of used database (currently only SQLite, but feel free 
+     * @var string Type of used database (currently only SQLite, but feel free
      * to expand this with mysql etc)
      */
     private $db_type = "sqlite"; //
@@ -47,7 +47,7 @@ class Login
 
 
     /**
-     * Does necessary checks for PHP version and PHP password compatibility 
+     * Does necessary checks for PHP version and PHP password compatibility
      * library and runs the application
      */
     public function __construct()
@@ -58,22 +58,22 @@ class Login
     }
 
     /**
-     * 
+     *
      * Init the internal variable
      */
     Private function init () {
-    	$db_parameters = db_parser (_INI_FILE_DIR,_SERVER_DIR);
-    	if (!empty($db_parameters)) {
-    		$this->db_sqlite_path = $db_parameters['db_path'];
-    		return true;
-    	}else {
-    		echo 'Sorry, it was impossible to get the informations to connect 
+        $db_parameters = db_parser (_INI_FILE_DIR,_SERVER_DIR);
+        if (!empty($db_parameters)) {
+            $this->db_sqlite_path = $db_parameters['db_path'];
+            return true;
+        }else {
+            echo 'Sorry, it was impossible to get the informations to connect
     			to the database';
-    		return false;
-    	}
+            return false;
+        }
     }
-    
-    
+
+
     /**
      * Performs a check for minimum requirements to run this application.
      * Does not run the further application when PHP version is lower than 5.3.7
@@ -112,32 +112,32 @@ class Login
             if ($this->getUserLoginStatus()) {
                 $this->showPageLoggedIn();
                 if (isset($_GET["action"])) {
-	                switch ($_GET["action"]) {
-		            	case 'setpersonalinfo':
-		            		echo 'You can change your personnal data here <br/>';
-		            		$this->SaveUserInformations();
-		            		$this->ShowPageUserInformation();
-		            		break;
-		            	case 'createnewevent':
-		            		echo 'You can change your create your new event here <br/>';
-		            		$this->SaveEventInformations();
-		            		$this->ShowPageEventCreation();
-		            		break;
-		            	case 'seeallusers':
-		            		echo 'Below is the list of all website members <br/>';
-		            		$this->ShowPageAllUsers();
-		            		break;
-		            	case 'seeyourevents':
-		            		echo 'Below is the list of all your events <br/>';
-		            		$this->ShowPageYourEvents();
-		            		break;
-		            	case 'seeevent':
-		            		$this->ShowPageEventInformation();
-		            		break;	
-		            	default:
-		            		echo 'This is an unknown action';
-		            		break;
-	                }
+                    switch ($_GET["action"]) {
+                        case 'setpersonalinfo':
+                            echo 'You can change your personnal data here <br/>';
+                            $this->SaveUserInformations();
+                            $this->ShowPageUserInformation();
+                            break;
+                        case 'createnewevent':
+                            echo 'You can change your create your new event here <br/>';
+                            $this->SaveEventInformations();
+                            $this->ShowPageEventCreation();
+                            break;
+                        case 'seeallusers':
+                            echo 'Below is the list of all website members <br/>';
+                            $this->ShowPageAllUsers();
+                            break;
+                        case 'seeyourevents':
+                            echo 'Below is the list of all your events <br/>';
+                            $this->ShowPageYourEvents();
+                            break;
+                        case 'seeevent':
+                            $this->ShowPageEventInformation();
+                            break;
+                        default:
+                            echo 'This is an unknown action';
+                            break;
+                    }
                 }
             } else {
                 $this->showPageLoginForm();
@@ -183,9 +183,9 @@ class Login
      */
     private function doStartSession()
     {
-		if (!isset ($_SESSION)){
-        	session_start();
-		}
+        if (!isset ($_SESSION)){
+            session_start();
+        }
     }
 
     /**
@@ -233,8 +233,8 @@ class Login
         // default return
         return false;
     }
- 
-    
+
+
     /**
      * Validates the login form data, checks if username and password are provided
      * @return bool Login form data check success state
@@ -274,18 +274,18 @@ class Login
             // using PHP 5.5's password_verify() function to check password
             if (password_verify($_POST['user_password'], $result_row->user_password_hash)) {
                 // write user data into PHP SESSION [a file on your server]
-                $parameters = array ('user_id' => intval($result_row->user_id), 
+                $parameters = array ('user_id' => intval($result_row->user_id),
                  	'user_name' => $result_row->user_name,
  					'user_email' => $result_row->user_email,
                 	'user_birthday' => $result_row->user_birthday,
                 	'user_nationality' => $result_row->user_nationality,
                 	'user_lastname' => $result_row->user_lastname,
                 	'user_firstname' => $result_row->user_firstname);
-				$user = New User ($parameters);
+                $user = New User ($parameters);
                 $_SESSION['user'] = $user;
                 //load user events;
                 $events = $user->select_user_events();
-				$_SESSION['events'] = $events;
+                $_SESSION['events'] = $events;
                 $_SESSION['user_is_logged_in'] = true;
                 $this->user_is_logged_in = true;
                 return true;
@@ -312,15 +312,15 @@ class Login
 
         // validating the input
         if (!empty($_POST['user_name'])
-            && strlen($_POST['user_name']) <= 64
-            && strlen($_POST['user_name']) >= 2
-            && preg_match('/^[a-z\d]{2,64}$/i', $_POST['user_name'])
-            && !empty($_POST['user_email'])
-            && strlen($_POST['user_email']) <= 64
-            && filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)
-            && !empty($_POST['user_password_new'])
-            && !empty($_POST['user_password_repeat'])
-            && ($_POST['user_password_new'] === $_POST['user_password_repeat'])
+        && strlen($_POST['user_name']) <= 64
+        && strlen($_POST['user_name']) >= 2
+        && preg_match('/^[a-z\d]{2,64}$/i', $_POST['user_name'])
+        && !empty($_POST['user_email'])
+        && strlen($_POST['user_email']) <= 64
+        && filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)
+        && !empty($_POST['user_password_new'])
+        && !empty($_POST['user_password_repeat'])
+        && ($_POST['user_password_new'] === $_POST['user_password_repeat'])
         ) {
             // only this case return true, only this case is valid
             return true;
@@ -476,336 +476,336 @@ class Login
     }
 
 
-	 /**
-	  * 
-	  * Show the user form for user personal information
-	  */
+    /**
+     *
+     * Show the user form for user personal information
+     */
     private function ShowPageUserInformation ()
     {
-     	if ($this->feedback) {
+        if ($this->feedback) {
             echo $this->feedback . "<br/><br/>";
         }
-    	if (isset($_SESSION))
-    	{
-	        $r = '<h2>Your personal informations</h2>';
-			//build it
-			$r .=  '<form method="post" action="' . $_SERVER['SCRIPT_NAME'] . 
+        if (isset($_SESSION))
+        {
+            $r = '<h2>Your personal informations</h2>';
+            //build it
+            $r .=  '<form method="post" action="' . $_SERVER['SCRIPT_NAME'] .
 	        '?action=setpersonalinfo" name="userinfoform">';
-			$nationalities = NULL;
-			$nationalities = Nationality::select_all_nationalities();
-			if (!empty($nationalities)) {
-				//table
-				$r .= '<table>';
-				$r .= display_row('Username:', '<input type="text" name="user_name") value="'
-				 . $_SESSION['user']->get_string_attribute('user_name').'"readonly/>');
-				$r .= display_row('Email:', '<input type="email" name="user_email" value="'
-				 . $_SESSION['user']->get_string_attribute('user_email').'"required/>');
-				$r .= display_row('Last name:', '<input type="text" name="user_lastname" value="'
-				 . $_SESSION['user']->get_string_attribute('user_lastname').'"required/>');
-				$r .= display_row('First name:', '<input type="text" name="user_firstname" value="'
-				 . $_SESSION['user']->get_string_attribute('user_firstname').'"required/>');
-				$r .= display_row('Birthday:', '<input type="date" name="user_birthday"  value="'
-				 . $_SESSION['user']->get_string_attribute('user_birthday').'"required/>');
-				$r .= display_row('Nationality:', display_dropdownlist 
-					(array('name' => 'user_nationality', 'multiple' => FALSE, 
+            $nationalities = NULL;
+            $nationalities = Nationality::select_all_nationalities();
+            if (!empty($nationalities)) {
+                //table
+                $r .= '<table>';
+                $r .= display_row('Username:', '<input type="text" name="user_name") value="'
+                . $_SESSION['user']->get_string_attribute('user_name').'"readonly/>');
+                $r .= display_row('Email:', '<input type="email" name="user_email" value="'
+                . $_SESSION['user']->get_string_attribute('user_email').'"required/>');
+                $r .= display_row('Last name:', '<input type="text" name="user_lastname" value="'
+                . $_SESSION['user']->get_string_attribute('user_lastname').'"required/>');
+                $r .= display_row('First name:', '<input type="text" name="user_firstname" value="'
+                . $_SESSION['user']->get_string_attribute('user_firstname').'"required/>');
+                $r .= display_row('Birthday:', '<input type="date" name="user_birthday"  value="'
+                . $_SESSION['user']->get_string_attribute('user_birthday').'"required/>');
+                $r .= display_row('Nationality:', display_dropdownlist
+                (array('name' => 'user_nationality', 'multiple' => FALSE,
 					'required' => TRUE) , $nationalities, 
-					$_SESSION['user']->get_string_attribute('user_nationality')));
-				$r .= display_row('', '<input type="submit" value = "Save" name="saveuserinfo"/>');
-				$r .= '<table/>';
-				$r .= '</form>';
-				echo $r;
-				echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
-    		}else {
-    			$this->feedback = "The form could not have been loaded";
-    		}
-    	}
+                $_SESSION['user']->get_string_attribute('user_nationality')));
+                $r .= display_row('', '<input type="submit" value = "Save" name="saveuserinfo"/>');
+                $r .= '<table/>';
+                $r .= '</form>';
+                echo $r;
+                echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
+            }else {
+                $this->feedback = "The form could not have been loaded";
+            }
+        }
     }
-    
-    
-	/**
-	  * 
-	  * Show the Event information
-	  */
+
+
+    /**
+     *
+     * Show the Event information
+     */
     private function ShowPageEventInformation ()
     {
-     	if ($this->feedback) {
+        if ($this->feedback) {
             echo $this->feedback . "<br/><br/>";
         }
-    	if (isset($_GET['id']) && (isset($_SESSION['events']))) {
-    		foreach ($_SESSION['events'] as $event) {
-    			if ($event->get_id() == $_GET['id']) {	
-			        $r = '<h2>'.$event->get_name().'</h2>';
-					//build it
-					$r .= '<table>';
-					$r .= display_row('Type', $event->get_type() );
-					$r .= display_row('Location:', $event->get_location());
-					$r .= display_row('Check in:', $event->get_starting_date());
-					$r .= display_row('Check out date:', $event->get_ending_date());
-					$r .= display_row('Maximal number of participants:', 
-						$event->get_max_nb_participants());
-					$r .= display_row('Languages spoken :', 
-						display_dropdownlist('', $event->get_languages(), 0));
-					$r .= display_row('Description:', $event->get_description());
-					$r .= display_row('Participants:', display_dropdownlist('', 
-					$event->get_participants(), 0));
-					$r .= '<table/>';
-					echo $r;
-					break;
-    			}
-    		}
-    	} else {
-    		$this->feedback = 'Impossible to retrieve event informations'.'<br/>';
-    	}
+        if (isset($_GET['id']) && (isset($_SESSION['events']))) {
+            foreach ($_SESSION['events'] as $event) {
+                if ($event->get_id() == $_GET['id']) {
+                    $r = '<h2>'.$event->get_name().'</h2>';
+                    //build it
+                    $r .= '<table>';
+                    $r .= display_row('Type', $event->get_type() );
+                    $r .= display_row('Location:', $event->get_location());
+                    $r .= display_row('Check in:', $event->get_starting_date());
+                    $r .= display_row('Check out date:', $event->get_ending_date());
+                    $r .= display_row('Maximal number of participants:',
+                    $event->get_max_nb_participants());
+                    $r .= display_row('Languages spoken :',
+                    display_dropdownlist('', $event->get_languages(), 0));
+                    $r .= display_row('Description:', $event->get_description());
+                    $r .= display_row('Participants:', display_dropdownlist('',
+                    $event->get_participants(), 0));
+                    $r .= '<table/>';
+                    echo $r;
+                    break;
+                }
+            }
+        } else {
+            $this->feedback = 'Impossible to retrieve event informations'.'<br/>';
+        }
     }
-    
-	/**
-	  * 
-	  * Show the user form for event creation
-	  */
+
+    /**
+     *
+     * Show the user form for event creation
+     */
     private function ShowPageEventCreation ()
     {
-     	if ($this->feedback) {
+        if ($this->feedback) {
             echo $this->feedback . "<br/><br/>";
         }
-    	if (isset($_SESSION))
-    	{
-	        $r = '<h2>Your personal informations</h2>';
-			//build it
-			$r .=  '<form method="post" action="' . $_SERVER['SCRIPT_NAME'] . 
+        if (isset($_SESSION))
+        {
+            $r = '<h2>Your personal informations</h2>';
+            //build it
+            $r .=  '<form method="post" action="' . $_SERVER['SCRIPT_NAME'] .
 	        '?action=createnewevent" name="neweventcreation">';
-			$event_types = NULL;
-			$languages = NULL;
-			$event_types = Event::select_all_event_types();
-			$languages = Language::select_all_languages();
-			$countries = Country::select_all_countries();
-			if (!empty($event_types) && !empty($languages) && !empty($countries)) {
-				//table
-				sort($languages);
-				sort($event_types);
-				sort($countries);
-				$r .= '<table>';
-				$r .= display_row('Event Name:', '<input type="text" 
+            $event_types = NULL;
+            $languages = NULL;
+            $event_types = Event::select_all_event_types();
+            $languages = Language::select_all_languages();
+            $countries = Country::select_all_countries();
+            if (!empty($event_types) && !empty($languages) && !empty($countries)) {
+                //table
+                sort($languages);
+                sort($event_types);
+                sort($countries);
+                $r .= '<table>';
+                $r .= display_row('Event Name:', '<input type="text"
 					name="event_name" placeholder="My new awesome event" size="25" required/>');
-				$r .= display_row('Type', display_dropdownlist (array('name' => 
+                $r .= display_row('Type', display_dropdownlist (array('name' =>
 					'event_type', 'multiple' => FALSE, 'required' => TRUE) , 
-					$event_types, ''));
-				$r .= display_row('Location:', '<input type="text" 
+                $event_types, ''));
+                $r .= display_row('Location:', '<input type="text"
 					name="event_address" placeholder="1, Lombard Street" 
 					size=50 required/> <input type="text" placeholder="94133"
 					name="event_zipcode" width="8" required/> <input type="text" 
 					name="event_city_name" size="20" placeholder="San Francisco" required/>'
-					.display_dropdownlist(array('multiple' => false, 'required' => 
+					.display_dropdownlist(array('multiple' => false, 'required' =>
 					true, 'name' => 'event_country_name'), $countries, 'United States'));
-				$r .= display_row('Check in:', '<input type="date" 
+					$r .= display_row('Check in:', '<input type="date"
 					name="event_starting_date" placeholder="mm/dd/yyyy" size="10" 
 					required/>'.' Time :'. ' <input type="time" name="event_starting_time" 
 					placeholder="hh:mm" size="8" max="23:00" required/>');
-				$r .= display_row('Check out date:', '<input type="date" 
+					$r .= display_row('Check out date:', '<input type="date"
 					name="event_ending_date" placeholder="mm/dd/yyyy" size="10" required/>'.
 					' Time :'.' <input type="time" name="event_ending_time" size="8" 
 					placeholder="hh:mm" max="23:00" required/>');
-				$r .= display_row('Maximal number of participants:', 
+					$r .= display_row('Maximal number of participants:',
 					'<input type="number" size="2" min="1" value="1"  
 					name="event_max_nb_participants" required/>');
-				$r .= display_row('Tell us which language will be spoken :', 
-					display_dropdownlist(array('multiple' => true, 'required' => 
+					$r .= display_row('Tell us which language will be spoken :',
+					display_dropdownlist(array('multiple' => true, 'required' =>
 					true, 'name' => 'event_spoken_languages[]'), $languages, 'English'));
-				$r .= display_row('Tell us more about this event:', 
+					$r .= display_row('Tell us more about this event:',
 					'<textarea type="text" name="event_description" maxlength="4000" 
 					cols="30" row="10" placeholder="This is going to be mad!" 
 					required/></textarea>');
-				$r .= display_row('', '<input type="submit" value = 
+					$r .= display_row('', '<input type="submit" value =
 					"Create Event" name="createevent"/>');
-				$r .= '<table/>';
-				$r .= '</form>';
-				echo $r;
-				echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
-    		}else {
-    			$this->feedback = "The form could not have been loaded";
-    		}
-    	}
+					$r .= '<table/>';
+					$r .= '</form>';
+					echo $r;
+					echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
+            }else {
+                $this->feedback = "The form could not have been loaded";
+            }
+        }
     }
-    
-    
-    
-	/**
-	 * 
-	 * Show all members of the website
-	 */
+
+
+
+    /**
+     *
+     * Show all members of the website
+     */
     private function ShowPageAllUsers ()
     {
-     	if ($this->feedback) {
+        if ($this->feedback) {
             echo $this->feedback . "<br/><br/>";
         }
-    	if (isset($_SESSION))
-    	{
-	        $r = '<h2>Members</h2>';
-			//build it
-			$users = NULL;
-			$users = User::select_all_user();
-			if (!empty($users)) {
-				$r .= '<table>';
-				foreach ($users as $user) {
-					$r .= display_row($user, '');
-				}
-				$r .= '</table>';
-				echo $r;
-				echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
-    		}else {
-    			$this->feedback = "There are no members, so who are you? 
+        if (isset($_SESSION))
+        {
+            $r = '<h2>Members</h2>';
+            //build it
+            $users = NULL;
+            $users = User::select_all_user();
+            if (!empty($users)) {
+                $r .= '<table>';
+                foreach ($users as $user) {
+                    $r .= display_row($user, '');
+                }
+                $r .= '</table>';
+                echo $r;
+                echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
+            }else {
+                $this->feedback = "There are no members, so who are you?
     			(please advise the webmaster if you face this message)";
-    		}
-    	}
+            }
+        }
     }
-    
-    
-	/**
-	 * 
-	 * Show all the user events
-	 */
+
+
+    /**
+     *
+     * Show all the user events
+     */
     private function ShowPageYourEvents ()
     {
-     	if ($this->feedback) {
+        if ($this->feedback) {
             echo $this->feedback . "<br/><br/>";
         }
-    	if (isset($_SESSION))
-    	{
-    		if (isset($_SESSION['user']) && (!empty($_SESSION['user']))) {
-		        $r = '<h2>Your events</h2>';
-		        //retrieve the user from session
-				$user = $_SESSION['user'];
-				$events = NULL;
-				if (!isset($_SESSION['events'])) {
-					$events = $user->select_user_events();
-					$_SESSION['events'] = $events;
-				}else {
-					$events = $_SESSION['events'];
-				}
-				if (!empty($events)) {
-					$event_types = Event::select_all_event_types();
-					$r .= '<table>';
-					$r .= display_advanced_row( array ('<label for="event_type">'
-					.$event_types[0].'</label>',
+        if (isset($_SESSION))
+        {
+            if (isset($_SESSION['user']) && (!empty($_SESSION['user']))) {
+                $r = '<h2>Your events</h2>';
+                //retrieve the user from session
+                $user = $_SESSION['user'];
+                $events = NULL;
+                if (!isset($_SESSION['events'])) {
+                    $events = $user->select_user_events();
+                    $_SESSION['events'] = $events;
+                }else {
+                    $events = $_SESSION['events'];
+                }
+                if (!empty($events)) {
+                    $event_types = Event::select_all_event_types();
+                    $r .= '<table>';
+                    $r .= display_advanced_row( array ('<label for="event_type">'
+                    .$event_types[0].'</label>',
 					'<label for="event_type">'.$event_types[1].'</label>',
 					'<label for="event_type">'.$event_types[2].'</label>',
 					'<label for="event_type">'.$event_types[3].'</label>'));
-					foreach ($events as $event) {
-						echo $event->get_name();
-						switch ($event->get_type()) {
-							case $event_types[0]:
-								$r .= display_advanced_row( array (
+                    foreach ($events as $event) {
+                        echo $event->get_name();
+                        switch ($event->get_type()) {
+                            case $event_types[0]:
+                                $r .= display_advanced_row( array (
 								'<a href="' . $_SERVER['SCRIPT_NAME'] . 
 								'?action=seeevent&id=' . $event->get_id() . '">'
 								.$event->get_name().'</a>'));
 								break;
-							case $event_types[1]:
-								$r .= display_advanced_row(array('', '<a href="' . $_SERVER['SCRIPT_NAME'] . 
+                            case $event_types[1]:
+                                $r .= display_advanced_row(array('', '<a href="' . $_SERVER['SCRIPT_NAME'] .
 								'?action=seeevent&id=' . $event->get_id() . '">'
 								.$event->get_name().'</a>'));
 								break;
-							case $event_types[2]:
-								$r .= display_advanced_row( array ('', '',
+                            case $event_types[2]:
+                                $r .= display_advanced_row( array ('', '',
 								'<a href="' . $_SERVER['SCRIPT_NAME'] . 
 								'?action=seeevent&id=' . $event->get_id() . '">'
 								.$event->get_name().'</a>'));
 								break;
-							case $event_types[3]:
-								$r .= display_advanced_row( array ('', '', '',
+                            case $event_types[3]:
+                                $r .= display_advanced_row( array ('', '', '',
 								'<a href="' . $_SERVER['SCRIPT_NAME'] . 
 								'?action=seeevent&id=' . $event->get_id() . '">'
 								.$event->get_name().'</a>'));
 								break;
-							default:
-								echo 'This event has an invalid event type <br/>';
-							break;
-						}
-					}
-					$r .= '</table>';
-					echo $r;
-					echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
-	    		}else {
-	    			$this->feedback = "You have never created any event.";
-	    		}	
-    		}else {
-    			$this->feedback = "You must log in to access this function.";
-    			return false;
-    		}
-    	}
+                            default:
+                                echo 'This event has an invalid event type <br/>';
+                                break;
+                        }
+                    }
+                    $r .= '</table>';
+                    echo $r;
+                    echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
+                }else {
+                    $this->feedback = "You have never created any event.";
+                }
+            }else {
+                $this->feedback = "You must log in to access this function.";
+                return false;
+            }
+        }
     }
-    
-    
+
+
     /**
-     * 
+     *
      * Save input personal informations into db and Session
      */
     private function SaveUserInformations ()
     {
-    	if (!isset($_POST['saveuserinfo'])) {
-    		return False;
-    	}
-    	if ($this->checkPICorrectness()){
-	    	// Retrieve datas from form
-	    	$user_name = $_POST['user_name'];
-	    	//$user_password = $_POST['user_password'];
-	    	$user_email = $_POST['user_email'];
-	    	$user_birthday = $_POST['user_birthday'];
-	    	$user_nationality = $_POST['user_nationality'];
-	    	$user_lastname = $_POST['user_lastname'];
-	    	$user_firstname = $_POST['user_firstname'];
-			
-	    	//Create an user object with it
-			$parameters =  array ('user_id' => 
-				$_SESSION['user']->get_string_attribute('user_id'),
+        if (!isset($_POST['saveuserinfo'])) {
+            return False;
+        }
+        if ($this->checkPICorrectness()){
+            // Retrieve datas from form
+            $user_name = $_POST['user_name'];
+            //$user_password = $_POST['user_password'];
+            $user_email = $_POST['user_email'];
+            $user_birthday = $_POST['user_birthday'];
+            $user_nationality = $_POST['user_nationality'];
+            $user_lastname = $_POST['user_lastname'];
+            $user_firstname = $_POST['user_firstname'];
+            	
+            //Create an user object with it
+            $parameters =  array ('user_id' =>
+            $_SESSION['user']->get_string_attribute('user_id'),
 				'user_name' => $user_name,
 				'user_email' => $user_email,
 				'user_birthday' => $user_birthday,
 				'user_nationality' => $user_nationality,
 				'user_lastname' => $user_lastname,
 				'user_firstname' => $user_firstname );
-			$user = new User ($parameters);
-			
-			// save new datas in database;
-			if ($user->update_user_data()) {
-	    		// Save them in the user session
-	    		$_SESSION['user'] = $user;
-			} else {
-				$this->feedback = 'Your personal information update has failed <br/>';
-			}
-    	}    	
+            $user = new User ($parameters);
+            	
+            // save new datas in database;
+            if ($user->update_user_data()) {
+                // Save them in the user session
+                $_SESSION['user'] = $user;
+            } else {
+                $this->feedback = 'Your personal information update has failed <br/>';
+            }
+        }
     }
 
     /**
-     * 
+     *
      * Save event into db and Session
      */
     private function SaveEventInformations ()
     {
-    	if (!isset($_POST['createevent']) || (!isset ($_SESSION))) {
-    		return False;
-    	}
-    	
-    	if ($this->checkEICorrectness()){
-	    	// Retrieve datas from form
-	    	$event_name = $_POST['event_name'];
-	    	$event_type = $_POST['event_type'];
-	    	$event_starting_date = $_POST['event_starting_date'].' '
-	    		.$_POST['event_starting_time'];
-	    	$event_ending_date = $_POST['event_ending_date'].' '
-	    		.$_POST['event_ending_time'];
-	    	$event_description = $_POST['event_description'];
-	    	$event_max_nb_participants = $_POST['event_max_nb_participants'];
-	    	$event_languages_spoken = $_POST['event_spoken_languages'];
-	    	$event_address = $_POST['event_address'];
-	    	$event_zipcode = $_POST['event_zipcode'];
-	    	$event_city_name = $_POST['event_city_name'];
-	    	$event_country_name = $_POST['event_country_name'];
-	    	
-	    	
-	    	//Get the user id to use as the holder_id
-	    	$event_holder_id = $_SESSION['user']->get_user_id();
-				    	
-	    	//Create an user object with it
-			$parameters =  array ('event_name' => $event_name, 
+        if (!isset($_POST['createevent']) || (!isset ($_SESSION))) {
+            return False;
+        }
+         
+        if ($this->checkEICorrectness()){
+            // Retrieve datas from form
+            $event_name = $_POST['event_name'];
+            $event_type = $_POST['event_type'];
+            $event_starting_date = $_POST['event_starting_date'].' '
+            .$_POST['event_starting_time'];
+            $event_ending_date = $_POST['event_ending_date'].' '
+            .$_POST['event_ending_time'];
+            $event_description = $_POST['event_description'];
+            $event_max_nb_participants = $_POST['event_max_nb_participants'];
+            $event_languages_spoken = $_POST['event_spoken_languages'];
+            $event_address = $_POST['event_address'];
+            $event_zipcode = $_POST['event_zipcode'];
+            $event_city_name = $_POST['event_city_name'];
+            $event_country_name = $_POST['event_country_name'];
+
+
+            //Get the user id to use as the holder_id
+            $event_holder_id = $_SESSION['user']->get_user_id();
+             
+            //Create an user object with it
+            $parameters =  array ('event_name' => $event_name,
 			'event_type' => $event_type, 
 			'event_starting_date' => $event_starting_date,
 	    	'event_ending_date'=> $event_ending_date, 
@@ -817,126 +817,126 @@ class Login
 			'event_city_name' => $event_city_name,
 			'event_country_name' => $event_country_name,
 			'event_description' => $event_description);
-			$event = new Event ($parameters);
-			
-			// save new datas in database;
-			if ($event->insert_event()) {
-	    	
-				// Save them in the user session
-				if (!array_key_exists('events', $_SESSION)) {
-					$events = array();
-				}else {
-					$events = $_SESSION['events'];
-				}
-				
-				array_push($events, $event);
-		    	$_SESSION['events'] = $events;
-			}
-			else {
-				$this->feedback = 'The event creation failed <br/>';
-			}
-    	}
-    	
-	//echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=register">Register new account</a>';
-    	
-    	
+            $event = new Event ($parameters);
+            	
+            // save new datas in database;
+            if ($event->insert_event()) {
+
+                // Save them in the user session
+                if (!array_key_exists('events', $_SESSION)) {
+                    $events = array();
+                }else {
+                    $events = $_SESSION['events'];
+                }
+
+                array_push($events, $event);
+                $_SESSION['events'] = $events;
+            }
+            else {
+                $this->feedback = 'The event creation failed <br/>';
+            }
+        }
+         
+        //echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=register">Register new account</a>';
+         
+         
     }
-    
-	/**
-     * 
+
+    /**
+     *
      * Check if input event informations match the requirements
      */
     private function checkEICorrectness()
     {
         // if no registration form submitted: exit the method
-    	if (!isset($_POST['createevent'])) {
-    		return False;
-    	}
-		
+        if (!isset($_POST['createevent'])) {
+            return False;
+        }
+
         // validating the input
         if (!empty($_POST['event_name'])
-        	&& data_validation($_POST['event_name'], 
-        	FILTER_SANITIZE_STRING, true)
-            && data_validation($_POST['event_type'], 
-            FILTER_SANITIZE_STRING, true)
-			&& data_validation($_POST['event_address'], 
-			FILTER_SANITIZE_STRING, true)
-			&& data_validation($_POST['event_zipcode'], 
-			FILTER_SANITIZE_NUMBER_INT, true)
-			&& data_validation($_POST['event_city_name'], 
-			FILTER_SANITIZE_STRING, true)
-			&& data_validation($_POST['event_country_name'], 
-			FILTER_SANITIZE_STRING, true)
-			&& data_validation($_POST['event_max_nb_participants'], 
-			FILTER_SANITIZE_STRING, true)
-			&& check_and_valid_date($_POST['event_starting_date'], true)
-			&& check_and_valid_date($_POST['event_ending_date'], true)
-			&& (is_it_futur ($_POST['event_starting_date'].' '
-			.$_POST['event_starting_time']))
-			&& (is_it_futur ($_POST['event_ending_date'].' '
-			.$_POST['event_ending_time']))
-			&& check_and_valid_time($_POST['event_starting_time'], true)
-			&& check_and_valid_time($_POST['event_ending_time'], true)
-			&& data_validation($_POST['event_description'], 
-			FILTER_SANITIZE_STRING, true)
-			&& array_data_validation($_POST['event_spoken_languages'], 
-			FILTER_SANITIZE_STRING, true)) {
-			return true;       
-        } elseif (empty($_POST['event_name'])) {            
-       		$this->feedback = "Event name cannot be empty";
-        } elseif (empty($_POST['event_type'])) {            
-       		$this->feedback = "Event type cannot be empty";
+        && data_validation($_POST['event_name'],
+        FILTER_SANITIZE_STRING, true)
+        && data_validation($_POST['event_type'],
+        FILTER_SANITIZE_STRING, true)
+        && data_validation($_POST['event_address'],
+        FILTER_SANITIZE_STRING, true)
+        && data_validation($_POST['event_zipcode'],
+        FILTER_SANITIZE_NUMBER_INT, true)
+        && data_validation($_POST['event_city_name'],
+        FILTER_SANITIZE_STRING, true)
+        && data_validation($_POST['event_country_name'],
+        FILTER_SANITIZE_STRING, true)
+        && data_validation($_POST['event_max_nb_participants'],
+        FILTER_SANITIZE_STRING, true)
+        && check_and_valid_date($_POST['event_starting_date'], true)
+        && check_and_valid_date($_POST['event_ending_date'], true)
+        && (is_it_futur ($_POST['event_starting_date'].' '
+        .$_POST['event_starting_time']))
+        && (is_it_futur ($_POST['event_ending_date'].' '
+        .$_POST['event_ending_time']))
+        && check_and_valid_time($_POST['event_starting_time'], true)
+        && check_and_valid_time($_POST['event_ending_time'], true)
+        && data_validation($_POST['event_description'],
+        FILTER_SANITIZE_STRING, true)
+        && array_data_validation($_POST['event_spoken_languages'],
+        FILTER_SANITIZE_STRING, true)) {
+            return true;
+        } elseif (empty($_POST['event_name'])) {
+            $this->feedback = "Event name cannot be empty";
+        } elseif (empty($_POST['event_type'])) {
+            $this->feedback = "Event type cannot be empty";
         } elseif (empty($_POST['event_address']) || empty($_POST['event_zipcode'])
-        	|| empty($_POST['event_city_name']) || empty($_POST['event_country_name'])) {            
-       		$this->feedback = "Event location cannot be empty";
-        } elseif (empty($_POST['event_starting_date'])) {            
-       		$this->feedback = "Event check in cannot be empty";
-        } elseif (empty($_POST['event_ending_date'])) {            
-       		$this->feedback = "Event check out cannot be empty";
-        } elseif (empty($_POST['event_description'])) {            
-       		$this->feedback = "Event description cannot be empty";
+        || empty($_POST['event_city_name']) || empty($_POST['event_country_name'])) {
+            $this->feedback = "Event location cannot be empty";
+        } elseif (empty($_POST['event_starting_date'])) {
+            $this->feedback = "Event check in cannot be empty";
+        } elseif (empty($_POST['event_ending_date'])) {
+            $this->feedback = "Event check out cannot be empty";
+        } elseif (empty($_POST['event_description'])) {
+            $this->feedback = "Event description cannot be empty";
         } elseif (empty($_POST['event_spoken_languages'])) {
-       		$this->feedback = "Event languages spoken cannot be empty";
-        } elseif (empty($_POST['event_starting_time'])) {            
-       		$this->feedback = "Event check in time cannot be empty";
-        } elseif (empty($_POST['event_ending_time'])) {            
-       		$this->feedback = "Event check out time cannot be empty";
-        } elseif (empty($_POST['event_spoken_languages'])) {            
-       		$this->feedback = "Event spoken languages cannot be empty";
+            $this->feedback = "Event languages spoken cannot be empty";
+        } elseif (empty($_POST['event_starting_time'])) {
+            $this->feedback = "Event check in time cannot be empty";
+        } elseif (empty($_POST['event_ending_time'])) {
+            $this->feedback = "Event check out time cannot be empty";
+        } elseif (empty($_POST['event_spoken_languages'])) {
+            $this->feedback = "Event spoken languages cannot be empty";
         } elseif (!data_validation($_POST['event_name'], FILTER_SANITIZE_STRING,
-        	 true)){
-			$this->feedback = "The event name does not match the requirements";
+        true)){
+            $this->feedback = "The event name does not match the requirements";
         } elseif (!data_validation($_POST['event_type'], FILTER_SANITIZE_STRING,
-        	 true)){
-			$this->feedback = "The event type does not match the field 
+        true)){
+            $this->feedback = "The event type does not match the field
 			requirements";
         } elseif (!check_and_valid_date($_POST['event_starting_date'], true)){
-			$this->feedback = "The event check in date doesn't match the field 
+            $this->feedback = "The event check in date doesn't match the field
 			requirements (MM/DD/YYYY) or is not a valid date";
         } elseif (!check_and_valid_date($_POST['event_ending_date'], true)){
-			$this->feedback = "The event check out date doesn't match the field 
+            $this->feedback = "The event check out date doesn't match the field
 			requirements (MM/DD/YYYY) or is not a valid date";
         } elseif (!check_and_valid_time($_POST['event_starting_time'], true)){
-			$this->feedback = "The event check in time doesn't match the field 
+            $this->feedback = "The event check in time doesn't match the field
 			requirements (HH/MM)";
         } elseif (!check_and_valid_time($_POST['event_ending_time'], true)){
-			$this->feedback = "The event check out time doesn't match the field 
+            $this->feedback = "The event check out time doesn't match the field
 			requirements (HH/MM)";
         } elseif (!is_it_futur($_POST['event_starting_date'].' '
-        	.$_POST['event_starting_time'], true)){
-			$this->feedback = "I am not sure the time machine exists yet, 
+        .$_POST['event_starting_time'], true)){
+            $this->feedback = "I am not sure the time machine exists yet,
 			please make sure the event check in date is valid.";
         } elseif (!is_it_futur($_POST['event_ending_date'].' '
-        	.$_POST['event_ending_time'], true)){
-			$this->feedback = "Well, you won't be able to end this event before 
+        .$_POST['event_ending_time'], true)){
+            $this->feedback = "Well, you won't be able to end this event before
 			you started it, please make sure the event check out is valid.";
-        } elseif (!data_validation($_POST['event_description'], 
-        	FILTER_SANITIZE_STRING, true)){
-			$this->feedback = "The event description does not match the field 
+        } elseif (!data_validation($_POST['event_description'],
+        FILTER_SANITIZE_STRING, true)){
+            $this->feedback = "The event description does not match the field
 			requirements";
-        } elseif (!array_data_validation($_POST['event_spoken_languages'], 
-        	FILTER_SANITIZE_STRING, true)){
-			$this->feedback = "The event spoken languages does not match the field 
+        } elseif (!array_data_validation($_POST['event_spoken_languages'],
+        FILTER_SANITIZE_STRING, true)){
+            $this->feedback = "The event spoken languages does not match the field
 			requirements";
         } else {
             $this->feedback = "An unknown error occurred.";
@@ -944,52 +944,52 @@ class Login
         // default return
         return false;
     }
-    
-    
+
+
     /**
-     * 
+     *
      * Check if input personal informations match the requirements
      */
     private function checkPICorrectness()
     {
         // if no registration form submitted: exit the method
-    	if (!isset($_POST['saveuserinfo'])) {
-    		return False;
-    	}
-       // validating the input
+        if (!isset($_POST['saveuserinfo'])) {
+            return False;
+        }
+        // validating the input
         if (!empty($_POST['user_name'])
-            && strlen($_POST['user_email']) <= 64
-            && filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)
-			&& data_validation($_POST['user_lastname'], FILTER_SANITIZE_STRING, 0)
-			&& data_validation($_POST['user_firstname'], FILTER_SANITIZE_STRING, 0)
-			&& check_and_valid_date($_POST['user_birthday'], 0)
-			&& (!is_it_futur ($_POST['user_birthday']))
-			&& data_validation($_POST['user_nationality'], FILTER_SANITIZE_STRING, 0)) {
-			return true;       
-            
-        } elseif (empty($_POST['user_email'])) {            
-       		$this->feedback = "Email cannot be empty";
+        && strlen($_POST['user_email']) <= 64
+        && filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)
+        && data_validation($_POST['user_lastname'], FILTER_SANITIZE_STRING, 0)
+        && data_validation($_POST['user_firstname'], FILTER_SANITIZE_STRING, 0)
+        && check_and_valid_date($_POST['user_birthday'], 0)
+        && (!is_it_futur ($_POST['user_birthday']))
+        && data_validation($_POST['user_nationality'], FILTER_SANITIZE_STRING, 0)) {
+            return true;
+
+        } elseif (empty($_POST['user_email'])) {
+            $this->feedback = "Email cannot be empty";
         } elseif (strlen($_POST['user_email']) > 64) {
             $this->feedback = "Email cannot be longer than 64 characters";
         } elseif (!filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)) {
             $this->feedback = "Your email address is not in a valid email format";
         } elseif (!data_validation($_POST['user_lastname'], FILTER_SANITIZE_STRING, 0)){
-			$this->feedback = "Your lastname doesn't match the field requirements";
+            $this->feedback = "Your lastname doesn't match the field requirements";
         } elseif (!data_validation($_POST['user_firstname'], FILTER_SANITIZE_STRING, 0)){
-			$this->feedback = "Your firstname doesn't match the field requirements";
+            $this->feedback = "Your firstname doesn't match the field requirements";
         } elseif (!check_and_valid_date($_POST['user_birthday'], 0)){
-			$this->feedback = "Your birthday doesn't match the field requirements (MM/DD/YYYY)";
+            $this->feedback = "Your birthday doesn't match the field requirements (MM/DD/YYYY)";
         } elseif (is_it_futur($_POST['user_birthday'], 0)){
-			$this->feedback = "You probably would not be using this website if you were not born :).";
+            $this->feedback = "You probably would not be using this website if you were not born :).";
         } elseif (!data_validation($_POST['user_nationality'], FILTER_SANITIZE_STRING, 0)){
-			$this->feedback = "Your nationality doesn't match the field requirements";
+            $this->feedback = "Your nationality doesn't match the field requirements";
         } else {
             $this->feedback = "An unknown error occurred.";
         }
         // default return
         return false;
     }
-    
+
 }
 
 
