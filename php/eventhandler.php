@@ -12,7 +12,7 @@ require_once ('basicerrorhandling.php');
  * 'type' => string, 
  * 'starting_date' => date,  
  * 'ending_date' => date, 
- * 'holder' => Member,
+ * 'holder_id' => Member,
  * 'max_nb_participants' => integer, 
  * 'Participants' => array (UserX, UserY, UserW,..)
  * 'languages' => string or array of strings, 
@@ -25,11 +25,12 @@ Class Event {
 	// Internal variables
 	protected $_parameters_list;
 	protected $_id = 0;
+	protected $_name = '';
 	protected $_location = '';
 	protected $_type = '';
 	protected $_starting_date = '';
 	protected $_ending_date = '';
-	protected $_holder = '';
+	protected $_holder_id = '';
 	protected $_max_nb_participants = 0;
 	protected $_participants = array();
 	protected $_languages = array();
@@ -39,7 +40,7 @@ Class Event {
 	
 	
 	function __construct($parameters) {
-		if (($this->set_up() == 0) && (is_array($parameters))) {	
+		if (($this->set_up()) && (is_array($parameters))) {	
 			foreach ($this->_parameters_list as $key) {
 				//echo $key. '<br />';
 				if (!array_key_exists ($key , $parameters))	{
@@ -50,34 +51,37 @@ Class Event {
 			}
 			foreach ($parameters as $key=>$value) {
 				switch ($key){
-					case 'id':
+					case 'event_name':
+						$this->set_name($value);
+						break;
+					case 'event_id':
 						$this->set_id($value);
 						break;
-					case 'location':
+					case 'event_location':
 						$this->set_location ($value);
 						break;
-					case 'type':
+					case 'event_type':
 						$this->set_type ($value);
 						break;
-					case 'starting_date':
+					case 'event_starting_date':
 						$this->set_starting_date ($value);
 						break;
-					case 'ending_date':
+					case 'event_ending_date':
 						$this->set_ending_date ($value);
 						break;
-					case 'holder':
-						$this->set_holder ($value);
+					case 'event_holder_id':
+						$this->set_holder_id ($value);
 						break;
-					case 'max_nb_participants':
+					case 'event_max_nb_participants':
 						$this->set_max_nb_participants ($value);
 						break;
-					case 'languages':
+					case 'event_languages':
 						$this->set_languages ($value);
 						break;
-					case 'description':
+					case 'event_description':
 						$this->set_description ($value);
 						break;
-					case 'participants':
+					case 'event_participants':
 						$this->set_participants ($value);
 						break;
 					default:
@@ -95,9 +99,12 @@ Class Event {
 	 * 
 	 * Set the parameterlist defaut value
 	 */
-	public function set_up() {
-		$this->_parameters_list = array ('id','location','type', 'starting_date', 'ending_date',
-		'max_nb_participants', 'holder', 'languages', 'description');
+	protected function set_up() {
+		$this->_parameters_list = array ('event_name', 'event_location', 
+			'event_type', 'event_starting_date', 'event_ending_date',
+			'event_max_nb_participants', 'event_holder_id', 'event_languages', 
+			'event_description');
+		return true;
 	}
 	
 	/**
@@ -106,12 +113,12 @@ Class Event {
 	 * @param integer $id
 	 */
 	public function set_id ($id) {
-		if (is_string($id))	{
+		if (is_int($id))	{
 			$this->_id = $id;
-			return False;
+			return true;
 		} else {
 			trigger_error('The Id parameter of the '.get_class($this) 
-			.' must be a string', E_USER_ERROR);
+			.' must be an integer', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
@@ -121,10 +128,43 @@ Class Event {
 	 * Get the id parameter
 	 */
 	public  function get_id () {
-		if (is_string($this->_id)) {
+		if (is_int($this->_id)) {
 			return $this->_id;
 		} else {
 			trigger_error('The Id parameter of the '.get_class($this) 
+			.' should have been an integer', E_USER_ERROR);
+			return E_USER_ERROR;
+		}
+	}
+	
+	/**
+	 * 
+	 * Set the event name 
+	 * @param string $name
+	 */
+	protected  function set_name ($name) {
+		if (is_string($name)) {
+			$this->_name = $name;
+			return False;
+		} else {
+			trigger_error('The name parameter of the '.get_class($this) 
+			.' must be a string', E_USER_ERROR);
+			return E_USER_ERROR;
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * Get the event
+	 */
+	public  function get_name ()
+	{
+		// HERE : Check if it's really a name and not bullshit
+		if (is_string($this->_name)) {
+			return $this->_name;
+		} else {
+			trigger_error('The name parameter of the '.get_class($this) 
 			.' should have been a string', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
@@ -135,7 +175,7 @@ Class Event {
 	 * Set the location parameter
 	 * @param string $location
 	 */
-	public  function set_location ($location) {
+	protected  function set_location ($location) {
 		// HERE : Check if it's really a location and not bullshit
 		if (is_string($location)) {
 			$this->_location = $location;
@@ -169,7 +209,7 @@ Class Event {
 	 * Set the type parameter
 	 * @param string $type
 	 */
-	public  function set_type ($type) {
+	protected  function set_type ($type) {
 		if (!in_array ($type, self::$_type_range)) {
 			trigger_error('The Type parameter of the '.get_class($this) 
 			.' must be matching one of the following values ' .self::$_type_range, E_USER_ERROR);
@@ -200,7 +240,7 @@ Class Event {
 	 * Set the starting_date parameter
 	 * @param date $starting_date
 	 */
-	public  function set_starting_date ($starting_date) {
+	protected  function set_starting_date ($starting_date) {
 		if ($starting_date && (IsDate($starting_date)))	{
 			$this->_starting_date = $starting_date;
 			return False;
@@ -231,7 +271,7 @@ Class Event {
 	 * Set the ending parameter
 	 * @param date $ending_date
 	 */
-	public  function set_ending_date ($ending_date) {
+	protected  function set_ending_date ($ending_date) {
 		if ($ending_date && (IsDate($ending_date))) {
 			$this->_ending_date = $ending_date;
 			return False;
@@ -261,7 +301,7 @@ Class Event {
 	 * Set the holder id parameter
 	 * @param integer $holder_id
 	 */
-	public  function set_holder_id($holder_id) {
+	protected  function set_holder_id($holder_id) {
 		if (!empty($holder_id) && is_int($holder_id)) {
 			$this->_holder_id = $holder_id;
 			return False;
@@ -274,7 +314,7 @@ Class Event {
 	
 	/**
 	 * 
-	 * Get the holder parameter
+	 * Get the holder id parameter
 	 */
 	public  function get_holder_id () {
 		if ($this->_holder_id && is_int($holder_id)) {
@@ -291,13 +331,13 @@ Class Event {
 	 * set the maximal number of participants parameter
 	 * @param integer $max_nb_participants
 	 */
-	public  function set_max_nb_participants ($max_nb_participants)	{
+	protected  function set_max_nb_participants ($max_nb_participants)	{
 		if (is_int($max_nb_participants)) {
 			$this->_max_nb_participants = $max_nb_participants;
 			return False; 
 		} else {
 			trigger_error('The max_nb_participants parameter of the '
-			.get_class($this) .' must be a digit', E_USER_ERROR);
+			.get_class($this) .' must be a integer', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
@@ -377,7 +417,7 @@ Class Event {
 	 * Set spoken languages for the event
 	 * @param array of languages $languages
 	 */
-	public  function set_languages ($languages) {
+	protected  function set_languages ($languages) {
 		$language = '';
 		// if languages does not exist
 		if (!$languages){
@@ -429,7 +469,7 @@ Class Event {
 	 * Set the description parameter
 	 * @param string $description
 	 */ 
-	public function set_description($description) {
+	protected function set_description($description) {
 		if (is_string($description)) {
 			$this->_description = $description;
 			return False;
@@ -465,7 +505,7 @@ Class Event {
 		$r .= 'Type: '. $this->get_type() . '<br />';
 		$r .= 'starting_date: '. $this->get_starting_date() . '<br />';
 		$r .= 'ending_date: '. $this->get_ending_date() . '<br />';
-		$r .= 'Holder: '. $this->get_holder()->get_name() . '<br />';
+		$r .= 'holder_id: '. $this->get_holder_id()->get_name() . '<br />';
 		$r .= 'max_nb_participants: '. $this->get_max_nb_participants() . '<br />';
 		$r .= 'description: '. $this->get_description() . '<br />';
 		$r .= 'participants: ';
@@ -531,7 +571,7 @@ Class Event {
 	 * Insert a new event in the table, return false if failure or rowid of the 
 	 * event if success
 	 */
-	public function insert_new_event (){
+	public function insert_event (){
 		$dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
 		if (empty($dbhandler)) {
 			echo 'Impossible to initiate communication with database </br>';
@@ -542,42 +582,50 @@ Class Event {
 		$event_type = htmlentities($this->_type, ENT_QUOTES);
 		$event_checkin = htmlentities($this->_starting_date, ENT_QUOTES);
 		$event_checkout = htmlentities($this->_ending_date, ENT_QUOTES);
-		$event_holder = htmlentities($this->_holder, ENT_QUOTES);
-		$event_max_nb_participants = htmlentities($this->_max_nb_participants, ENT_QUOTES);
+		$event_holder_id = htmlentities($this->_holder_id, ENT_QUOTES);
+		$event_max_nb_participants = $this->_max_nb_participants;
 		$event_description = htmlentities($this->_description, ENT_QUOTES);
-		$event_participants = htmlentities($this->_participants, ENT_QUOTES);
+		//$event_participants = htmlentities($this->_participants, ENT_QUOTES);
+		//$event_languages = htmlentities($this->_languages, ENT_QUOTES);
 		
 		
-		$sql = 'INSERT INTO event (event_name, event_type, event_location, 
+		$sql = 'INSERT INTO events (event_name, event_type, event_location, 
 		event_holder_id, event_max_nb_of_participants, event_starting_date, 
-		event_ending_date) VALUES(:event_name, :event_type, :event_location, 
-		:event_holder, :event_max_nb_of_participants, :event_starting_date, 
-		:event_ending_date)';
+		event_ending_date, event_description) VALUES(:event_name, :event_type, :event_location, 
+		:event_holder_id, :event_max_nb_participants, :event_starting_date, 
+		:event_ending_date, :event_description)';
 		$query = $dbhandler->_db_connection->prepare($sql);
 		if ($query) {
 			$query->bindValue(':event_name', $event_name, PDO::PARAM_STR);
 			$query->bindValue(':event_type', $event_type, PDO::PARAM_STR);
 			$query->bindValue(':event_location', $event_location, PDO::PARAM_STR);
-			$query->bindValue(':event_checkin', $event_checkin, PDO::PARAM_STR);
-			$query->bindValue(':event_checkout', $event_checkout, PDO::PARAM_STR);
-			$query->bindValue(':event_holder', $event_holder, PDO::PARAM_STR);
-			$query->bindValue(':event_max_nb_of_participants', 
-			$event_max_nb_of_participants, PDO::PARAM_STR);
+			$query->bindValue(':event_starting_date', $event_checkin, PDO::PARAM_STR);
+			$query->bindValue(':event_ending_date', $event_checkout, PDO::PARAM_STR);
+			$query->bindValue(':event_holder_id', $event_holder_id, PDO::PARAM_INT);
+			$query->bindValue(':event_max_nb_participants', 
+			$event_max_nb_participants, PDO::PARAM_INT);
 			$query->bindValue(':event_description', $event_description, PDO::PARAM_STR);
 			// PDO's execute() gives back TRUE when successful, 
 			// false when not
 			$registration_success_state = $query->execute();
 			if ($registration_success_state) {
-				//TODO Check that participants are in the user table and insert
-				// them into the participants event table
-				// return the event id back ( needed for the particpants)	
-				echo "$event_name has been successfuly inserted in the 
-				'event' table. <br/>";
-				return true;
+				$event_id = intval($dbhandler->_db_connection->lastInsertId());
+				if ($this->set_id($event_id)) {
+					if ($this->insert_spoken_languages()) {
+						echo "$event_name has been successfuly inserted in the 
+						'event' table. <br/>";
+						return $event_id;
+					}
+					else {
+						return false;
+					}
+				}else {
+					echo 'Impossible to retrieve the event id. <br/>';
+					return false;
+				}
 			} else {
 				echo "$event_name failed to be inserted in the 
 				'events' table. <br/>";
-				//print_r ($query);
 				return false;
 			}
 		} else {
@@ -585,6 +633,48 @@ Class Event {
 			in the 'events' table could not be prepared.<br/>";
 			return false;
 		}
+	}
+	
+	
+/**
+	 * 
+	 * Insert a new spoken language in the  db for this event id, return false 
+	 * if failure or true in case of success
+	 */
+	protected function insert_spoken_languages () {
+		$dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+		if (empty($dbhandler)) {
+			echo 'Impossible to initiate communication with database </br>';
+			return false;
+		}
+		$event_id = $this->_id;
+		foreach ($this->_languages as $language) {
+			$language = htmlentities($language, ENT_QUOTES);
+			$sql = 'INSERT INTO languages_event (event_id, language_name) 
+			VALUES (:event_id, :language_name)';
+			$query = $dbhandler->_db_connection->prepare($sql);
+			if ($query) {
+				$query->bindValue(':event_id', $event_id, PDO::PARAM_INT);
+				$query->bindValue(':language_name', $language, PDO::PARAM_STR);
+				// PDO's execute() gives back TRUE when successful, 
+				// false when not
+				$registration_success_state = $query->execute();
+				if ($registration_success_state) {
+					echo "$language has been successfuly inserted in the 
+					'languages_event' table for the event id $event_id. <br/>";
+				} else {
+					echo "$language failed to be inserted in the 
+					'languages_event' tablefor the event id $event_id. <br/>";
+					return false;
+				}
+			} else {
+				echo "The database request for inserting $language 
+				in the 'languages_event' table for the event id $event_id 
+				could not be prepared.<br/>";
+				return false;
+			}
+		}
+		return true;	
 	}
 	
 }

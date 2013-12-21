@@ -766,6 +766,40 @@ class Language {
 		}
 	}
 	
+	/**
+	 * 
+	 * Select and return an array of all languages of the languages table
+	 */
+	static public function select_all_languages () {
+		// Get the database connection if it's not the case yet
+		$dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+		if (empty($dbhandler)) {
+			echo 'Impossible to initiate communication with database </br>';
+			return false;
+		}
+		// Look for existing languages_name in the nationalities table
+		$sql = 'SELECT * FROM languages';
+		$query = $dbhandler->_db_connection->prepare($sql);
+		if ($query) {
+			$query->execute();
+			$results = $query->fetchall(PDO::FETCH_COLUMN);
+			if ($results) {
+				$languages = array();
+				foreach ($results as $key=>$value) {
+					array_push ($languages, html_entity_decode($value));
+					}
+				return $languages;
+			} else {
+				echo "There is no language in the 'languages' table.<br/>";
+				return false;
+			}
+		} else {
+			echo "The database request for selecting languages in the 
+			'languages'	table could not be prepared.<br/>";
+			return false;
+		}
+	}	
+	
 }
 
 
@@ -908,7 +942,7 @@ class Nationality {
 	 * Insert a nationality name into the nationalities table 
 	 */
 	public function insert_nationality_data ()
-	{
+	{ 
 		// Get the database connection if it's not the case yet
 		if (empty ($this->_db_connection)) {
 			$dbhandler = new SqliteDbHanlder ( 

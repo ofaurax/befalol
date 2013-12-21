@@ -113,8 +113,19 @@ Class User {
 	
 	/**
 	 * 
-	
-	
+	 * Get the user id
+	 */
+	public function get_user_id ()
+	{
+		if (!empty($this->_user_id) && is_int($this->_user_id)){
+			return $this->_user_id;
+		}
+		else {
+			echo 'The user id should have been an integer <br/>';
+			return FALSE;
+		}		
+	} 
+		
 	/**
 	 * 
 	 * Set the user pwd

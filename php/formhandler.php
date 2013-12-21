@@ -43,7 +43,7 @@ function display_dropdownlist ($SelectParameters, $InputValues, $DefaultValue)
 	//}
 	foreach ($InputValues as $Inputvalue)
 	{
-		if (strcmp($Inputvalue,$DefaultValue) == 0) {
+		if (!strcmp($Inputvalue,$DefaultValue)) {
 			$r .= '<option selected value="'.$Inputvalue.'">'.$Inputvalue.'</option>';
 		}else {
 			$r .= '<option value="'.$Inputvalue.'">'.$Inputvalue.'</option>';
