@@ -26,7 +26,6 @@ Class Event {
 	protected $_parameters_list;
 	protected $_id = 0;
 	protected $_name = '';
-	protected $_location = '';
 	protected $_type = '';
 	protected $_starting_date = '';
 	protected $_ending_date = '';
@@ -35,6 +34,11 @@ Class Event {
 	protected $_participants = array();
 	protected $_languages = array();
 	protected $_description = '';
+	protected $_event_address = '';
+	protected $_event_zipcode = '';
+	protected $_event_city_name = '';
+	protected $_event_country_name = '';
+	
 	// Define different types of events allowed
 	static public $_type_range = array('Visits', 'Activities', 'Journeys', 'Parties');
 	
@@ -51,14 +55,17 @@ Class Event {
 			}
 			foreach ($parameters as $key=>$value) {
 				switch ($key){
+					case 'event_address':
+					case 'event_zipcode':
+					case 'event_city_name':
+					case 'event_country_name':
+						$this->set_string_attribute (array($key=>$value));
+						break;
 					case 'event_name':
 						$this->set_name($value);
 						break;
 					case 'event_id':
 						$this->set_id($value);
-						break;
-					case 'event_location':
-						$this->set_location ($value);
 						break;
 					case 'event_type':
 						$this->set_type ($value);
@@ -86,6 +93,7 @@ Class Event {
 						break;
 					default:
        					echo "This parameter $key does not exist";
+       					break;
 				}
 			}
 		} else {
@@ -95,18 +103,53 @@ Class Event {
 		}
     }
 	
+        
 	/**
 	 * 
 	 * Set the parameterlist defaut value
 	 */
 	protected function set_up() {
-		$this->_parameters_list = array ('event_name', 'event_location', 
-			'event_type', 'event_starting_date', 'event_ending_date',
-			'event_max_nb_participants', 'event_holder_id', 'event_languages', 
-			'event_description');
+		$this->_parameters_list = array ('event_name', 'event_address',
+		'event_zipcode', 'event_city_name', 'event_country_name', 'event_type',
+		'event_starting_date', 'event_ending_date', 'event_max_nb_participants',
+		'event_holder_id', 'event_languages', 'event_description');
 		return true;
 	}
 	
+		
+	/**
+	 * 
+	 * Set the  key=>value given, as an attribute of the user object. Key would
+	 * be the name of the attribute and value its value
+	 * @param array $parameter
+	 */
+	public function set_string_attribute ($parameter) {
+		if (is_array($parameter))
+		{	
+			foreach ($parameter as $key => $value){
+				//echo $value.'<br/>';
+				if (!empty($key)  
+					&& is_string ($value) 
+					&& !empty($value)  
+					&& is_string ($key) ) {
+					$dump_string = '_'.$key;
+					$this->$dump_string = $value;
+					return TRUE;		
+				}
+				else {
+					echo "Impossible to set the $key attribute <br/> ";
+					return FALSE;
+				}
+			}
+		}
+		else {
+			echo 'The input parameters must be an array <br/>';
+			return FALSE;
+		}
+	}
+	
+	
+		
 	/**
 	 * 
 	 * Set the id parameter
@@ -122,6 +165,7 @@ Class Event {
 			return E_USER_ERROR;
 		}
 	}
+
 	
 	/**
 	 * 
@@ -170,24 +214,7 @@ Class Event {
 		}
 	}
 	
-	/**
-	 * 
-	 * Set the location parameter
-	 * @param string $location
-	 */
-	protected  function set_location ($location) {
-		// HERE : Check if it's really a location and not bullshit
-		if (is_string($location)) {
-			$this->_location = $location;
-			return False;
-		} else {
-			trigger_error('The location parameter of the '.get_class($this) 
-			.' must be a string', E_USER_ERROR);
-			return E_USER_ERROR;
-		}
 		
-	}
-	
 	/**
 	 * 
 	 * Get the location parameter
@@ -195,11 +222,14 @@ Class Event {
 	public  function get_location ()
 	{
 		// HERE : Check if it's really a location and not bullshit
-		if (is_string($this->_location)) {
-			return $this->_location;
+		if (!empty($this->_event_address) && !empty($this->_event_zipcode) && 
+			!empty($this->_event_city_name) && !empty($this->_event_country_name)) {
+			return ($this->_event_address.', '
+				.$this->_event_zipcode.' '
+				.$this->_event_city_name.', '
+				.$this->_event_country_name);
 		} else {
-			trigger_error('The location parameter of the '.get_class($this) 
-			.' should have been a string', E_USER_ERROR);
+			trigger_error('One of the location parameters is empty', E_USER_ERROR);
 			return E_USER_ERROR;
 		}
 	}
@@ -578,30 +608,39 @@ Class Event {
 			return false;
 		}
 		$event_name = htmlentities($this->_name, ENT_QUOTES);
-		$event_location = htmlentities($this->_location, ENT_QUOTES);
 		$event_type = htmlentities($this->_type, ENT_QUOTES);
 		$event_checkin = htmlentities($this->_starting_date, ENT_QUOTES);
 		$event_checkout = htmlentities($this->_ending_date, ENT_QUOTES);
 		$event_holder_id = htmlentities($this->_holder_id, ENT_QUOTES);
 		$event_max_nb_participants = $this->_max_nb_participants;
 		$event_description = htmlentities($this->_description, ENT_QUOTES);
+		$event_address = htmlentities($this->_event_address, ENT_QUOTES);
+		$event_zipcode = htmlentities($this->_event_zipcode, ENT_QUOTES);
+		$event_city_name = htmlentities($this->_event_city_name, ENT_QUOTES);
+		$event_country_name = htmlentities($this->_event_country_name, ENT_QUOTES);
 		
-		$sql = 'INSERT INTO events (event_name, event_type, event_location, 
-		event_holder_id, event_max_nb_of_participants, event_starting_date, 
-		event_ending_date, event_description) VALUES(:event_name, :event_type, 
-		:event_location, :event_holder_id, :event_max_nb_participants, 
-		:event_starting_date, :event_ending_date, :event_description)';
+		$sql = 'INSERT INTO events (event_name, event_type, event_holder_id, 
+		event_max_nb_of_participants, event_starting_date, event_ending_date, 
+		event_description, event_address, event_zipcode, event_city_name, 
+		event_country_name) VALUES(:event_name, :event_type, :event_holder_id, 
+		:event_max_nb_participants, :event_starting_date, :event_ending_date, 
+		:event_description, :event_address, :event_zipcode, :event_city_name, 
+		:event_country_name)';
 		$query = $dbhandler->_db_connection->prepare($sql);
 		if ($query) {
 			$query->bindValue(':event_name', $event_name, PDO::PARAM_STR);
 			$query->bindValue(':event_type', $event_type, PDO::PARAM_STR);
-			$query->bindValue(':event_location', $event_location, PDO::PARAM_STR);
 			$query->bindValue(':event_starting_date', $event_checkin, PDO::PARAM_STR);
 			$query->bindValue(':event_ending_date', $event_checkout, PDO::PARAM_STR);
 			$query->bindValue(':event_holder_id', $event_holder_id, PDO::PARAM_INT);
 			$query->bindValue(':event_max_nb_participants', 
 			$event_max_nb_participants, PDO::PARAM_INT);
 			$query->bindValue(':event_description', $event_description, PDO::PARAM_STR);
+			$query->bindValue(':event_address', $event_address, PDO::PARAM_STR);
+			$query->bindValue(':event_zipcode', $event_zipcode, PDO::PARAM_STR);
+			$query->bindValue(':event_city_name', $event_city_name, PDO::PARAM_STR);
+			$query->bindValue(':event_country_name', $event_country_name, PDO::PARAM_STR);
+			
 			// PDO's execute() gives back TRUE when successful, 
 			// false when not
 			$registration_success_state = $query->execute();
@@ -623,6 +662,7 @@ Class Event {
 			} else {
 				echo "$event_name failed to be inserted in the 
 				'events' table. <br/>";
+				print_r ($query->errorInfo());
 				return false;
 			}
 		} else {
@@ -646,7 +686,7 @@ Class Event {
 		$event_id = $this->_id;
 		foreach ($this->_languages as $language) {
 			$language = htmlentities($language, ENT_QUOTES);
-			$sql = 'INSERT INTO languages_event (event_id, language_name) 
+			$sql = 'INSERT INTO event_languages (event_id, language_name) 
 			VALUES (:event_id, :language_name)';
 			$query = $dbhandler->_db_connection->prepare($sql);
 			if ($query) {
@@ -657,15 +697,15 @@ Class Event {
 				$registration_success_state = $query->execute();
 				if ($registration_success_state) {
 					echo "$language has been successfuly inserted in the 
-					'languages_event' table for the event id $event_id. <br/>";
+					'event_languages' table for the event id $event_id. <br/>";
 				} else {
 					echo "$language failed to be inserted in the 
-					'languages_event' tablefor the event id $event_id. <br/>";
+					'event_languages' tablefor the event id $event_id. <br/>";
 					return false;
 				}
 			} else {
 				echo "The database request for inserting $language 
-				in the 'languages_event' table for the event id $event_id 
+				in the 'event_languages' table for the event id $event_id 
 				could not be prepared.<br/>";
 				return false;
 			}

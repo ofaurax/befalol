@@ -291,7 +291,7 @@ Class User {
 			$results = $query->fetchall();
 			foreach ($results as $result_row) {
 				//then look for the languages spoken at this event 
-				$sql = 'SELECT language_name FROM languages_event 
+				$sql = 'SELECT language_name FROM event_languages 
 					WHERE event_id = :event_id';
 				$query = $dbhandler->_db_connection->prepare($sql);
 				if ($query) {
@@ -316,7 +316,10 @@ Class User {
 				// bundle all input parameters
 				$parameters = array ('event_id' => intval($result_row['event_id']),
 				'event_name' => html_entity_decode($result_row['event_name']), 
-				'event_location' => html_entity_decode($result_row['event_location']), 
+				'event_address' => html_entity_decode($result_row['event_address']),
+				'event_zipcode' => html_entity_decode($result_row['event_zipcode']), 
+				'event_city_name' => html_entity_decode($result_row['event_city_name']), 
+				'event_country_name' => html_entity_decode($result_row['event_country_name']), 
 				'event_type' => html_entity_decode($result_row['event_type']), 
 				'event_starting_date' => html_entity_decode($result_row['event_starting_date']),
 		    	'event_ending_date'=> html_entity_decode($result_row['event_ending_date']), 

@@ -616,6 +616,40 @@ Class Country {
 			return false;
 		}
 	}
+	
+	/**
+	 * 
+	 * Select and return an array of all country names of the countries table
+	 */
+	static public function select_all_countries () {
+		// Get the database connection if it's not the case yet
+		$dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+		if (empty($dbhandler)) {
+			echo 'Impossible to initiate communication with database </br>';
+			return false;
+		}
+		// Look for existing languages_name in the nationalities table
+		$sql = 'SELECT country_name FROM countries';
+		$query = $dbhandler->_db_connection->prepare($sql);
+		if ($query) {
+			$query->execute();
+			$results = $query->fetchall(PDO::FETCH_COLUMN);
+			if ($results) {
+				$countries = array();
+				foreach ($results as $key=>$value) {
+					array_push ($countries, html_entity_decode($value));
+					}
+				return $countries;
+			} else {
+				echo "There is no country in the 'countries' table.<br/>";
+				return false;
+			}
+		} else {
+			echo "The database request for selecting country names in the 
+			'countries'	table could not be prepared.<br/>";
+			return false;
+		}
+	}	
 }
 
 

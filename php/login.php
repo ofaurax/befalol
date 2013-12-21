@@ -577,10 +577,12 @@ class Login
 			$languages = NULL;
 			$event_types = Event::select_all_event_types();
 			$languages = Language::select_all_languages();
-			if (!empty($event_types) && !empty($languages)) {
+			$countries = Country::select_all_countries();
+			if (!empty($event_types) && !empty($languages) && !empty($countries)) {
 				//table
 				sort($languages);
 				sort($event_types);
+				sort($countries);
 				$r .= '<table>';
 				$r .= display_row('Event Name:', '<input type="text" 
 					name="event_name" placeholder="My new awesome event" size="25" required/>');
@@ -588,7 +590,12 @@ class Login
 					'event_type', 'multiple' => FALSE, 'required' => TRUE) , 
 					$event_types, ''));
 				$r .= display_row('Location:', '<input type="text" 
-					name="event_location" size=50 required/>');
+					name="event_address" placeholder="1, Lombard Street" 
+					size=50 required/> <input type="text" placeholder="94133"
+					name="event_zipcode" width="8" required/> <input type="text" 
+					name="event_city_name" size="20" placeholder="San Francisco" required/>'
+					.display_dropdownlist(array('multiple' => false, 'required' => 
+					true, 'name' => 'event_country_name'), $countries, 'United States'));
 				$r .= display_row('Check in:', '<input type="date" 
 					name="event_starting_date" placeholder="mm/dd/yyyy" size="10" 
 					required/>'.' Time :'. ' <input type="time" name="event_starting_time" 
@@ -613,9 +620,9 @@ class Login
 				$r .= '</form>';
 				echo $r;
 				echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
-    		}//else {
-    	//	$this->feedback = "The form could not have been loaded";
-    	//	}
+    		}else {
+    			$this->feedback = "The form could not have been loaded";
+    		}
     	}
     }
     
@@ -781,7 +788,6 @@ class Login
 	    	// Retrieve datas from form
 	    	$event_name = $_POST['event_name'];
 	    	$event_type = $_POST['event_type'];
-	    	$event_location = $_POST['event_location'];
 	    	$event_starting_date = $_POST['event_starting_date'].' '
 	    		.$_POST['event_starting_time'];
 	    	$event_ending_date = $_POST['event_ending_date'].' '
@@ -789,16 +795,27 @@ class Login
 	    	$event_description = $_POST['event_description'];
 	    	$event_max_nb_participants = $_POST['event_max_nb_participants'];
 	    	$event_languages_spoken = $_POST['event_spoken_languages'];
+	    	$event_address = $_POST['event_address'];
+	    	$event_zipcode = $_POST['event_zipcode'];
+	    	$event_city_name = $_POST['event_city_name'];
+	    	$event_country_name = $_POST['event_country_name'];
+	    	
+	    	
 	    	//Get the user id to use as the holder_id
 	    	$event_holder_id = $_SESSION['user']->get_user_id();
 				    	
 	    	//Create an user object with it
-			$parameters =  array ('event_name' => $event_name, 'event_location' => $event_location, 
-			'event_type' => $event_type, 'event_starting_date' => $event_starting_date,
+			$parameters =  array ('event_name' => $event_name, 
+			'event_type' => $event_type, 
+			'event_starting_date' => $event_starting_date,
 	    	'event_ending_date'=> $event_ending_date, 
 	    	'event_max_nb_participants' => intval($event_max_nb_participants), 
 	    	'event_holder_id' => $event_holder_id, 
 	    	'event_languages' => $event_languages_spoken, 
+			'event_address' => $event_address,
+			'event_zipcode' => $event_zipcode,
+			'event_city_name' => $event_city_name,
+			'event_country_name' => $event_country_name,
 			'event_description' => $event_description);
 			$event = new Event ($parameters);
 			
@@ -842,7 +859,13 @@ class Login
         	FILTER_SANITIZE_STRING, true)
             && data_validation($_POST['event_type'], 
             FILTER_SANITIZE_STRING, true)
-			&& data_validation($_POST['event_location'], 
+			&& data_validation($_POST['event_address'], 
+			FILTER_SANITIZE_STRING, true)
+			&& data_validation($_POST['event_zipcode'], 
+			FILTER_SANITIZE_NUMBER_INT, true)
+			&& data_validation($_POST['event_city_name'], 
+			FILTER_SANITIZE_STRING, true)
+			&& data_validation($_POST['event_country_name'], 
 			FILTER_SANITIZE_STRING, true)
 			&& data_validation($_POST['event_max_nb_participants'], 
 			FILTER_SANITIZE_STRING, true)
@@ -863,7 +886,8 @@ class Login
        		$this->feedback = "Event name cannot be empty";
         } elseif (empty($_POST['event_type'])) {            
        		$this->feedback = "Event type cannot be empty";
-        } elseif (empty($_POST['event_location'])) {            
+        } elseif (empty($_POST['event_address']) || empty($_POST['event_zipcode'])
+        	|| empty($_POST['event_city_name']) || empty($_POST['event_country_name'])) {            
        		$this->feedback = "Event location cannot be empty";
         } elseif (empty($_POST['event_starting_date'])) {            
        		$this->feedback = "Event check in cannot be empty";
@@ -885,10 +909,6 @@ class Login
         } elseif (!data_validation($_POST['event_type'], FILTER_SANITIZE_STRING,
         	 true)){
 			$this->feedback = "The event type does not match the field 
-			requirements";
-        } elseif (!data_validation($_POST['event_location'], 
-        	FILTER_SANITIZE_STRING, true)){
-			$this->feedback = "The event location does not match the field 
 			requirements";
         } elseif (!check_and_valid_date($_POST['event_starting_date'], true)){
 			$this->feedback = "The event check in date doesn't match the field 

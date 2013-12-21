@@ -150,10 +150,10 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
 		$errno = $this->create_cities_table () && $errno;
 		$errno = $this->create_languages_table () && $errno;
 		$errno = $this->create_countries_languages_table () && $errno;
-		$errno = $this->create_languages_event_table () && $errno;
+		$errno = $this->create_event_languages_table () && $errno;
 		$errno = $this->create_users_table () && $errno;
 		$errno = $this->create_events_table () && $errno;
-		$errno = $this->create_participants_event_table () && $errno;
+		$errno = $this->create_event_participants_table () && $errno;
 		$errno = $this->create_visited_countries_table () && $errno;
 		$errno = $this->create_nationalities_table () && $errno; 
 		$errno = $this->enable_foreign_keys () && $errno;
@@ -177,10 +177,10 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
 		$errno = $this->delete_table ('cities') && $errno;
 		$errno = $this->delete_table ('languages') && $errno;
 		$errno = $this->delete_table ('countries_languages') && $errno;
-		$errno = $this->delete_table ('languages_event') && $errno;
+		$errno = $this->delete_table ('event_languages') && $errno;
 		$errno = $this->delete_table ('users') && $errno;
 		$errno = $this->delete_table ('events') && $errno;
-		$errno = $this->delete_table ('participants_event') && $errno;
+		$errno = $this->delete_table ('event_participants') && $errno;
 		$errno = $this->delete_table ('visited_countries_by_users') && $errno;
 		$errno = $this->delete_table ('nationalities') && $errno;
 		$errno = $this->enable_foreign_keys () && $errno;
@@ -295,12 +295,16 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
 				event_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 				event_name TEXT NOT NULL,
 				event_type TEXT NOT NULL,
-				event_location TEXT NOT NULL,
 				event_holder_id INTEGER NOT NULL,
 				event_max_nb_of_participants INTEGER NOT NULL,
 				event_starting_date TEXT NOT NULL,
 				event_ending_date TEXT NOT NULL,
 				event_description TEXT,
+				event_address TEXT NOT NULL,
+				event_zipcode TEXT NOT NULL,
+				event_city_name TEXT NOT NULL,
+				event_country_name TEXT NOT NULL,
+				FOREIGN KEY (event_country_name) REFERENCES countries (country_name)
 				FOREIGN KEY (event_type) REFERENCES event_types (event_type_name),
 				FOREIGN KEY (event_holder_id) REFERENCES users (user_id)
 				);';
@@ -354,11 +358,11 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
 	 * 
 	 * Create table for languages that will be spoken at an event
 	 */
-	function create_languages_event_table ()
+	function create_event_languages_table ()
 	{
 			// create new empty table inside the database 
 			// (if table does not already exist)
-		$sql = 'CREATE TABLE IF NOT EXISTS languages_event (
+		$sql = 'CREATE TABLE IF NOT EXISTS event_languages (
 				event_id INTEGER NOT NULL,
 				language_name TEXT NOT NULL,
 				FOREIGN KEY (event_id) REFERENCES events (event_id),
@@ -375,11 +379,11 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
 	 * 
 	 * Create table for users that will be participating to an event
 	 */
-	function create_participants_event_table ()
+	function create_event_participants_table ()
 	{
 		// create new empty table inside the database 
 		// (if table does not already exist)
-		$sql = 'CREATE TABLE IF NOT EXISTS participants_event (
+		$sql = 'CREATE TABLE IF NOT EXISTS event_participants (
 				event_id INTEGER NOT NULL,
 				user_id INTEGER,
 				FOREIGN KEY (event_id) REFERENCES events (event_id),
@@ -390,6 +394,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
 		// return false if no connection with db
 		return $this->prepare_and_execute_query ($sql);
 	}
+	
 	
 	
 	/**

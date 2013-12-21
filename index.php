@@ -33,6 +33,23 @@ session_start();
 	//$dbhandler->delete_all_tables();
 	//$dbhandler->create_tables();
 	//$dbhandler->db_disconnect();
+	/*$geocoder = new \Geocoder\Geocoder();
+	$adapter  = new \Geocoder\HttpAdapter\BuzzHttpAdapter();	
+	$chain = new \Geocoder\Provider\ChainProvider(array(
+	    new \Geocoder\Provider\FreeGeoIpProvider($adapter),
+	    new \Geocoder\Provider\HostIpProvider($adapter),
+	    new \Geocoder\Provider\GoogleMapsProvider($adapter, 'fr_FR', 'France', true),
+	    new \Geocoder\Provider\BingMapsProvider($adapter, '<API_KEY>'),
+	    
+	));
+	$geocoder->registerProvider($chain);
+	
+	try {
+	    $geocode = $geocoder->geocode('78.228.245.112');
+	    var_export($geocode);
+	} catch (Exception $e) {
+	    echo $e->getMessage();
+	}*/
 	$login = new Login();
 ?>
 
