@@ -130,7 +130,7 @@ function check_and_valid_date ($date, $actionforempty) {
  * Check if time format is correct then check validity of the date. Return true
  * if the time has the right format and is valid
  * @param date $date
- * @param $actionforempty, 0: ignore emptyness, 1: validation will fail if emptyness
+ * @param boolean $actionforempty, 0: ignore emptyness, 1: validation will fail if emptyness
  */
 function check_and_valid_time ($time, $actionforempty) {
     //TODO Must be motified according to the timezone
@@ -159,6 +159,11 @@ function check_and_valid_time ($time, $actionforempty) {
     }
 }
 
+/**
+ * 
+ * Test if a date is in the futur or not. Return true if futur, false if not
+ * @param string $string_date
+ */
 function is_it_futur ($string_date) {
     // then check if year is not in the futur
     //TODO take into account time zone
@@ -169,22 +174,73 @@ function is_it_futur ($string_date) {
     }
     return false;
 }
+
 /**
- *
- * Check if a string is valid date
- * @param string/date $Str
+ * 
+ * Check if there is no digit in a string. Return true if no digit, false if digit.
+ * @param string $string
+ * @param bool $actionforempty 0: ignore emptyness, 1: validation will fail if 
+ * emptyness
  */
-function IsDate( $Str )
-{
-    //TODO does not work for february
-    $Stamp = strtotime( $Str );
-    $Month = date( 'mm', $Stamp );
-    $Day   = date( 'dd', $Stamp );
-    $Year  = date( 'YYYY', $Stamp );
-    echo $Month.'<br/>';
-    echo $Day.'<br/>';
-    echo $Year.'<br/>';
-    return checkdate( $Month, $Day, $Year );
+function check_no_digit ($string, $actionforempty) {
+    $reg = '#[^\D]#';
+    // if empty and actionforempty is true, then considered as fail
+    if (empty($string) && $actionforempty) {
+        return false;
+    // if empty and actionforempty is false then considered as success
+    } else if (empty($string)) {
+        return true;
+    // if not empty, apply the regex matching
+    }else if (is_string ($string)) {
+        preg_match($reg, $string, $matches);
+        //print_r ($matches);
+        if (!empty ($matches[0])) {
+            return false;
+        }else {
+            return true;
+        }
+    }else {
+        echo 'Please, give us a string. <br/>';
+        return false;
+    }
+}
+
+/**
+ * 
+ * Check if there is no digit in a array of string. Return true if no digit, false if digit.
+ * @param array $array_of_string
+ * @param bool $actionforempty 0: ignore emptyness, 1: validation will fail if 
+ * emptyness
+ */
+function array_check_no_digit ($array_of_string, $actionforempty) {
+    $reg = '#[^\D]#';
+    if (is_array($array_of_string)) {
+        foreach ($array_of_string as $string) {
+            // if empty and actionforempty is true, then considered as fail
+            if (empty($string) && $actionforempty) {
+                return false;
+            // if empty and actionforempty is false then considered as success
+            } else if (empty($string)) {
+                continue;
+            // if not empty, apply the regex matching
+            }else if (is_string ($string)) {
+                preg_match($reg, $string, $matches);
+                //print_r ($matches);
+                if (!empty ($matches[0])) {
+                    return false;
+                }else {
+                    continue;
+                }
+            }else {
+                echo 'Please, give us a string. <br/>';
+                return false;
+            }
+        }
+        return true;
+    } else {
+        echo 'The input parameters must be an array <br>.';
+        return false;
+    }
 }
 
 

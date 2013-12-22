@@ -27,7 +27,6 @@ class Login
     /**
      * @var string Path of the database file
      */
-    //TODO Change that by ini config parser
     private $db_sqlite_path = "";
 
     /**
@@ -504,7 +503,8 @@ class Login
                 . $_SESSION['user']->get_string_attribute('user_lastname').'"required/>');
                 $r .= display_row('First name:', '<input type="text" name="user_firstname" value="'
                 . $_SESSION['user']->get_string_attribute('user_firstname').'"required/>');
-                $r .= display_row('Birthday:', '<input type="date" name="user_birthday"  value="'
+                $r .= display_row('Birthday:', '<input type="date" name="user_birthday" 
+                placeholder="mm-dd-yyyy" value="'
                 . $_SESSION['user']->get_string_attribute('user_birthday').'"required/>');
                 $r .= display_row('Nationality:', display_dropdownlist
                 (array('name' => 'user_nationality', 'multiple' => FALSE,
@@ -597,11 +597,11 @@ class Login
 					.display_dropdownlist(array('multiple' => false, 'required' =>
 					true, 'name' => 'event_country_name'), $countries, 'United States'));
 					$r .= display_row('Check in:', '<input type="date"
-					name="event_starting_date" placeholder="mm/dd/yyyy" size="10" 
+					name="event_starting_date" placeholder="mm-dd-yyyy" size="10" 
 					required/>'.' Time :'. ' <input type="time" name="event_starting_time" 
 					placeholder="hh:mm" size="8" max="23:00" required/>');
 					$r .= display_row('Check out date:', '<input type="date"
-					name="event_ending_date" placeholder="mm/dd/yyyy" size="10" required/>'.
+					name="event_ending_date" placeholder="mm-dd-yyyy" size="10" required/>'.
 					' Time :'.' <input type="time" name="event_ending_time" size="8" 
 					placeholder="hh:mm" max="23:00" required/>');
 					$r .= display_row('Maximal number of participants:',
@@ -745,13 +745,19 @@ class Login
         }
         if ($this->checkPICorrectness()){
             // Retrieve datas from form
-            $user_name = $_POST['user_name'];
+            $user_name = filter_var($_POST['user_name'],
+             FILTER_SANITIZE_STRING);
             //$user_password = $_POST['user_password'];
-            $user_email = $_POST['user_email'];
-            $user_birthday = $_POST['user_birthday'];
-            $user_nationality = $_POST['user_nationality'];
-            $user_lastname = $_POST['user_lastname'];
-            $user_firstname = $_POST['user_firstname'];
+            $user_email = filter_var($_POST['user_email'], 
+            FILTER_SANITIZE_EMAIL);
+            $user_birthday = filter_var($_POST['user_birthday'], 
+            FILTER_SANITIZE_STRING);
+            $user_nationality = filter_var($_POST['user_nationality'], 
+            FILTER_SANITIZE_STRING);
+            $user_lastname = filter_var($_POST['user_lastname'], 
+            FILTER_SANITIZE_STRING);
+            $user_firstname = filter_var($_POST['user_firstname'], 
+            FILTER_SANITIZE_STRING);
             	
             //Create an user object with it
             $parameters =  array ('user_id' =>
@@ -786,20 +792,32 @@ class Login
          
         if ($this->checkEICorrectness()){
             // Retrieve datas from form
-            $event_name = $_POST['event_name'];
-            $event_type = $_POST['event_type'];
-            $event_starting_date = $_POST['event_starting_date'].' '
-            .$_POST['event_starting_time'];
-            $event_ending_date = $_POST['event_ending_date'].' '
-            .$_POST['event_ending_time'];
-            $event_description = $_POST['event_description'];
-            $event_max_nb_participants = $_POST['event_max_nb_participants'];
-            $event_languages_spoken = $_POST['event_spoken_languages'];
-            $event_address = $_POST['event_address'];
-            $event_zipcode = $_POST['event_zipcode'];
-            $event_city_name = $_POST['event_city_name'];
-            $event_country_name = $_POST['event_country_name'];
-
+            $event_name = filter_var($_POST['event_name'], 
+                FILTER_SANITIZE_STRING);
+            $event_type = filter_var($_POST['event_type'], 
+                FILTER_SANITIZE_STRING);
+            $event_starting_date = filter_var($_POST['event_starting_date'].' '
+                .$_POST['event_starting_time'], FILTER_SANITIZE_STRING);
+            $event_ending_date = filter_var($_POST['event_ending_date'].' '
+                .$_POST['event_ending_time'], FILTER_SANITIZE_STRING);
+            $event_description = filter_var($_POST['event_description'], 
+                FILTER_SANITIZE_STRING);
+            $event_max_nb_participants = filter_var(
+                $_POST['event_max_nb_participants'], FILTER_SANITIZE_NUMBER_INT);
+            $event_address = filter_var($_POST['event_address'], 
+                FILTER_SANITIZE_STRING);
+            $event_zipcode = filter_var($_POST['event_zipcode'], 
+                FILTER_SANITIZE_STRING);
+            $event_city_name = filter_var($_POST['event_city_name'], 
+                FILTER_SANITIZE_STRING);
+            $event_country_name = filter_var($_POST['event_country_name'], 
+                FILTER_SANITIZE_STRING);
+                
+            $event_languages_spoken = array(); 
+            foreach($_POST['event_spoken_languages'] as $language) {
+                array_push($event_languages_spoken, filter_var($language, 
+                FILTER_SANITIZE_STRING));
+            }
 
             //Get the user id to use as the holder_id
             $event_holder_id = $_SESSION['user']->get_user_id();
@@ -855,40 +873,38 @@ class Login
 
         // validating the input
         if (!empty($_POST['event_name'])
-        && data_validation($_POST['event_name'],
-        FILTER_SANITIZE_STRING, true)
-        && data_validation($_POST['event_type'],
-        FILTER_SANITIZE_STRING, true)
-        && data_validation($_POST['event_address'],
-        FILTER_SANITIZE_STRING, true)
-        && data_validation($_POST['event_zipcode'],
-        FILTER_SANITIZE_NUMBER_INT, true)
-        && data_validation($_POST['event_city_name'],
-        FILTER_SANITIZE_STRING, true)
-        && data_validation($_POST['event_country_name'],
-        FILTER_SANITIZE_STRING, true)
+        && check_no_digit($_POST['event_type'], true)
+        && (!empty($_POST['event_zipcode']))
+        && check_no_digit($_POST['event_city_name'], true)
+        && check_no_digit($_POST['event_country_name'], true)
         && data_validation($_POST['event_max_nb_participants'],
-        FILTER_SANITIZE_STRING, true)
+            FILTER_SANITIZE_NUMBER_INT, true)
         && check_and_valid_date($_POST['event_starting_date'], true)
         && check_and_valid_date($_POST['event_ending_date'], true)
         && (is_it_futur ($_POST['event_starting_date'].' '
-        .$_POST['event_starting_time']))
+            .$_POST['event_starting_time']))
         && (is_it_futur ($_POST['event_ending_date'].' '
-        .$_POST['event_ending_time']))
+            .$_POST['event_ending_time']))
         && check_and_valid_time($_POST['event_starting_time'], true)
         && check_and_valid_time($_POST['event_ending_time'], true)
         && data_validation($_POST['event_description'],
-        FILTER_SANITIZE_STRING, true)
-        && array_data_validation($_POST['event_spoken_languages'],
-        FILTER_SANITIZE_STRING, true)) {
+            FILTER_SANITIZE_STRING, true)
+        && array_check_no_digit($_POST['event_spoken_languages'],true)) {
             return true;
         } elseif (empty($_POST['event_name'])) {
             $this->feedback = "Event name cannot be empty";
-        } elseif (empty($_POST['event_type'])) {
-            $this->feedback = "Event type cannot be empty";
+        } elseif (!check_no_digit($_POST['event_type'], true)) {
+            $this->feedback = "Event type cannot be empty or contain digit";
         } elseif (empty($_POST['event_address']) || empty($_POST['event_zipcode'])
         || empty($_POST['event_city_name']) || empty($_POST['event_country_name'])) {
             $this->feedback = "Event location cannot be empty";
+        } elseif (!check_no_digit($_POST['event_city_name'], true)) {
+            $this->feedback = "Event city is not a valid city";
+        } elseif (!check_no_digit($_POST['event_country_name'], true)) {
+            $this->feedback = "Event country is not a valid country";
+        }elseif (!data_validation($_POST['event_max_nb_participants'],
+            FILTER_SANITIZE_NUMBER_INT, true)) {
+            $this->feedback = "Maximum number of participant must be a digit";
         } elseif (empty($_POST['event_starting_date'])) {
             $this->feedback = "Event check in cannot be empty";
         } elseif (empty($_POST['event_ending_date'])) {
@@ -901,27 +917,12 @@ class Login
             $this->feedback = "Event check in time cannot be empty";
         } elseif (empty($_POST['event_ending_time'])) {
             $this->feedback = "Event check out time cannot be empty";
-        } elseif (empty($_POST['event_spoken_languages'])) {
-            $this->feedback = "Event spoken languages cannot be empty";
-        } elseif (!data_validation($_POST['event_name'], FILTER_SANITIZE_STRING,
-        true)){
-            $this->feedback = "The event name does not match the requirements";
-        } elseif (!data_validation($_POST['event_type'], FILTER_SANITIZE_STRING,
-        true)){
-            $this->feedback = "The event type does not match the field
-			requirements";
         } elseif (!check_and_valid_date($_POST['event_starting_date'], true)){
             $this->feedback = "The event check in date doesn't match the field
 			requirements (MM/DD/YYYY) or is not a valid date";
         } elseif (!check_and_valid_date($_POST['event_ending_date'], true)){
             $this->feedback = "The event check out date doesn't match the field
 			requirements (MM/DD/YYYY) or is not a valid date";
-        } elseif (!check_and_valid_time($_POST['event_starting_time'], true)){
-            $this->feedback = "The event check in time doesn't match the field
-			requirements (HH/MM)";
-        } elseif (!check_and_valid_time($_POST['event_ending_time'], true)){
-            $this->feedback = "The event check out time doesn't match the field
-			requirements (HH/MM)";
         } elseif (!is_it_futur($_POST['event_starting_date'].' '
         .$_POST['event_starting_time'], true)){
             $this->feedback = "I am not sure the time machine exists yet,
@@ -930,12 +931,17 @@ class Login
         .$_POST['event_ending_time'], true)){
             $this->feedback = "Well, you won't be able to end this event before
 			you started it, please make sure the event check out is valid.";
+        } elseif (!check_and_valid_time($_POST['event_starting_time'], true)){
+            $this->feedback = "The event check in time doesn't match the field
+			requirements (HH/MM)";
+        } elseif (!check_and_valid_time($_POST['event_ending_time'], true)){
+            $this->feedback = "The event check out time doesn't match the field
+			requirements (HH/MM)";
         } elseif (!data_validation($_POST['event_description'],
         FILTER_SANITIZE_STRING, true)){
             $this->feedback = "The event description does not match the field
 			requirements";
-        } elseif (!array_data_validation($_POST['event_spoken_languages'],
-        FILTER_SANITIZE_STRING, true)){
+        } elseif (!array_check_no_digit($_POST['event_spoken_languages'],true)){
             $this->feedback = "The event spoken languages does not match the field
 			requirements";
         } else {
@@ -960,28 +966,34 @@ class Login
         if (!empty($_POST['user_name'])
         && strlen($_POST['user_email']) <= 64
         && filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)
-        && data_validation($_POST['user_lastname'], FILTER_SANITIZE_STRING, 0)
-        && data_validation($_POST['user_firstname'], FILTER_SANITIZE_STRING, 0)
-        && check_and_valid_date($_POST['user_birthday'], 0)
-        && (!is_it_futur ($_POST['user_birthday']))
-        && data_validation($_POST['user_nationality'], FILTER_SANITIZE_STRING, 0)) {
-            return true;
-
+        && check_no_digit($_POST['user_lastname'], false)
+        && strlen($_POST['user_lastname']) <= 64
+        && check_no_digit($_POST['user_firstname'], false)
+        && strlen($_POST['user_firstname']) <= 64
+        && check_no_digit($_POST['user_nationality'], false)
+        && check_and_valid_date($_POST['user_birthday'], False)        
+        && (!is_it_futur ($_POST['user_birthday']))) {
+            return true;     
         } elseif (empty($_POST['user_email'])) {
             $this->feedback = "Email cannot be empty";
         } elseif (strlen($_POST['user_email']) > 64) {
             $this->feedback = "Email cannot be longer than 64 characters";
         } elseif (!filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)) {
             $this->feedback = "Your email address is not in a valid email format";
-        } elseif (!data_validation($_POST['user_lastname'], FILTER_SANITIZE_STRING, 0)){
+        } elseif (!check_no_digit($_POST['user_lastname'], false)){
             $this->feedback = "Your lastname doesn't match the field requirements";
-        } elseif (!data_validation($_POST['user_firstname'], FILTER_SANITIZE_STRING, 0)){
+        } elseif (strlen($_POST['user_lastname']) > 64) {
+            $this->feedback = "Lastname cannot be longer than 64 characters";
+        } elseif (!check_no_digit($_POST['user_firstname'], false)){
             $this->feedback = "Your firstname doesn't match the field requirements";
+        } elseif (strlen($_POST['user_firstname']) > 64) {
+            $this->feedback = "Firstname cannot be longer than 64 characters";
         } elseif (!check_and_valid_date($_POST['user_birthday'], 0)){
-            $this->feedback = "Your birthday doesn't match the field requirements (MM/DD/YYYY)";
+            $this->feedback = "Your birthday doesn't match the field requirements - mm-dd-yyyy -
+            or is not a valid date";
         } elseif (is_it_futur($_POST['user_birthday'], 0)){
             $this->feedback = "You probably would not be using this website if you were not born :).";
-        } elseif (!data_validation($_POST['user_nationality'], FILTER_SANITIZE_STRING, 0)){
+        } elseif (!check_no_digit($_POST['user_nationality'], false)){
             $this->feedback = "Your nationality doesn't match the field requirements";
         } else {
             $this->feedback = "An unknown error occurred.";
