@@ -80,10 +80,12 @@ function data_validation ($data, $filter, $actionforempty) {
  */
 function check_and_valid_date ($date, $actionforempty) {
     //TODO Must be motified according to the timezone
+    echo $date;
     if (empty($date) && ($actionforempty==1)) {
         // if data is empty and that the function is set to fail if empty,
         //then failing happens
         return false;
+    // mm/dd/yyyy
     }else if (!empty($date)) {
         if (preg_match( '`^\d{1,2}/\d{1,2}/\d{4}$`' , $date)) {
             // check if month is correct
@@ -100,6 +102,23 @@ function check_and_valid_date ($date, $actionforempty) {
             preg_match( '`^\d{1,2}/\d{1,2}/(\d{4})$`' , $date, $year);
             // check if the date is valid
             return checkdate( intval($month[1]), intval($day[1]), intval($year[1]));
+        // mm-dd-yyyy
+        }elseif (preg_match( '`^\d{1,2}-\d{1,2}-\d{4}$`' , $date)) { 
+             // check if month is correct
+            preg_match( '`^\d{1,2}-(\d{1,2})-\d{4}$`' , $date, $day);
+            if ((intval($day[1]) > 31) || (intval($day[1]) <= 0 )) {
+                return false;
+            }
+            // check if day is correct too
+            preg_match( '`^(\d{1,2})-\d{1,2}-\d{4}$`' , $date, $month);
+            if ((intval($month[1]) > 12) || (intval($month[1]) <= 0 )) {
+                return false;
+            }
+            // check if day is correct too
+            preg_match( '`^\d{1,2}-\d{1,2}-(\d{4})$`' , $date, $year);
+            // check if the date is valid
+            return checkdate( intval($month[1]), intval($day[1]), intval($year[1]));
+        // mm/dd/yyyy hh:mm
         }elseif (preg_match( '`^\d{1,2}/\d{1,2}/\d{4}\s\d{1,2}:\d{1,2}$`' , $date)){
             // check if month is correct
             preg_match( '`^\d{1,2}/(\d{1,2})/\d{4}\s\d{1,2}:\d{1,2}$`' , $date, $day);
@@ -115,8 +134,23 @@ function check_and_valid_date ($date, $actionforempty) {
             preg_match( '`^\d{1,2}/\d{1,2}/(\d{4})\s\d{1,2}:\d{1,2}$`' , $date, $year);
             // check if the date is valid
             return checkdate( intval($month[1]), intval($day[1]), intval($year[1]));
-        }
-        else {
+        // mm-dd-yyyy hh:mm
+        } elseif (preg_match( '`^\d{1,2}-\d{1,2}-\d{4}\s\d{1,2}:\d{1,2}$`' , $date)){
+            // check if month is correct
+            preg_match( '`^\d{1,2}-(\d{1,2})-\d{4}\s\d{1,2}:\d{1,2}$`' , $date, $day);
+            if ((intval($day[1]) > 31) || (intval($day[1]) <= 0 )) {
+                return false;
+            }
+            // check if day is correct too
+            preg_match( '`^(\d{1,2})-\d{1,2}-\d{4}\s\d{1,2}:\d{1,2}$`' , $date, $month);
+            if ((intval($month[1]) > 12) || (intval($month[1]) <= 0 )) {
+                return false;
+            }
+            // check if day is correct too
+            preg_match( '`^\d{1,2}-\d{1,2}-(\d{4})\s\d{1,2}:\d{1,2}$`' , $date, $year);
+            // check if the date is valid
+            return checkdate( intval($month[1]), intval($day[1]), intval($year[1]));
+        } else {
             return false;
         }
     } else {

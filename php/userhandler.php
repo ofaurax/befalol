@@ -1,8 +1,8 @@
 <?php
 
 /**
- *
- * Enter description here ...
+ * 
+ * Class allowing to handle user informations
  * @author Aldeen Berluti
  *
  */
@@ -15,6 +15,7 @@ Class User {
     protected $_user_nationality = '';
     protected $_user_firstname = '';
     protected $_user_lastname = '';
+    protected $_user_password_hash = '';
     protected $_db_connection = NULL;
 
 
@@ -34,13 +35,12 @@ Class User {
                     case 'user_email':
                     case 'user_lastname':
                     case 'user_firstname':
-                        $errno = $this->set_string_attribute (array($key => $value)) && $errno;
+                    case 'user_password_hash':
+                        $errno = $this->set_string_attribute 
+                                            (array($key => $value)) && $errno;
                         break;
                     case 'user_id':
                         $errno = $this->set_user_id ($value) && $errno;
-                        break;
-                    case 'user_password':
-                        $errno = $this->set_user_password ($value) && $errno;
                         break;
                     case 'user_birthday':
                         $errno = $this->set_user_birthday ($value) && $errno;
@@ -126,24 +126,7 @@ Class User {
         }
     }
 
-    /**
-     *
-     * Set the user pwd
-     * @param string $pwd
-     */
-    public function set_user_password ($pwd)
-    {
-        /*if (!empty($pwd)){
-         $this->_user_birthday = $birthday;
-         return True;
-         }
-         else {
-         echo 'The input parameters must be an array';
-         return FALSE;
-         }*/
-    }
-
-
+    
     /**
      *
      * Set the user birthday date
@@ -199,23 +182,24 @@ Class User {
         $user_lastname = htmlentities($this->_user_lastname, ENT_QUOTES);
         $user_firstname = htmlentities($this->_user_firstname, ENT_QUOTES);
         $user_birthday = htmlentities($this->_user_birthday, ENT_QUOTES);
+        $user_password_hash = htmlentities($this->_user_password_hash, ENT_QUOTES);
+        $user_password_hash = $this->_user_password_hash;
         $sql = 'UPDATE users
 		SET user_email = :user_email, user_lastname = :user_lastname, 
 		user_firstname = :user_firstname, user_nationality = :user_nationality,
-		user_birthday = :user_birthday WHERE user_name = :user_name';
+		user_birthday = :user_birthday, user_password_hash = :user_password_hash 
+		WHERE user_name = :user_name';
         $query = $dbhandler->_db_connection->prepare($sql);
         if ($query) {
-            $query->bindValue(':user_email', $user_email,
-            PDO::PARAM_STR);
-            $query->bindValue(':user_name', $user_name,
-            PDO::PARAM_STR);
+            $query->bindValue(':user_email', $user_email, PDO::PARAM_STR);
+            $query->bindValue(':user_name', $user_name, PDO::PARAM_STR);
             $query->bindValue(':user_nationality', $user_nationality,
             PDO::PARAM_STR);
-            $query->bindValue(':user_birthday', $user_birthday,
-            PDO::PARAM_STR);
-            $query->bindValue(':user_lastname', $user_lastname,
-            PDO::PARAM_STR);
+            $query->bindValue(':user_birthday', $user_birthday, PDO::PARAM_STR);
+            $query->bindValue(':user_lastname', $user_lastname, PDO::PARAM_STR);
             $query->bindValue(':user_firstname', $user_firstname,
+            PDO::PARAM_STR);
+            $query->bindValue(':user_password_hash', $user_password_hash, 
             PDO::PARAM_STR);
             // PDO's execute() gives back TRUE when successful,
             // false when not

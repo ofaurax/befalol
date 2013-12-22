@@ -113,6 +113,7 @@ class Login
                 if (isset($_GET["action"])) {
                     switch ($_GET["action"]) {
                         case 'setpersonalinfo':
+                        case 'setpersonalinfo&changepwd':
                             echo 'You can change your personnal data here <br/>';
                             $this->SaveUserInformations();
                             $this->ShowPageUserInformation();
@@ -274,12 +275,13 @@ class Login
             if (password_verify($_POST['user_password'], $result_row->user_password_hash)) {
                 // write user data into PHP SESSION [a file on your server]
                 $parameters = array ('user_id' => intval($result_row->user_id),
-                 	'user_name' => $result_row->user_name,
- 					'user_email' => $result_row->user_email,
-                	'user_birthday' => $result_row->user_birthday,
-                	'user_nationality' => $result_row->user_nationality,
-                	'user_lastname' => $result_row->user_lastname,
-                	'user_firstname' => $result_row->user_firstname);
+                 	'user_name' => html_entity_decode($result_row->user_name),
+ 					'user_email' => html_entity_decode($result_row->user_email),
+                	'user_birthday' => html_entity_decode($result_row->user_birthday),
+                	'user_nationality' => html_entity_decode($result_row->user_nationality),
+                	'user_lastname' => html_entity_decode($result_row->user_lastname),
+                	'user_firstname' => html_entity_decode($result_row->user_firstname),
+                	'user_password_hash' => $result_row->user_password_hash);
                 $user = New User ($parameters);
                 $_SESSION['user'] = $user;
                 //load user events;
@@ -320,7 +322,7 @@ class Login
         && !empty($_POST['user_password_new'])
         && !empty($_POST['user_password_repeat'])
         && ($_POST['user_password_new'] === $_POST['user_password_repeat'])
-        ) {
+        && strlen($_POST['user_password_new']) > 6 ) {
             // only this case return true, only this case is valid
             return true;
         } elseif (empty($_POST['user_name'])) {
@@ -497,6 +499,18 @@ class Login
                 $r .= '<table>';
                 $r .= display_row('Username:', '<input type="text" name="user_name") value="'
                 . $_SESSION['user']->get_string_attribute('user_name').'"readonly/>');
+                if (isset($_GET['changepwd'])){
+                     $r .= display_advanced_row (array('Password:', 'Current password <input 
+                     id="login_input_password" class="login_input" type="password" 
+                     name="user_password" pattern=".{6,}" required autocomplete="off" />',
+                     'New password <input id="login_input_password_new" class="login_input" 
+                     type="password" name="user_password_new" pattern=".{6,}" 
+                     required autocomplete="off" />',
+                     'New password again <input id="login_input_password_new2" 
+                     class="login_input" type="password" 
+                     name="user_password_repeat" pattern=".{6,}" required 
+                     autocomplete="off" />'));
+                }
                 $r .= display_row('Email:', '<input type="email" name="user_email" value="'
                 . $_SESSION['user']->get_string_attribute('user_email').'"required/>');
                 $r .= display_row('Last name:', '<input type="text" name="user_lastname" value="'
@@ -510,7 +524,10 @@ class Login
                 (array('name' => 'user_nationality', 'multiple' => FALSE,
 					'required' => TRUE) , $nationalities, 
                 $_SESSION['user']->get_string_attribute('user_nationality')));
-                $r .= display_row('', '<input type="submit" value = "Save" name="saveuserinfo"/>');
+                $r .= display_row('', '<a href="' . $_SERVER['SCRIPT_NAME'] . 
+                '?action=setpersonalinfo&changepwd" >
+                <input type="button" value = "Change Password" name="changepwd"/></a>
+                <input type="submit" value = "Save" name="saveuserinfo"/>');
                 $r .= '<table/>';
                 $r .= '</form>';
                 echo $r;
@@ -758,6 +775,13 @@ class Login
             FILTER_SANITIZE_STRING);
             $user_firstname = filter_var($_POST['user_firstname'], 
             FILTER_SANITIZE_STRING);
+            if (isset($_POST['user_password_new'])) {
+                $user_password_hash = password_hash($_POST['user_password_new'],
+                 PASSWORD_DEFAULT);
+            }else {
+                $user_password_hash = 
+                $_SESSION['user']->get_string_attribute('user_password_hash');
+            }
             	
             //Create an user object with it
             $parameters =  array ('user_id' =>
@@ -767,7 +791,8 @@ class Login
 				'user_birthday' => $user_birthday,
 				'user_nationality' => $user_nationality,
 				'user_lastname' => $user_lastname,
-				'user_firstname' => $user_firstname );
+				'user_firstname' => $user_firstname,
+            	'user_password_hash' => $user_password_hash);
             $user = new User ($parameters);
             	
             // save new datas in database;
@@ -846,7 +871,6 @@ class Login
                 }else {
                     $events = $_SESSION['events'];
                 }
-
                 array_push($events, $event);
                 $_SESSION['events'] = $events;
             }
@@ -870,7 +894,7 @@ class Login
         if (!isset($_POST['createevent'])) {
             return False;
         }
-
+                
         // validating the input
         if (!empty($_POST['event_name'])
         && check_no_digit($_POST['event_type'], true)
@@ -919,10 +943,10 @@ class Login
             $this->feedback = "Event check out time cannot be empty";
         } elseif (!check_and_valid_date($_POST['event_starting_date'], true)){
             $this->feedback = "The event check in date doesn't match the field
-			requirements (MM/DD/YYYY) or is not a valid date";
+			requirements - mm-dd-yyyy - or is not a valid date";
         } elseif (!check_and_valid_date($_POST['event_ending_date'], true)){
             $this->feedback = "The event check out date doesn't match the field
-			requirements (MM/DD/YYYY) or is not a valid date";
+			requirements - mm-dd-yyyy - or is not a valid date";
         } elseif (!is_it_futur($_POST['event_starting_date'].' '
         .$_POST['event_starting_time'], true)){
             $this->feedback = "I am not sure the time machine exists yet,
@@ -933,10 +957,10 @@ class Login
 			you started it, please make sure the event check out is valid.";
         } elseif (!check_and_valid_time($_POST['event_starting_time'], true)){
             $this->feedback = "The event check in time doesn't match the field
-			requirements (HH/MM)";
+			requirements (hh:mm)";
         } elseif (!check_and_valid_time($_POST['event_ending_time'], true)){
             $this->feedback = "The event check out time doesn't match the field
-			requirements (HH/MM)";
+			requirements (hh:mm)";
         } elseif (!data_validation($_POST['event_description'],
         FILTER_SANITIZE_STRING, true)){
             $this->feedback = "The event description does not match the field
@@ -962,8 +986,25 @@ class Login
         if (!isset($_POST['saveuserinfo'])) {
             return False;
         }
+        // validation input password informations
+        $password_ok_flag = false;
+        if (isset($_POST['user_password'])) {
+            if (!empty($_POST['user_password_new']) && !empty($_POST['user_password_repeat'])
+            && ($_POST['user_password_new'] === $_POST['user_password_repeat'])
+            && password_verify($_POST['user_password'], 
+                $_SESSION['user']->get_string_attribute('user_password_hash'))
+            && strlen($_POST['user_password_new']) > 6 ) {
+                $password_ok_flag = true;
+            } else {
+                $this->feedback = "Please check your informations' passwords.";
+                return false;
+            }
+        } elseif (!isset($_POST['user_password'])) {
+            $password_ok_flag = true;
+        }
+        
         // validating the input
-        if (!empty($_POST['user_name'])
+        if ($password_ok_flag && !empty($_POST['user_name'])
         && strlen($_POST['user_email']) <= 64
         && filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)
         && check_no_digit($_POST['user_lastname'], false)
