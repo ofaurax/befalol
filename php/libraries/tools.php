@@ -15,10 +15,16 @@ function db_parser ($ini,$server_path)
             $db_path = $server_path.$v;
             $dsn .= "${db_path}" ;
     }
+    
+    $options = array();
+    foreach ( $parse [ "db_options" ] as $k => $v ) {
+        $options [$k] = $v;
+    }
+    
 	}
 	//echo $server_path.'<br/>';
 	//	echo $dsn.'<br/>';
-	return array('dsn' => $dsn, 'db_path' => $db_path) ;
+	return array('dsn' => $dsn, 'db_path' => $db_path, 'options' => $options) ;
 
 }
 
@@ -80,7 +86,6 @@ function data_validation ($data, $filter, $actionforempty) {
  */
 function check_and_valid_date ($date, $actionforempty) {
     //TODO Must be motified according to the timezone
-    echo $date;
     if (empty($date) && ($actionforempty==1)) {
         // if data is empty and that the function is set to fail if empty,
         //then failing happens

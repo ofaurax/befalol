@@ -31,10 +31,6 @@ session_start();
 </p>
 
 <?php
-    //$dbhandler = new SqliteDbTableHanlder(db_parser (_INI_FILE_DIR,_SERVER_DIR));
-    //$dbhandler->delete_all_tables();
-    //$dbhandler->create_tables();
-    //$dbhandler->db_disconnect();
     /*$geocoder = new \Geocoder\Geocoder();
      $adapter  = new \Geocoder\HttpAdapter\BuzzHttpAdapter();
      $chain = new \Geocoder\Provider\ChainProvider(array(

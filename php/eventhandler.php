@@ -607,6 +607,10 @@ Class Event {
             echo 'Impossible to initiate communication with database </br>';
             return false;
         }
+        /*$res = Country::fetch_country_data($this->_event_country_name);
+        if (!$res) {
+            return false;
+        }*/
         $event_name = htmlentities($this->_name, ENT_QUOTES);
         $event_type = htmlentities($this->_type, ENT_QUOTES);
         $event_checkin = htmlentities($this->_starting_date, ENT_QUOTES);
@@ -617,8 +621,9 @@ Class Event {
         $event_address = htmlentities($this->_event_address, ENT_QUOTES);
         $event_zipcode = htmlentities($this->_event_zipcode, ENT_QUOTES);
         $event_city_name = htmlentities($this->_event_city_name, ENT_QUOTES);
-        $event_country_name = htmlentities($this->_event_country_name, ENT_QUOTES);
-
+        $event_country_name = $this->_event_country_name;
+        
+        
         $sql = 'INSERT INTO events (event_name, event_type, event_holder_id,
 		event_max_nb_of_participants, event_starting_date, event_ending_date, 
 		event_description, event_address, event_zipcode, event_city_name, 
@@ -662,7 +667,11 @@ Class Event {
             } else {
                 echo "$event_name failed to be inserted in the
 				'events' table. <br/>";
-                print_r ($query->errorInfo());
+                print_r ($query->errorInfo()).'<br/>';
+                print_r (array ($event_name, $event_type, $event_checkin, 
+                $event_checkout, $event_holder_id, $event_max_nb_participants, 
+                $event_description, $event_address, $event_zipcode, $event_city_name,
+                $event_country_name)).'<br/>';
                 return false;
             }
         } else {
@@ -685,7 +694,6 @@ Class Event {
         }
         $event_id = $this->_id;
         foreach ($this->_languages as $language) {
-            $language = htmlentities($language, ENT_QUOTES);
             $sql = 'INSERT INTO event_languages (event_id, language_name)
 			VALUES (:event_id, :language_name)';
             $query = $dbhandler->_db_connection->prepare($sql);
@@ -700,7 +708,9 @@ Class Event {
 					'event_languages' table for the event id $event_id. <br/>";
                 } else {
                     echo "$language failed to be inserted in the
-					'event_languages' tablefor the event id $event_id. <br/>";
+					'event_languages' table for the event id $event_id. <br/>";
+                    print_r ($query->errorInfo());
+                    echo '<br/>';
                     return false;
                 }
             } else {
@@ -712,7 +722,123 @@ Class Event {
         }
         return true;
     }
+    
+	/**
+	 * 
+	 * Insert a event type  in the db return false
+     * if failure or true in case of success
+	 * @param string $event_type
+	 */
+    public static function insert_event_type ($event_type) {
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        if (empty($dbhandler)) {
+            echo 'Impossible to initiate communication with database </br>';
+            return false;
+        }
+        $event_type = htmlentities($event_type);
+        $sql = 'INSERT INTO event_types (event_type_name)
+		VALUES (:event_type)';
+        $query = $dbhandler->_db_connection->prepare($sql);
+        if ($query) {
+            $query->bindValue(':event_type', $event_type, PDO::PARAM_STR);
+            // PDO's execute() gives back TRUE when successful,
+            // false when not
+            $registration_success_state = $query->execute();
+            if ($registration_success_state) {
+                echo "$event_type has been successfuly inserted in the
+				'event_types' table. <br/>";
+            } else {
+                echo "$event_type failed to be inserted in the
+				'event_types' table. <br/>";
+                print_r ($query->errorInfo());
+                echo '<br/>';
+                return false;
+            }
+        } else {
+            echo "The database request for inserting $event_type
+			in the 'event_languages' table could not be prepared.<br/>";
+            return false;
+        }
+        return true;
+    }
+    
+    
+    
+	/**
+     *
+     * Select all events in databse and return them as an array
+     */
+    static public function select_all_events(){
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        if (empty($dbhandler)) {
+            echo 'Impossible to initiate communication with database </br>';
+            return false;
+        }
 
+        // Look for all event types in the event types table
+        $sql = 'SELECT * FROM events';
+        $query = $dbhandler->_db_connection->prepare($sql);
+        if ($query) {
+            $query->execute();
+            $results = $query->fetchall();
+            if ($results) {
+                $events = array();
+                foreach ($results as $result_row) {
+                    echo $result_row['event_id'].'<br>';
+                    //then get the languages spoken at each event
+                    $sql = 'SELECT language_name FROM event_languages
+    					WHERE event_id = :event_id';
+                    $query = $dbhandler->_db_connection->prepare($sql);
+                    if ($query) {
+                        $query->bindValue(':event_id', $result_row['event_id'],
+                        PDO::PARAM_INT);
+                        $query->execute();
+                        $languages_res = $query->fetchall(PDO::FETCH_COLUMN);
+                        if ($languages_res) {
+                            $languages = array();
+                            foreach ($languages_res as $key=>$value) {
+                                array_push ($languages, html_entity_decode($value));
+                            }
+                        } else {
+                            echo 'There is no language spoken at this event <br/>';
+                            return false;
+                        }
+                    }else {
+                        echo "The request for selecting spoken languages could not
+    					be prepared. <br/>";
+                        return false;
+                    }
+                    $parameters = array ('event_id' => intval($result_row['event_id']),
+    				'event_name' => html_entity_decode($result_row['event_name']), 
+    				'event_address' => html_entity_decode($result_row['event_address']),
+    				'event_zipcode' => html_entity_decode($result_row['event_zipcode']), 
+    				'event_city_name' => html_entity_decode($result_row['event_city_name']), 
+    				'event_country_name' => html_entity_decode($result_row['event_country_name']), 
+    				'event_type' => html_entity_decode($result_row['event_type']), 
+    				'event_starting_date' => html_entity_decode($result_row['event_starting_date']),
+    		    	'event_ending_date'=> html_entity_decode($result_row['event_ending_date']), 
+    		    	'event_max_nb_participants' => intval($result_row['event_max_nb_of_participants']), 
+    		    	'event_holder_id' => intval($result_row['event_holder_id']), 
+    		    	'event_description' => html_entity_decode( $result_row['event_description']),
+    				'event_languages' => $languages);
+                    // create new object event with input parameters
+                    $event = new Event ($parameters);
+                    if (!empty($event)) {
+                        // create an array of event objects
+                        array_push ($events, $event);
+                    }
+                }
+                return $events;
+            } else {
+                echo "There is no event types in the 'event_types' table.<br/>";
+                return false;
+            }
+        } else {
+            echo "The database request for selecting event types in the
+			'event_types' table could not be prepared.<br/>";
+            return false;
+        }
+    }
 }
 
 ?>

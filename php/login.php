@@ -131,6 +131,10 @@ class Login
                             echo 'Below is the list of all your events <br/>';
                             $this->ShowPageYourEvents();
                             break;
+                        case 'seeallevents':
+                            echo 'Below is the list of all events <br/>';
+                            $this->ShowAllEvents();
+                            break;
                         case 'seeevent':
                             $this->ShowPageEventInformation();
                             break;
@@ -420,6 +424,7 @@ class Login
         echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=setpersonalinfo">Your personal informations</a>'.'<br/>';
         echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=createnewevent">Post a new Event</a>'.'<br/>';
         echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeyourevents">List of your events</a>'.'<br/>';
+        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeallevents">List of all events</a>'.'<br/>';
         echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeallusers">List of members</a>'.'<br/>';
         echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=logout">Log out</a><br/>';
     }
@@ -492,13 +497,19 @@ class Login
             //build it
             $r .=  '<form method="post" action="' . $_SERVER['SCRIPT_NAME'] .
 	        '?action=setpersonalinfo" name="userinfoform">';
+            $user_name = $_SESSION['user']->get_string_attribute('user_name');
+            $user_email = $_SESSION['user']->get_string_attribute('user_email');
+            $user_lastname = utf8_decode($_SESSION['user']->get_string_attribute('user_lastname'));
+            $user_firstname = utf8_decode($_SESSION['user']->get_string_attribute('user_firstname'));
+            $user_birthday = $_SESSION['user']->get_string_attribute('user_birthday');
+            $user_nationality = $_SESSION['user']->get_string_attribute('user_nationality');
             $nationalities = NULL;
             $nationalities = Nationality::select_all_nationalities();
             if (!empty($nationalities)) {
                 //table
                 $r .= '<table>';
                 $r .= display_row('Username:', '<input type="text" name="user_name") value="'
-                . $_SESSION['user']->get_string_attribute('user_name').'"readonly/>');
+                .$user_name .'"readonly/>');
                 if (isset($_GET['changepwd'])){
                      $r .= display_advanced_row (array('Password:', 'Current password <input 
                      id="login_input_password" class="login_input" type="password" 
@@ -511,19 +522,19 @@ class Login
                      name="user_password_repeat" pattern=".{6,}" required 
                      autocomplete="off" />'));
                 }
-                $r .= display_row('Email:', '<input type="email" name="user_email" value="'
-                . $_SESSION['user']->get_string_attribute('user_email').'"required/>');
-                $r .= display_row('Last name:', '<input type="text" name="user_lastname" value="'
-                . $_SESSION['user']->get_string_attribute('user_lastname').'"required/>');
-                $r .= display_row('First name:', '<input type="text" name="user_firstname" value="'
-                . $_SESSION['user']->get_string_attribute('user_firstname').'"required/>');
-                $r .= display_row('Birthday:', '<input type="date" name="user_birthday" 
-                placeholder="mm-dd-yyyy" value="'
-                . $_SESSION['user']->get_string_attribute('user_birthday').'"required/>');
+                $r .= display_row('Email:', '<input type="email" 
+                	name="user_email" value="' . $user_email.'"required/>');
+                $r .= display_row('Last name:', '<input type="text" 
+                	name="user_lastname" value="'. $user_lastname.'"required/>');
+                $r .= display_row('First name:', '<input type="text"
+                	name="user_firstname" value="'. $user_firstname.'"required/>');
+                $r .= display_row('Birthday:', '<input type="date" 
+                	name="user_birthday" placeholder="mm-dd-yyyy" value="'
+                    . $user_birthday .'"required/>');
                 $r .= display_row('Nationality:', display_dropdownlist
                 (array('name' => 'user_nationality', 'multiple' => FALSE,
 					'required' => TRUE) , $nationalities, 
-                $_SESSION['user']->get_string_attribute('user_nationality')));
+                $user_nationality));
                 $r .= display_row('', '<a href="' . $_SERVER['SCRIPT_NAME'] . 
                 '?action=setpersonalinfo&changepwd" >
                 <input type="button" value = "Change Password" name="changepwd"/></a>
@@ -551,20 +562,33 @@ class Login
         if (isset($_GET['id']) && (isset($_SESSION['events']))) {
             foreach ($_SESSION['events'] as $event) {
                 if ($event->get_id() == $_GET['id']) {
-                    $r = '<h2>'.$event->get_name().'</h2>';
+                    $event_name = utf8_decode($event->get_name());
+                    $event_type = $event->get_type();
+                    $event_starting_date = $event->get_starting_date();
+                    $event_ending_date = $event->get_ending_date();
+                    $event_location = utf8_decode($event->get_location());
+                    $event_max_nb_participants = $event->get_max_nb_participants();
+                    $event_languages = $event->get_languages();
+                    $event_participants = array ();
+                    foreach ($event->get_participants() as $participant) {
+                        array_push($event_participants, utf8_decode($participant));
+                    }
+                    $event_description = utf8_decode($event->get_description());
+                    
+                    $r = '<h2>'.$event_name.'</h2>';
                     //build it
                     $r .= '<table>';
-                    $r .= display_row('Type', $event->get_type() );
-                    $r .= display_row('Location:', $event->get_location());
-                    $r .= display_row('Check in:', $event->get_starting_date());
-                    $r .= display_row('Check out date:', $event->get_ending_date());
+                    $r .= display_row('Type', $event_type);
+                    $r .= display_row('Location:', $event_location);
+                    $r .= display_row('Check in:', $event_starting_date);
+                    $r .= display_row('Check out date:', $event_ending_date);
                     $r .= display_row('Maximal number of participants:',
-                    $event->get_max_nb_participants());
+                    $event_max_nb_participants);
                     $r .= display_row('Languages spoken :',
-                    display_dropdownlist('', $event->get_languages(), 0));
-                    $r .= display_row('Description:', $event->get_description());
+                    display_dropdownlist('', $event_languages, 0));
+                    $r .= display_row('Description:', $event_description);
                     $r .= display_row('Participants:', display_dropdownlist('',
-                    $event->get_participants(), 0));
+                    $event_participants, 0));
                     $r .= '<table/>';
                     echo $r;
                     break;
@@ -674,7 +698,69 @@ class Login
             }
         }
     }
-
+    
+	/**
+     *
+     * Show all the user events
+     */
+    private function ShowAllEvents ()
+    {
+        if ($this->feedback) {
+            echo $this->feedback . "<br/><br/>";
+        }
+        if (isset($_SESSION['user'])) {
+            $r = '<h2>Events</h2>';
+            //retrieve the user from session
+            $events = Event::select_all_events();
+            if (!empty($events)) {
+                $event_types = Event::select_all_event_types();
+                $r .= '<table>';
+                $r .= display_advanced_row( array ('<label for="event_type">'
+                .$event_types[0].'</label>',
+				'<label for="event_type">'.$event_types[1].'</label>',
+				'<label for="event_type">'.$event_types[2].'</label>',
+				'<label for="event_type">'.$event_types[3].'</label>'));
+                foreach ($events as $event) {
+                    switch ($event->get_type()) {
+                        case $event_types[0]:
+                            $r .= display_advanced_row( array (
+							'<a href="' . $_SERVER['SCRIPT_NAME'] . 
+							'?action=seeevent&id=' . $event->get_id() . '">'
+							.$event->get_name().'</a>'));
+							break;
+                        case $event_types[1]:
+                            $r .= display_advanced_row(array('', '<a href="' . $_SERVER['SCRIPT_NAME'] .
+							'?action=seeevent&id=' . $event->get_id() . '">'
+							.$event->get_name().'</a>'));
+							break;
+                        case $event_types[2]:
+                            $r .= display_advanced_row( array ('', '',
+							'<a href="' . $_SERVER['SCRIPT_NAME'] . 
+							'?action=seeevent&id=' . $event->get_id() . '">'
+							.$event->get_name().'</a>'));
+							break;
+                        case $event_types[3]:
+                            $r .= display_advanced_row( array ('', '', '',
+							'<a href="' . $_SERVER['SCRIPT_NAME'] . 
+							'?action=seeevent&id=' . $event->get_id() . '">'
+							.$event->get_name().'</a>'));
+							break;
+                        default:
+                            echo 'This event has an invalid event type <br/>';
+                            break;
+                    }
+                }
+                $r .= '</table>';
+                echo $r;
+                echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
+            }else {
+                $this->feedback = "You have never created any event.";
+            }
+        }else {
+            $this->feedback = "You must log in to access this function.";
+            return false;
+        }
+    }
 
     /**
      *
@@ -707,30 +793,29 @@ class Login
 					'<label for="event_type">'.$event_types[2].'</label>',
 					'<label for="event_type">'.$event_types[3].'</label>'));
                     foreach ($events as $event) {
-                        echo $event->get_name();
                         switch ($event->get_type()) {
                             case $event_types[0]:
                                 $r .= display_advanced_row( array (
 								'<a href="' . $_SERVER['SCRIPT_NAME'] . 
 								'?action=seeevent&id=' . $event->get_id() . '">'
-								.$event->get_name().'</a>'));
+								.utf8_decode($event->get_name()).'</a>'));
 								break;
                             case $event_types[1]:
                                 $r .= display_advanced_row(array('', '<a href="' . $_SERVER['SCRIPT_NAME'] .
 								'?action=seeevent&id=' . $event->get_id() . '">'
-								.$event->get_name().'</a>'));
+								.utf8_decode($event->get_name()).'</a>'));
 								break;
                             case $event_types[2]:
                                 $r .= display_advanced_row( array ('', '',
 								'<a href="' . $_SERVER['SCRIPT_NAME'] . 
 								'?action=seeevent&id=' . $event->get_id() . '">'
-								.$event->get_name().'</a>'));
+								.utf8_decode($event->get_name()).'</a>'));
 								break;
                             case $event_types[3]:
                                 $r .= display_advanced_row( array ('', '', '',
 								'<a href="' . $_SERVER['SCRIPT_NAME'] . 
 								'?action=seeevent&id=' . $event->get_id() . '">'
-								.$event->get_name().'</a>'));
+								.utf8_decode($event->get_name()).'</a>'));
 								break;
                             default:
                                 echo 'This event has an invalid event type <br/>';
@@ -769,12 +854,12 @@ class Login
             FILTER_SANITIZE_EMAIL);
             $user_birthday = filter_var($_POST['user_birthday'], 
             FILTER_SANITIZE_STRING);
-            $user_nationality = filter_var($_POST['user_nationality'], 
-            FILTER_SANITIZE_STRING);
-            $user_lastname = filter_var($_POST['user_lastname'], 
-            FILTER_SANITIZE_STRING);
-            $user_firstname = filter_var($_POST['user_firstname'], 
-            FILTER_SANITIZE_STRING);
+            $user_nationality = utf8_encode(filter_var($_POST['user_nationality'], 
+            FILTER_SANITIZE_STRING));
+            $user_lastname = utf8_encode(filter_var($_POST['user_lastname'], 
+            FILTER_SANITIZE_STRING));
+            $user_firstname = utf8_encode(filter_var($_POST['user_firstname'], 
+            FILTER_SANITIZE_STRING));
             if (isset($_POST['user_password_new'])) {
                 $user_password_hash = password_hash($_POST['user_password_new'],
                  PASSWORD_DEFAULT);
@@ -817,24 +902,24 @@ class Login
          
         if ($this->checkEICorrectness()){
             // Retrieve datas from form
-            $event_name = filter_var($_POST['event_name'], 
-                FILTER_SANITIZE_STRING);
+            $event_name = utf8_encode(filter_var($_POST['event_name'], 
+                FILTER_SANITIZE_STRING));
             $event_type = filter_var($_POST['event_type'], 
                 FILTER_SANITIZE_STRING);
             $event_starting_date = filter_var($_POST['event_starting_date'].' '
                 .$_POST['event_starting_time'], FILTER_SANITIZE_STRING);
             $event_ending_date = filter_var($_POST['event_ending_date'].' '
                 .$_POST['event_ending_time'], FILTER_SANITIZE_STRING);
-            $event_description = filter_var($_POST['event_description'], 
-                FILTER_SANITIZE_STRING);
+            $event_description = utf8_encode(filter_var($_POST['event_description'], 
+                FILTER_SANITIZE_STRING));
             $event_max_nb_participants = filter_var(
                 $_POST['event_max_nb_participants'], FILTER_SANITIZE_NUMBER_INT);
-            $event_address = filter_var($_POST['event_address'], 
-                FILTER_SANITIZE_STRING);
-            $event_zipcode = filter_var($_POST['event_zipcode'], 
-                FILTER_SANITIZE_STRING);
-            $event_city_name = filter_var($_POST['event_city_name'], 
-                FILTER_SANITIZE_STRING);
+            $event_address = utf8_encode(filter_var($_POST['event_address'], 
+                FILTER_SANITIZE_STRING));
+            $event_zipcode = utf8_encode(filter_var($_POST['event_zipcode'], 
+                FILTER_SANITIZE_STRING));
+            $event_city_name = utf8_encode(filter_var($_POST['event_city_name'], 
+                FILTER_SANITIZE_STRING));
             $event_country_name = filter_var($_POST['event_country_name'], 
                 FILTER_SANITIZE_STRING);
                 
@@ -1024,16 +1109,18 @@ class Login
         } elseif (!check_no_digit($_POST['user_lastname'], false)){
             $this->feedback = "Your lastname doesn't match the field requirements";
         } elseif (strlen($_POST['user_lastname']) > 64) {
-            $this->feedback = "Lastname cannot be longer than 64 characters";
+            $this->feedback = "Your Lastname cannot be longer than 64 characters or 
+            shorter than 2 characters";
         } elseif (!check_no_digit($_POST['user_firstname'], false)){
             $this->feedback = "Your firstname doesn't match the field requirements";
         } elseif (strlen($_POST['user_firstname']) > 64) {
             $this->feedback = "Firstname cannot be longer than 64 characters";
         } elseif (!check_and_valid_date($_POST['user_birthday'], 0)){
-            $this->feedback = "Your birthday doesn't match the field requirements - mm-dd-yyyy -
-            or is not a valid date";
+            $this->feedback = "Your birthday doesn't match the field requirements
+             - mm-dd-yyyy - or is not a valid date";
         } elseif (is_it_futur($_POST['user_birthday'], 0)){
-            $this->feedback = "You probably would not be using this website if you were not born :).";
+            $this->feedback = "You probably would not be using this website 
+            if you were not born :).";
         } elseif (!check_no_digit($_POST['user_nationality'], false)){
             $this->feedback = "Your nationality doesn't match the field requirements";
         } else {

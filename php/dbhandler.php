@@ -42,7 +42,8 @@ Class SqliteDbHanlder {
         if ($parameters){
             // create new database file / connection
             try {
-                $this->_db_connection = new PDO($parameters['dsn']);
+                $options =  $parameters['options'];
+                $this->_db_connection = new PDO($parameters['dsn'], 'charset=UTF-8');
                 return true;
             } catch (PDOException $e) {
                 echo 'Database connection failed : '. $e->getMessage();

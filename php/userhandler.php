@@ -176,19 +176,19 @@ Class User {
             return False;
         }
         // Update data for user in user table
-        $user_nationality = htmlentities($this->_user_nationality, ENT_QUOTES);
+        $user_nationality = $this->_user_nationality;
         $user_name = htmlentities($this->_user_name, ENT_QUOTES);
         $user_email = htmlentities($this->_user_email, ENT_QUOTES);
-        $user_lastname = htmlentities($this->_user_lastname, ENT_QUOTES);
-        $user_firstname = htmlentities($this->_user_firstname, ENT_QUOTES);
+        $user_lastname = htmlentities($this->_user_lastname, ENT_QUOTES | ENT_SUBSTITUTE, $encoding = 'UTF-8');
+        $user_firstname = htmlentities($this->_user_firstname, ENT_QUOTES | ENT_SUBSTITUTE, $encoding = 'UTF-8');
         $user_birthday = htmlentities($this->_user_birthday, ENT_QUOTES);
-        $user_password_hash = htmlentities($this->_user_password_hash, ENT_QUOTES);
+        $user_id = $this->_user_id;
         $user_password_hash = $this->_user_password_hash;
         $sql = 'UPDATE users
 		SET user_email = :user_email, user_lastname = :user_lastname, 
 		user_firstname = :user_firstname, user_nationality = :user_nationality,
 		user_birthday = :user_birthday, user_password_hash = :user_password_hash 
-		WHERE user_name = :user_name';
+		WHERE user_id = :user_id AND user_name = :user_name';
         $query = $dbhandler->_db_connection->prepare($sql);
         if ($query) {
             $query->bindValue(':user_email', $user_email, PDO::PARAM_STR);
@@ -201,6 +201,7 @@ Class User {
             PDO::PARAM_STR);
             $query->bindValue(':user_password_hash', $user_password_hash, 
             PDO::PARAM_STR);
+            $query->bindValue(':user_id', $user_id, PDO::PARAM_STR);
             // PDO's execute() gives back TRUE when successful,
             // false when not
             $registration_success_state = $query->execute();
@@ -210,6 +211,8 @@ Class User {
             } else {
                 echo "$user_name failed to be updated. <br/>";
                 print_r ($query->errorInfo());
+                print_r (array($user_id, $user_nationality, $user_name, $user_email, $user_lastname,
+                $user_firstname, $user_birthday, $user_password_hash));
                 return false;
             }
         } else {
@@ -219,6 +222,59 @@ Class User {
             return false;
         }
     }
+    
+	/**
+     *
+     * Insert a new user in the table
+     */
+    public function insert_new_user () {
+    // Get the database connection if it's not the case yet
+        $dbhandler = Null;
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        if (empty($dbhandler))  {
+            echo 'Impossible to initiate communication with database </br>';
+            return False;
+        }
+        // Update data for user in user table
+        $user_name = htmlentities($this->_user_name, ENT_QUOTES);
+        $user_email = htmlentities($this->_user_email, ENT_QUOTES);
+        $user_password_hash = $this->_user_password_hash;
+        $sql = 'INSERT INTO users (user_name, user_email, user_password_hash) 
+        VALUES(:user_name, :user_email, :user_password_hash)';
+        $query = $dbhandler->_db_connection->prepare($sql);
+        if ($query) {
+            $query->bindValue(':user_name', $user_name, PDO::PARAM_STR);
+            $query->bindValue(':user_email', $user_email, PDO::PARAM_STR);
+            $query->bindValue(':user_password_hash', $user_password_hash,
+            PDO::PARAM_STR);
+            // PDO's execute() gives back TRUE when successful,
+            // false when not
+            $registration_success_state = $query->execute();
+            if ($registration_success_state) {
+                // retrieve the id of the user object
+                $user_id = intval($dbhandler->_db_connection->lastInsertId());
+                // update the id of the user object
+                if ($this->set_user_id($user_id)){
+                    echo "$user_name has been successfuly inserted. <br/>";
+                    echo $user_id.'<br/>';
+                    return $user_id;
+                }else {
+                    echo 'Impossible to retrieve the user id. <br/>';
+                    return false;
+                }
+            } else {
+                echo "$user_name failed to be inserted. <br/>";
+                print_r ($query->errorInfo());
+                return false;
+            }
+        } else {
+            echo "The database request for inserted $user_name datas
+			in the 'users' table could not be prepared.<br/>";
+            print_r ($dbhandler->_db_connection->errorInfo());
+            return false;
+        }
+    }
+    
 
     /**
      *
@@ -274,7 +330,7 @@ Class User {
             $events = array();
             $results = $query->fetchall();
             foreach ($results as $result_row) {
-                //then look for the languages spoken at this event
+                //then get the languages spoken at each event
                 $sql = 'SELECT language_name FROM event_languages
 					WHERE event_id = :event_id';
                 $query = $dbhandler->_db_connection->prepare($sql);

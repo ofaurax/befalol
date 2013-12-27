@@ -372,18 +372,18 @@ Class Country {
      * Look up for a country in the countries table
      * @param string $country_name
      */
-    private function fetch_country_data ($country_name) {
+    static public function fetch_country_data ($country_name) {
         if (!empty($country_name)) {
             // Get the database connection if it's not the case yet
-            if (empty ($this->_db_connection)) {
-                $dbhandler = new SqliteDbHanlder (
-                db_parser (_INI_FILE_DIR,_SERVER_DIR));
-                $this->_db_connection = $dbhandler->get_connection_object();
+            $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+            if (empty($dbhandler)) {
+                echo 'Impossible to initiate communication with database </br>';
+                return false;
             }
-            $country_name = htmlentities($country_name, ENT_QUOTES);
+            //$country_name = htmlentities($country_name, ENT_QUOTES);
             // Look for existing city_name and country_name is the cities table
             $sql = 'SELECT * FROM countries WHERE country_name = :country_name';
-            $query = $this->_db_connection->prepare($sql);
+            $query = $dbhandler->_db_connection->prepare($sql);
             if ($query) {
                 $query->bindValue(':country_name', $country_name,
                 PDO::PARAM_STR);
@@ -540,9 +540,7 @@ Class Country {
         $country_name = htmlentities($this->_country_name, ENT_QUOTES);
         $country_index = htmlentities($this->_country_index, ENT_QUOTES);
         if (!$this->fetch_country_data ($country_name)) {
-            //$country_nationality = htmlentities($this->_country_nationality,
-            //		ENT_QUOTES);
-            /**TODO
+             /**TODO
              * Add the part for nationalities if necessary
              */
             $cities_names = $this->_cities_names;
@@ -726,7 +724,7 @@ class Language {
                 db_parser (_INI_FILE_DIR,_SERVER_DIR));
                 $this->_db_connection = $dbhandler->get_connection_object();
             }
-            $language_name = htmlentities($language_name, ENT_QUOTES);
+            $language_name2 = htmlentities($language_name, ENT_QUOTES);
             // Look for existing language_name in the languages table
             $sql = 'SELECT * FROM languages WHERE language_name = :language_name';
             $query = $this->_db_connection->prepare($sql);
