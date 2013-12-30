@@ -1,4 +1,5 @@
 <?php
+
 function display_row ($RowTitle, $RowHTMLInput)
 {
     $r = '';
@@ -6,6 +7,36 @@ function display_row ($RowTitle, $RowHTMLInput)
     $r .= '<td>'.$RowTitle .'<td>' ;
     $r .= '<td>'.$RowHTMLInput .'<td>' ;
     $r .= '<tr>';
+    return $r;
+}
+/**
+ * 
+ * Return rows and columns from the Input parameters which match the 
+ * following format (array(Column0Title, array(Column0Input0,Column0Input1,..), 
+ * Column1Title, array(Column1Input0,Column1Input1,...),...))
+ * @param array $Inputs
+ */
+function display_col ($Inputs)
+{
+    $r = '';
+    $r .= '<tr>';
+    $biggest_array_size = 0;
+    foreach ($Inputs as $ColTitle => $ArrayInput) {
+        $r .= '<th>'.$ColTitle .'<th>' ;
+        $biggest_array_size = ((sizeof($ArrayInput)>$biggest_array_size)? 
+            sizeof($ArrayInput) : $biggest_array_size);
+    }
+    $r .= '<tr>';
+    for ($i = 0 ; $i <= $biggest_array_size ; $i++) {
+        $r .= '<tr>';
+        foreach ($Inputs as $ColTitle => $ArrayInput) {
+            if (isset($ArrayInput[$i])) {
+                $r .= '<td>'.$ArrayInput[$i] .'<td>' ;
+            }
+        }
+        $r .= '<tr>';
+    }
+    
     return $r;
 }
 

@@ -48,5 +48,5 @@ session_start();
      } catch (Exception $e) {
      echo $e->getMessage();
      }*/
-    $login = new Login();
+     $login = new Login();
 ?>

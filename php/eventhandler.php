@@ -347,7 +347,7 @@ Class Event {
      * Get the holder id parameter
      */
     public  function get_holder_id () {
-        if ($this->_holder_id && is_int($holder_id)) {
+        if ($this->_holder_id && is_int($this->_holder_id)) {
             return $this->_holder_id;
         } else {
             trigger_error('The holder parameter of the '.get_class($this)
@@ -784,7 +784,6 @@ Class Event {
             if ($results) {
                 $events = array();
                 foreach ($results as $result_row) {
-                    echo $result_row['event_id'].'<br>';
                     //then get the languages spoken at each event
                     $sql = 'SELECT language_name FROM event_languages
     					WHERE event_id = :event_id';
@@ -838,6 +837,41 @@ Class Event {
 			'event_types' table could not be prepared.<br/>";
             return false;
         }
+    }
+
+
+    public function display_event_information () {
+        $event_holder_id = $this->get_holder_id();
+        $event_name = utf8_decode($this->get_name());
+        $event_type = $this->get_type();
+        $event_starting_date = $this->get_starting_date();
+        $event_ending_date = $this->get_ending_date();
+        $event_location = utf8_decode($this->get_location());
+        $event_max_nb_participants = $this->get_max_nb_participants();
+        $event_languages = $this->get_languages();
+        $event_participants = array ();
+        foreach ($this->get_participants() as $participant) {
+            array_push($event_participants, utf8_decode($participant));
+        }
+        $event_description = utf8_decode($this->get_description());
+        
+        $r = '<h2>'.$event_name.'</h2>';
+        //build it
+        $r .= '<table>';
+        $r .= display_row('Type', $event_type);
+        $r .= display_row('Location:', $event_location);
+        $r .= display_row('Check in:', $event_starting_date);
+        $r .= display_row('Check out date:', $event_ending_date);
+        $r .= display_row('Maximal number of participants:',
+        $event_max_nb_participants);
+        $r .= display_row('Languages spoken :',
+        display_dropdownlist('', $event_languages, 0));
+        $r .= display_row('Description:', $event_description);
+        $r .= display_row('Participants:', display_dropdownlist('',
+        $event_participants, 0));
+        $r .= display_row('Holder id:', $event_holder_id);
+        $r .= '<table/>';
+        return $r;
     }
 }
 
