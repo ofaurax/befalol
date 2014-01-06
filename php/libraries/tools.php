@@ -119,22 +119,22 @@ function check_and_valid_date ($date, $actionforempty) {
             preg_match( '`^\d{1,2}/\d{1,2}/(\d{4})$`' , $date, $year);
             // check if the date is valid
             return checkdate( intval($month[1]), intval($day[1]), intval($year[1]));
-        // mm-dd-yyyy
-        /*}elseif (preg_match( '`^\d{1,2}-\d{1,2}-\d{4}$`' , $date)) { 
-             // check if month is correct
-            preg_match( '`^\d{1,2}-(\d{1,2})-\d{4}$`' , $date, $day);
+        // yyyy-mm-dd
+        }elseif (preg_match( '`^\d{4}-\d{1,2}-\d{1,2}$`' , $date)) { 
+             // check if day is correct
+            preg_match( '`^\d{4}-\d{1,2}-(\d{1,2})$`' , $date, $day);
             if ((intval($day[1]) > 31) || (intval($day[1]) <= 0 )) {
                 return false;
             }
             // check if day is correct too
-            preg_match( '`^(\d{1,2})-\d{1,2}-\d{4}$`' , $date, $month);
+            preg_match( '`^\d{4}-(\d{1,2})-\d{1,2}$`' , $date, $month);
             if ((intval($month[1]) > 12) || (intval($month[1]) <= 0 )) {
                 return false;
             }
             // check if year is correct too
-            preg_match( '`^\d{1,2}-\d{1,2}-(\d{4})$`' , $date, $year);
+            preg_match( '`(^\d{4})-\d{1,2}-\d{1,2}$`' , $date, $year);
             // check if the date is valid
-            return checkdate( intval($month[1]), intval($day[1]), intval($year[1]));*/
+            return checkdate( intval($month[1]), intval($day[1]), intval($year[1]));
         // mm/dd/yyyy hh:mm
         }elseif (preg_match( '`^\d{1,2}/\d{1,2}/\d{4}\s\d{1,2}:\d{1,2}$`' , $date)){
             // check if month is correct
@@ -161,32 +161,32 @@ function check_and_valid_date ($date, $actionforempty) {
             preg_match( '`^\d{1,2}/\d{1,2}/(\d{4})\s\d{1,2}:\d{1,2}$`' , $date, $year);
             // check if the date is valid
             return checkdate( intval($month[1]), intval($day[1]), intval($year[1]));
-        // mm-dd-yyyy hh:mm
-        /*} elseif (preg_match( '`^\d{1,2}-\d{1,2}-\d{4}\s\d{1,2}:\d{1,2}$`' , $date)){
-            // check if month is correct
-            preg_match( '`^\d{1,2}-(\d{1,2})-\d{4}\s\d{1,2}:\d{1,2}$`' , $date, $day);
+        // yyyy-mm-dd hh:mm
+        } elseif (preg_match( '`^\d{4}-\d{1,2}-\d{1,2}\s\d{1,2}:\d{1,2}$`' , $date)){
+            // check if day is correct
+            preg_match( '`^\d{4}-\d{1,2}-(\d{1,2})\s\d{1,2}:\d{1,2}$`' , $date, $day);
             if ((intval($day[1]) > 31) || (intval($day[1]) <= 0 )) {
                 return false;
             }
-            // check if day is correct too
-            preg_match( '`^(\d{1,2})-\d{1,2}-\d{4}\s\d{1,2}:\d{1,2}$`' , $date, $month);
+            // check if month is correct too
+            preg_match( '`^\d{4}-(\d{1,2})-\d{1,2}\s\d{1,2}:\d{1,2}$`' , $date, $month);
             if ((intval($month[1]) > 12) || (intval($month[1]) <= 0 )) {
                 return false;
             }
             // check if hours are correct too
-            preg_match( '`^\d{1,2}-\d{1,2}-\d{4}\s(\d{1,2}):\d{1,2}$`' , $date, $hours);
+            preg_match( '`^\d{4}-\d{1,2}-\d{1,2}\s(\d{1,2}):\d{1,2}$`' , $date, $hours);
             if ((intval($hours[1]) > 23) || (intval($hours[1]) < 0 )) {
                 return false;
             }
             // check if minutes are correct too
-            preg_match( '`^\d{1,2}-\d{1,2}-\d{4}\s\d{1,2}:(\d{1,2})$`' , $date, $minutes);
+            preg_match( '`^\d{4}-\d{1,2}-\d{1,2}\s\d{1,2}:(\d{1,2})$`' , $date, $minutes);
             if ((intval($minutes[1]) > 59) || (intval($minutes[1]) < 0 )) {
                 return false;
             }
             // check if year is correct too
-            preg_match( '`^\d{1,2}-\d{1,2}-(\d{4})\s\d{1,2}:\d{1,2}$`' , $date, $year);
+            preg_match( '`^(\d{4})-\d{1,2}-\d{1,2}\s\d{1,2}:\d{1,2}$`' , $date, $year);
             // check if the date is valid
-            return checkdate( intval($month[1]), intval($day[1]), intval($year[1]));*/
+            return checkdate( intval($month[1]), intval($day[1]), intval($year[1]));
         // mm/dd/yyyy hh:mm:ss
         }elseif (preg_match( '`^\d{1,2}/\d{1,2}/\d{4}\s\d{1,2}:\d{1,2}:\d{1,2}$`' , $date)){
             // check if month is correct
@@ -218,37 +218,37 @@ function check_and_valid_date ($date, $actionforempty) {
             preg_match( '`^\d{1,2}/\d{1,2}/(\d{4})\s\d{1,2}:\d{1,2}:\d{1,2}$`' , $date, $year);
             // check if the date is valid
             return checkdate( intval($month[1]), intval($day[1]), intval($year[1]));
-        // mm-dd-yyyy hh:mm:ss
-        /*} elseif (preg_match( '`^\d{1,2}-\d{1,2}-\d{4}\s\d{1,2}:\d{1,2}:\d{1,2}$`' , $date)){
-            // check if month is correct
-            preg_match( '`^\d{1,2}-(\d{1,2})-\d{4}\s\d{1,2}:\d{1,2}:\d{1,2}$`' , $date, $day);
+        // yyyy-mm-dd hh:mm:ss
+        } elseif (preg_match( '`^\d{4}-\d{1,2}-\d{1,2}\s\d{1,2}:\d{1,2}:\d{1,2}$`' , $date)){
+            // check if day is correct
+            preg_match( '`^\d{4}-\d{1,2}-(\d{1,2})\s\d{1,2}:\d{1,2}:\d{1,2}$`' , $date, $day);
             if ((intval($day[1]) > 31) || (intval($day[1]) <= 0 )) {
                 return false;
             }
-            // check if day is correct too
-            preg_match( '`^(\d{1,2})-\d{1,2}-\d{4}\s\d{1,2}:\d{1,2}:\d{1,2}$`' , $date, $month);
+            // check if month is correct too
+            preg_match( '`^\d{4}-(\d{1,2})-\d{1,2}\s\d{1,2}:\d{1,2}:\d{1,2}$`' , $date, $month);
             if ((intval($month[1]) > 12) || (intval($month[1]) <= 0 )) {
                 return false;
             }
             // check if hours are correct too
-            preg_match( '`^\d{1,2}-\d{1,2}-\d{4}\s(\d{1,2}):\d{1,2}:\d{1,2}$`' , $date, $hours);
+            preg_match( '`^\d{4}-\d{1,2}-\d{1,2}\s(\d{1,2}):\d{1,2}:\d{1,2}$`' , $date, $hours);
             if ((intval($hours[1]) > 23) || (intval($hours[1]) < 0 )) {
                 return false;
             }
             // check if minutes are correct too
-            preg_match( '`^\d{1,2}-\d{1,2}-\d{4}\s\d{1,2}:(\d{1,2}):\d{1,2}$`' , $date, $minutes);
+            preg_match( '`^\d{4}-\d{1,2}-\d{1,2}\s\d{1,2}:(\d{1,2}):\d{1,2}$`' , $date, $minutes);
             if ((intval($minutes[1]) > 59) || (intval($minutes[1]) < 0 )) {
                 return false;
             }
             // check if secondes are correct too
-            preg_match( '`^\d{1,2}-\d{1,2}-\d{4}\s\d{1,2}:\d{1,2}:(\d{1,2})$`' , $date, $secondes);
+            preg_match( '`^\d{4}-\d{1,2}-\d{1,2}\s\d{1,2}:\d{1,2}:(\d{1,2})$`' , $date, $secondes);
             if ((intval($secondes[1]) > 59) || (intval($secondes[1]) < 0 )) {
                 return false;
             }
             // check if year is correct too
-            preg_match( '`^\d{1,2}-\d{1,2}-(\d{4})\s\d{1,2}:\d{1,2}:\d{1,2}$`' , $date, $year);
+            preg_match( '`^(\d{4})-\d{1,2}-\d{1,2}\s\d{1,2}:\d{1,2}:\d{1,2}$`' , $date, $year);
             // check if the date is valid
-            return checkdate( intval($month[1]), intval($day[1]), intval($year[1]));*/
+            return checkdate( intval($month[1]), intval($day[1]), intval($year[1]));
         } else {
             return false;
         }

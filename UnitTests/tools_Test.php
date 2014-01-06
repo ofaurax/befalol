@@ -3,9 +3,7 @@
 require_once ('./php/eventhandler.php');
 require_once ('./php/libraries/tools.php');
 require_once 'vendor/autoload.php';
-date_default_timezone_set('Europe/Paris');
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+
 /****** REQUIRES FAKER LIBRARY ********/
 // Uncomment the line above if you have installed fzaninotto / Faker library
 // fzaninotto / Faker
@@ -16,7 +14,11 @@ error_reporting(E_ALL);
 // phpunit / phpunit
 /***********************************/
 
-    
+date_default_timezone_set('Europe/Paris');
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+
 /**
  * 
  * Unittest allowing to test the array_data_validation tool
@@ -354,6 +356,13 @@ Class DateValidation_UT extends PHPUnit_Framework_TestCase {
         $date = "11/25/2013 23:00:00";
         $this->assertTrue(check_and_valid_date($date, false));
         $date = '';
+        $date = "2013-11-25 23:00:00";
+        $this->assertTrue(check_and_valid_date($date, false));
+        $date = "1988-11-25 12:00";
+        $this->assertTrue(check_and_valid_date($date, false));
+        $date = "1986-01-25";
+        $this->assertTrue(check_and_valid_date($date, false));
+        $date = '';
         $this->assertTrue(check_and_valid_date($date, false));
         $date = null;
         $this->assertTrue(check_and_valid_date($date, false));
@@ -364,7 +373,25 @@ Class DateValidation_UT extends PHPUnit_Framework_TestCase {
      * Test behavior with several incorrect input datas
      */
     public function test_behavior_incorrect_input_data () {
-        // incorrect date format - format hyphens
+        // incorrect date format - right format with hyphens is yyyy-mm-dd
+        $date = "11-25-2013";
+        $this->assertFalse(check_and_valid_date($date, false));
+        // incorrect date format - right format with hyphens is yyyy-mm-dd hh:mm
+        $date = "11-25-2013 23:00";
+        $this->assertFalse(check_and_valid_date($date, false));
+        // incorrect date format - right format with hyphens is yyyy-mm-dd hh:mm:ss 
+        $date = "11-25-2013 23:00:00";
+        $this->assertFalse(check_and_valid_date($date, false));
+        // incorrect date format - right format with hyphens is yyyy-mm-dd hh:mm:ss 
+        $date = "2013-25-12 23:00:00";
+        $this->assertFalse(check_and_valid_date($date, false));
+        // incorrect date format - right format with hyphens is yyyy-mm-dd hh:mm 
+        $date = "2013-25-12 23:00";
+        $this->assertFalse(check_and_valid_date($date, false));
+        // incorrect date format - right format with hyphens is yyyy-mm-dd 
+        $date = "2013-25-12";
+        $this->assertFalse(check_and_valid_date($date, false));
+         // incorrect date format - right format with hyphens is yyyy-mm-dd
         $date = "11-25-2013";
         $this->assertFalse(check_and_valid_date($date, false));
         // incorrect date format - European format with /
