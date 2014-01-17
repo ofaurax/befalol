@@ -1027,7 +1027,7 @@ class Login
         // validating the input
         if (!empty($_POST['event_name'])
         && strlen($_POST['event_name'] > 3)
-        && preg_match('#[\w]+#', $_POST['event_name'], '')
+        && preg_match('#[\w]+#', $_POST['event_name'])
         && check_no_digit($_POST['event_type'], true)
         && (!empty($_POST['event_zipcode']))
         && check_no_digit($_POST['event_city_name'], true)
