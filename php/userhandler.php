@@ -60,8 +60,6 @@ Class User {
         }
     }
 
-
-
     /**
      *
      * Set the  key=>value given, as an attribute of the user object. Key would
@@ -154,6 +152,7 @@ Class User {
         if (!empty($attribute_name) && is_string($attribute_name))
         {
             $dump_var = '_'.$attribute_name;
+            //TODO check if the attribute requested exists.
             return $this->$dump_var;
         }
         else

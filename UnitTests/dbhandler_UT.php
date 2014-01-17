@@ -6,12 +6,8 @@ ini_set('display_errors', 1);
 require_once ('./php/dbhandler.php');
 //require_once ('./vendor/autoload.php');
 
-/****************************************************************/
-/** Must change the path of _SERVER_DIR  according to the user **/
-/****************************************************************/
-define ('_SERVER_DIR', '/Users/aldeen/Desktop/Projet/Site');
-/****************************************************************/
-define ('_INI_FILE_DIR', _SERVER_DIR."/befalol/database/config.ini" );
+define ('_SERVER_DIR', getcwd());
+define ('_INI_FILE_DIR', _SERVER_DIR."/database/config.ini" );
 
 
 Class SqliteDbTableHanlderUT extends PHPUnit_Framework_TestCase {
