@@ -1,0 +1,67 @@
+{
+	"IcoMoonType": "selection",
+	"icons": [
+		{
+			"icon": {
+				"paths": [
+					"M622.826 702.736c-22.11-3.518-22.614-64.314-22.614-64.314s64.968-64.316 79.128-150.802c38.090 0 61.618-91.946 23.522-124.296 1.59-34.054 48.96-267.324-190.862-267.324-239.822 0-192.45 233.27-190.864 267.324-38.094 32.35-14.57 124.296 23.522 124.296 14.158 86.486 79.128 150.802 79.128 150.802s-0.504 60.796-22.614 64.314c-71.22 11.332-337.172 128.634-337.172 257.264h896c0-128.63-265.952-245.932-337.174-257.264z"
+				],
+				"tags": [
+					"user",
+					"profile",
+					"avatar",
+					"person",
+					"talk",
+					"member"
+				],
+				"grid": 16
+			},
+			"properties": {
+				"id": 112,
+				"order": 1,
+				"prevSize": 32,
+				"code": 117,
+				"name": "user2",
+				"ligatures": ""
+			}
+		}
+	],
+	"height": 1024,
+	"metadata": {
+		"name": "user"
+	},
+	"preferences": {
+		"fontPref": {
+			"prefix": "icon-",
+			"metadata": {
+				"fontFamily": "user"
+			},
+			"showGlyphs": true,
+			"metrics": {
+				"emSize": 1024,
+				"baseline": 6.25,
+				"whitespace": 50
+			},
+			"resetPoint": 117,
+			"showQuickUse": true,
+			"quickUsageToken": false,
+			"showMetrics": true,
+			"showMetadata": false
+		},
+		"imagePref": {
+			"color": 1,
+			"height": 32,
+			"columns": 16,
+			"margin": 16,
+			"png": true,
+			"sprites": true
+		},
+		"historySize": 100,
+		"showCodes": true,
+		"gridSize": 16,
+		"showLiga": false,
+		"showGrid": true,
+		"showGlyphs": true,
+		"showQuickUse": true
+	}
+}

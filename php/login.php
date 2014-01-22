@@ -99,44 +99,47 @@ class Login
     public function runApplication()
     {
         // check is user wants to see register page (etc.)
-        if (isset($_GET["action"]) && $_GET["action"] == "register") {
+        if (isset($_GET["action"]) && $_GET["action"] == "signin") {
             $this->doRegistration();
             $this->showPageRegistration();
-        } else {
+        } else if  (isset($_GET["action"]) && $_GET["action"] == "login") {
+            $this->showPageLoginForm();
+        }
+        else {
             // start the session, always needed!
             $this->doStartSession();
             // check for possible user interactions (login with session/post data or logout)
             $this->performUserLoginAction();
             // show "page", according to user's login status
             if ($this->getUserLoginStatus()) {
-                $this->showPageLoggedIn();
+                $this->showHomePage();
                 if (isset($_GET["action"])) {
                     switch ($_GET["action"]) {
                         case 'setpersonalinfo':
                         case 'setpersonalinfo&changepwd':
                             echo 'You can change your personnal data here <br/>';
                             $this->SaveUserInformations();
-                            $this->ShowPageUserInformation();
+                            $this->showPageUserInformation();
                             break;
                         case 'createnewevent':
-                            echo 'You can change your create your new event here <br/>';
+                            echo 'You can create your new event here <br/>';
                             $this->SaveEventInformations();
-                            $this->ShowPageEventCreation();
+                            $this->showPageEventCreation();
                             break;
                         case 'seeallusers':
                             echo 'Below is the list of all website members <br/>';
-                            $this->ShowPageAllUsers();
+                            $this->showPageAllUsers();
                             break;
                         case 'seeyourevents':
                             echo 'Below is the list of all your events <br/>';
-                            $this->ShowPageYourEvents();
+                            $this->showPageYourEvents();
                             break;
                         case 'seeallevents':
                             echo 'Below is the list of all events <br/>';
-                            $this->ShowAllEvents();
+                            $this->showAllEvents();
                             break;
                         case 'seeevent':
-                            $this->ShowPageEventInformation();
+                            $this->showPageEventInformation();
                             break;
                         default:
                             echo 'This is an unknown action';
@@ -217,10 +220,12 @@ class Login
      */
     private function doLogout()
     {
-        $_SESSION = array();
+        $user_name = $_SESSION['user']->get_string_attribute('user_name');
+        $_SESSION = null;
+        session_unset();
         session_destroy();
         $this->user_is_logged_in = false;
-        $this->feedback = "You were just logged out.";
+        $this->feedback = '<p id="goodbye">See you soon ' . $user_name .'</p>' ;
     }
 
     /**
@@ -231,7 +236,9 @@ class Login
     {
         if ($this->checkRegistrationData()) {
             if ($this->createDatabaseConnection()) {
-                $this->createNewUser();
+                if ($this->createNewUser()) {
+                    $this->showPageLoginForm();
+                }
             }
         }
         // default return
@@ -278,6 +285,7 @@ class Login
             // using PHP 5.5's password_verify() function to check password
             if (password_verify($_POST['user_password'], $result_row->user_password_hash)) {
                 // write user data into PHP SESSION [a file on your server]
+                //session_start();
                 $parameters = array ('user_id' => intval($result_row->user_id),
                  	'user_name' => html_entity_decode($result_row->user_name),
  					'user_email' => html_entity_decode($result_row->user_email),
@@ -290,7 +298,7 @@ class Login
                 $_SESSION['user'] = $user;
                 //load user events;
                 $events = $user->select_user_events();
-                 $_SESSION['user_events'] = $events;
+                $_SESSION['user_events'] = $events;
                 $_SESSION['user_is_logged_in'] = true;
                 $this->user_is_logged_in = true;
                 return true;
@@ -311,7 +319,7 @@ class Login
     private function checkRegistrationData()
     {
         // if no registration form submitted: exit the method
-        if (!isset($_POST["register"])) {
+        if (!isset($_POST["signin"])) {
             return false;
         }
 
@@ -410,25 +418,7 @@ class Login
         return $this->user_is_logged_in;
     }
 
-    /**
-     * Simple demo-"page" that will be shown when the user is logged in.
-     * In a real application you would probably include an html-template here, but for this extremely simple
-     * demo the "echo" statements are totally okay.
-     */
-    private function showPageLoggedIn()
-    {
-        if ($this->feedback) {
-            echo $this->feedback . "<br/><br/>";
-        }
-        echo 'Hello ' . $_SESSION['user']->get_string_attribute('user_name') . ', you are logged in.<br/><br/>';
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=setpersonalinfo">Your personal informations</a>'.'<br/>';
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=createnewevent">Post a new Event</a>'.'<br/>';
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeyourevents">List of your events</a>'.'<br/>';
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeallevents">List of all events</a>'.'<br/>';
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeallusers">List of members</a>'.'<br/>';
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=logout">Log out</a><br/>';
-    }
-
+ 
     /**
      * Simple demo-"page" with the login form.
      * In a real application you would probably include an html-template here, but for this extremely simple
@@ -436,22 +426,33 @@ class Login
      */
     private function showPageLoginForm()
     {
+        echo get_header();
+        echo '<body>';
+        echo topbar_public();
+        
+        echo '<div id="container">';
         if ($this->feedback) {
             echo $this->feedback . "<br/><br/>";
         }
-
-        echo '<h2>Login</h2>';
-
-        echo '<form method="post" action="' . $_SERVER['SCRIPT_NAME'] . '" name="loginform">';
-        echo '<label for="login_input_username">Username</label> ';
-        echo '<input id="login_input_username" type="text" name="user_name" required /> ';
-        echo '<label for="login_input_password">Password</label> ';
-        echo '<input id="login_input_password" type="password" name="user_password" required /> ';
+	    echo '<div id=content>
+			<br/><br/><br/>
+			<h1>From this point ahead <br/> your life will make more sense </h1>';
+        echo '<div id="loginarea">';
+        echo '<form method="post" action="' . $_SERVER['SCRIPT_NAME'] .'" name="loginform">';
+        echo '<label for="username" data-icon="u"></label>';
+        echo '<input class="loginbox" type="text" name="user_name" placeholder="Username" required  /> ';
+        echo '<label for="username" data-icon="p"></label>';
+        echo '<input class="pwdbox" type="password" name="user_password" placeholder="Password" required /> ';
         echo '<input type="submit"  name="login" value="Log in" />';
         echo '</form>';
-
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=register">Register new account</a>';
-    }
+        echo '</div>'; // loginarea
+        echo '<h3> Not a member yet? </h3>';
+        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=signin"><input type="button" value="Sign in"> </a>';
+        echo '</div>'; // content div
+        echo '</div>'; //end container
+        echo '</body>';
+        echo get_footer();
+    }    
 
     /**
      * Simple demo-"page" with the registration form.
@@ -460,101 +461,52 @@ class Login
      */
     private function showPageRegistration()
     {
+        echo get_header();
+        echo '<body>';
+        echo topbar_public();
+        echo '<div id="container">';
         if ($this->feedback) {
             echo $this->feedback . "<br/><br/>";
         }
-
-        echo '<h2>Registration</h2>';
-
-        echo '<form method="post" action="' . $_SERVER['SCRIPT_NAME'] . '?action=register" name="registerform">';
-        echo '<label for="login_input_username">Username (only letters and numbers, 2 to 64 characters)</label>';
-        echo '<input id="login_input_username" type="text" pattern="[a-zA-Z0-9]{2,64}" name="user_name" required />';
-        echo '<label for="login_input_email">User\'s email</label>';
-        echo '<input id="login_input_email" type="email" name="user_email" required />';
-        echo '<label for="login_input_password_new">Password (min. 6 characters)</label>';
-        echo '<input id="login_input_password_new" class="login_input" type="password" name="user_password_new" pattern=".{6,}" required autocomplete="off" />';
-        echo '<label for="login_input_password_repeat">Repeat password</label>';
-        echo '<input id="login_input_password_repeat" class="login_input" type="password" name="user_password_repeat" pattern=".{6,}" required autocomplete="off" />';
-        echo '<input type="submit" name="register" value="Register" />';
+        echo '<div id=content>
+		<br/><br/><br/>
+		<h1>From this point ahead <br/> your life will make more sense </h1>';
+        echo '<div id="signinarea">';  
+        echo '<form method="post" action="' . $_SERVER['SCRIPT_NAME'] . '?action=signin" name="registerform">';
+        echo '<p>';
+        echo '<label for="login_input_user_name" data-icon="u" >Username </label>';
+        echo '<input id="login_input_user_name" type="text" placeholder="username" pattern="[a-zA-Z0-9]{2,64}" name="user_name" required />';
+        echo '</p>';
+        echo '<p>';
+        echo '<label for="login_input_email" data-icon="e">Email </label>';
+        echo '<input id="login_input_email" type="email" placeholder="email@example.com" name="user_email" required />';
+        echo '</p>';
+        echo '<p>';
+        echo '<label for="login_input_password_new" data-icon="p">Password </label>';
+        echo '<input id="login_input_password_new" type="password" name="user_password_new" pattern=".{6,}" required autocomplete="off" />';
+        echo '</p>';
+        echo '<p>';
+        echo '<label for="login_input_password_repeat" data-icon="p">Confirm password</label>';
+        echo '<input id="login_input_password_repeat" type="password" name="user_password_repeat" pattern=".{6,}" required autocomplete="off" />';
+        echo '</p>';
+        echo '<p>';
+        echo '<input type="submit" name="signin" value="Sign in" />';
+        echo '<p>';
+        echo '</div>'; // signinarea
         echo '</form>';
-
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
+        echo '</div>'; //end content
+        echo '</div>'; //end container
+        echo '</body>';
+        echo get_footer();      
     }
+
 
 
     /**
      *
-     * Show the user form for user personal information
+     * show the Event information
      */
-    private function ShowPageUserInformation ()
-    {
-        if ($this->feedback) {
-            echo $this->feedback . "<br/><br/>";
-        }
-        if (isset($_SESSION))
-        {
-            $r = '<h2>Your personal informations</h2>';
-            //build it
-            $r .=  '<form method="post" action="' . $_SERVER['SCRIPT_NAME'] .
-	        '?action=setpersonalinfo" name="userinfoform">';
-            $user_name = $_SESSION['user']->get_string_attribute('user_name');
-            $user_email = $_SESSION['user']->get_string_attribute('user_email');
-            $user_lastname = utf8_decode($_SESSION['user']->get_string_attribute('user_lastname'));
-            $user_firstname = utf8_decode($_SESSION['user']->get_string_attribute('user_firstname'));
-            $user_birthday = $_SESSION['user']->get_string_attribute('user_birthday');
-            $user_nationality = $_SESSION['user']->get_string_attribute('user_nationality');
-            $nationalities = NULL;
-            $nationalities = Nationality::select_all_nationalities();
-            if (!empty($nationalities)) {
-                //table
-                $r .= '<table>';
-                $r .= display_row('Username:', '<input type="text" name="user_name") value="'
-                .$user_name .'"readonly/>');
-                if (isset($_GET['changepwd'])){
-                     $r .= display_advanced_row (array('Password:', 'Current password <input 
-                     id="login_input_password" class="login_input" type="password" 
-                     name="user_password" pattern=".{6,}" required autocomplete="off" />',
-                     'New password <input id="login_input_password_new" class="login_input" 
-                     type="password" name="user_password_new" pattern=".{6,}" 
-                     required autocomplete="off" />',
-                     'New password again <input id="login_input_password_new2" 
-                     class="login_input" type="password" 
-                     name="user_password_repeat" pattern=".{6,}" required 
-                     autocomplete="off" />'));
-                }
-                $r .= display_row('Email:', '<input type="email" 
-                	name="user_email" value="' . $user_email.'"required/>');
-                $r .= display_row('Last name:', '<input type="text" 
-                	name="user_lastname" value="'. $user_lastname.'"required/>');
-                $r .= display_row('First name:', '<input type="text"
-                	name="user_firstname" value="'. $user_firstname.'"required/>');
-                $r .= display_row('Birthday:', '<input type="date" 
-                	name="user_birthday" placeholder="mm/dd/yyyy" value="'
-                    . $user_birthday .'"required/>');
-                $r .= display_row('Nationality:', display_dropdownlist
-                (array('name' => 'user_nationality', 'multiple' => FALSE,
-					'required' => TRUE) , $nationalities, 
-                $user_nationality));
-                $r .= display_row('', '<a href="' . $_SERVER['SCRIPT_NAME'] . 
-                '?action=setpersonalinfo&changepwd" >
-                <input type="button" value = "Change Password" name="changepwd"/></a>
-                <input type="submit" value = "Save" name="saveuserinfo"/>');
-                $r .= '<table/>';
-                $r .= '</form>';
-                echo $r;
-                echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
-            }else {
-                $this->feedback = "The form could not have been loaded";
-            }
-        }
-    }
-
-
-    /**
-     *
-     * Show the Event information
-     */
-    private function ShowPageEventInformation ()
+    private function showPageEventInformation ()
     {
         if ($this->feedback) {
             echo $this->feedback . "<br/><br/>";
@@ -630,79 +582,9 @@ class Login
 
     /**
      *
-     * Show the user form for event creation
+     * show all members of the website
      */
-    private function ShowPageEventCreation ()
-    {
-        if ($this->feedback) {
-            echo $this->feedback . "<br/><br/>";
-        }
-        if (isset($_SESSION))
-        {
-            $r = '<h2>Your personal informations</h2>';
-            //build it
-            $r .=  '<form method="post" action="' . $_SERVER['SCRIPT_NAME'] .
-	        '?action=createnewevent" name="neweventcreation">';
-            $event_types = NULL;
-            $languages = NULL;
-            $event_types = Event::select_all_event_types();
-            $languages = Language::select_all_languages();
-            $countries = Country::select_all_countries();
-            if (!empty($event_types) && !empty($languages) && !empty($countries)) {
-                //table
-                sort($languages);
-                sort($event_types);
-                sort($countries);
-                $r .= '<table>';
-                $r .= display_row('Event Name:', '<input type="text"
-					name="event_name" placeholder="My new awesome event" size="25" required/>');
-                $r .= display_row('Type', display_dropdownlist (array('name' =>
-					'event_type', 'multiple' => FALSE, 'required' => TRUE) , 
-                $event_types, ''));
-                $r .= display_row('Location:', '<input type="text"
-					name="event_address" placeholder="1, Lombard Street" 
-					size=50 required/> <input type="text" placeholder="94133"
-					name="event_zipcode" width="8" required/> <input type="text" 
-					name="event_city_name" size="20" placeholder="San Francisco" required/>'
-					.display_dropdownlist(array('multiple' => false, 'required' =>
-					true, 'name' => 'event_country_name'), $countries, 'United States'));
-					$r .= display_row('Check in:', '<input type="date"
-					name="event_starting_date" placeholder="mm/dd/yyyy" size="10" 
-					required/>'.' Time :'. ' <input type="time" name="event_starting_time" 
-					placeholder="hh:mm" size="8" max="23:00" required/>');
-					$r .= display_row('Check out date:', '<input type="date"
-					name="event_ending_date" placeholder="mm/dd/yyyy" size="10" required/>'.
-					' Time :'.' <input type="time" name="event_ending_time" size="8" 
-					placeholder="hh:mm" max="23:00" required/>');
-					$r .= display_row('Maximal number of participants:',
-					'<input type="number" size="2" min="1" value="1"  
-					name="event_max_nb_participants" required/>');
-					$r .= display_row('Tell us which language will be spoken :',
-					display_dropdownlist(array('multiple' => true, 'required' =>
-					true, 'name' => 'event_spoken_languages[]'), $languages, 'English'));
-					$r .= display_row('Tell us more about this event:',
-					'<textarea type="text" name="event_description" maxlength="4000" 
-					cols="30" row="10" placeholder="This is going to be mad!" 
-					required/></textarea>');
-					$r .= display_row('', '<input type="submit" value =
-					"Create Event" name="createevent"/>');
-					$r .= '<table/>';
-					$r .= '</form>';
-					echo $r;
-					echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
-            }else {
-                $this->feedback = "The form could not have been loaded";
-            }
-        }
-    }
-
-
-
-    /**
-     *
-     * Show all members of the website
-     */
-    private function ShowPageAllUsers ()
+    private function showPageAllUsers ()
     {
         if ($this->feedback) {
             echo $this->feedback . "<br/><br/>";
@@ -730,9 +612,9 @@ class Login
     
 	/**
      *
-     * Show all the user events
+     * show all the user events
      */
-    private function ShowAllEvents ()
+    private function showAllEvents ()
     {
         if ($this->feedback) {
             echo $this->feedback . "<br/><br/>";
@@ -801,9 +683,9 @@ class Login
 
     /**
      *
-     * Show all the user events
+     * show all the user events
      */
-    private function ShowPageYourEvents ()
+    private function showPageYourEvents ()
     {
         if ($this->feedback) {
             echo $this->feedback . "<br/><br/>";
@@ -880,16 +762,100 @@ class Login
     }
 
 
-    /**
+       
+    private function showHomePage () {
+         /* Display page */
+        echo get_header();
+        echo '<body>';
+        echo topbar_user();
+        echo '<div id="container">';
+        
+        if ($this->feedback) {
+            echo $this->feedback . "<br/><br/>";
+        }
+
+        echo '<div id="content">'; 
+        echo 'Hello ' . $_SESSION['user']->get_string_attribute('user_name') . ', you are logged in.<br/><br/>';
+        echo '<a href="/befalol/php/userpage.php">Profile Page</a>'.'<br/>';
+        echo '<a href=/befalol/php/event.php">Post a new Event</a>'.'<br/>';
+        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeyourevents">List of your events</a>'.'<br/>';
+        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeallevents">List of all events</a>'.'<br/>';
+        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeallusers">List of members</a>'.'<br/>';
+        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=logout">Log out</a><br/>';
+        echo '</div>'; //end content
+        echo '</div>'; //end container
+        echo '</body>';
+        //echo $r;
+        echo get_footer();
+    }
+    
+        
+}
+
+
+/**
+ *
+ * Check if input personal informations match the requirements
+ */
+ function check_user_info()
+{
+    $feedback = array ();
+ 
+    // validating the input
+    if (!empty($_POST['user_name'])
+    && strlen($_POST['user_email']) <= 64
+    && filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)
+    && check_no_digit($_POST['user_lastname'], false)
+    && strlen($_POST['user_lastname']) <= 64
+    && check_no_digit($_POST['user_firstname'], false)
+    && strlen($_POST['user_firstname']) <= 64
+    && check_no_digit($_POST['user_nationality'], false)
+    && check_and_valid_date($_POST['user_birthday'], False)        
+    && (!is_it_futur ($_POST['user_birthday']))) {
+        $feedback['status'] = true;
+        $_SESSION['feedback'] = $feedback;
+        return true;     
+    } elseif (empty($_POST['user_email'])) {
+        $feedback['msg'] = "Email cannot be empty";
+    } elseif (strlen($_POST['user_email']) > 64) {
+        $feedback['msg'] = "Email cannot be longer than 64 characters";
+    } elseif (!filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)) {
+        $feedback['msg'] = "Your email address is not in a valid email format";
+    } elseif (!check_no_digit($_POST['user_lastname'], false)){
+        $feedback['msg'] = "Your lastname doesn't match the field requirements";
+    } elseif (strlen($_POST['user_lastname']) > 64) {
+        $feedback['msg'] = "Your Lastname cannot be longer than 64 characters or 
+        shorter than 2 characters";
+    } elseif (!check_no_digit($_POST['user_firstname'], false)){
+        $feedback['msg'] = "Your firstname doesn't match the field requirements";
+    } elseif (strlen($_POST['user_firstname']) > 64) {
+        $feedback['msg'] = "Firstname cannot be longer than 64 characters";
+    } elseif (!check_and_valid_date($_POST['user_birthday'], 0)){
+        $feedback['msg'] = "Your birthday doesn't match the field requirements
+         - mm/dd/yyyy - or is not a valid date";
+    } elseif (is_it_futur($_POST['user_birthday'], 0)){
+        $feedback['msg'] = "You probably would not be using this website 
+        if you were not born :).";
+    } elseif (!check_no_digit($_POST['user_nationality'], false)){
+        $feedback['msg'] = "Your nationality doesn't match the field requirements";
+    } else {
+        $feedback['msg'] = "An unknown error occurred.";
+    }
+    $feedback['status'] = false;
+    $_SESSION['feedback'] = $feedback;
+    // default return
+    return false;
+}
+
+
+ 	/**
      *
      * Save input personal informations into db and Session
      */
-    private function SaveUserInformations ()
+    function save_user_info ()
     {
-        if (!isset($_POST['saveuserinfo'])) {
-            return False;
-        }
-        if ($this->checkPICorrectness()){
+        if (check_user_info()){
+            $feedback = array ();
             // Retrieve datas from form
             $user_name = filter_var($_POST['user_name'],
              FILTER_SANITIZE_STRING);
@@ -904,13 +870,16 @@ class Login
             FILTER_SANITIZE_STRING));
             $user_firstname = utf8_encode(filter_var($_POST['user_firstname'], 
             FILTER_SANITIZE_STRING));
-            if (isset($_POST['user_password_new'])) {
+            $user_password_hash = 
+                $_SESSION['user']->get_string_attribute('user_password_hash');
+           
+            /*if (isset($_POST['user_password_new'])) {
                 $user_password_hash = password_hash($_POST['user_password_new'],
                  PASSWORD_DEFAULT);
             }else {
                 $user_password_hash = 
                 $_SESSION['user']->get_string_attribute('user_password_hash');
-            }
+            }*/
             	
             //Create an user object with it
             $parameters =  array ('user_id' =>
@@ -921,30 +890,224 @@ class Login
 				'user_nationality' => $user_nationality,
 				'user_lastname' => $user_lastname,
 				'user_firstname' => $user_firstname,
-            	'user_password_hash' => $user_password_hash);
+                'user_password_hash' => $user_password_hash);
             $user = new User ($parameters);
             	
             // save new datas in database;
             if ($user->update_user_data()) {
                 // Save them in the user session
                 $_SESSION['user'] = $user;
+                $feedback ['status'] = true;
+                $_SESSION['feedback'] = $feedback;
+                return true;
             } else {
-                $this->feedback = 'Your personal information update has failed <br/>';
+                $feedback ['msg'] = 'The update of your profile information has failed';
+                $feedback ['status'] = false;
+                $_SESSION['feedback'] = $feedback;
+                return false;
             }
+        }else {
+            return false;
         }
+    }
+    
+    
+    /**
+     * 
+     * Check if information given by user and related to password respects the
+     * requirements
+     */
+    function check_user_pwd () {
+        $feedback = array ();
+    	if (!empty($_POST['user_password_new']) && !empty($_POST['user_password_repeat']) 
+    	    && !empty($_POST['user_password'])
+    	    && ($_POST['user_password_new'] === $_POST['user_password_repeat'])
+    	    && password_verify($_POST['user_password'], 
+            $_SESSION['user']->get_string_attribute('user_password_hash'))
+            && !password_verify($_POST['user_password_new'], 
+            $_SESSION['user']->get_string_attribute('user_password_hash'))
+            && strlen($_POST['user_password_new']) > 6 ) {
+            $feedback['status'] = true;
+            $_SESSION['feedback'] = $feedback;
+            return true;
+        } else if (empty($_POST['user_password_new']) || empty($_POST['user_password_repeat']) 
+    	    || empty($_POST['user_password'])) {
+    	    $feedback['msg'] = "Please fill in all the required fields.";
+    	} else if ($_POST['user_password_new'] != $_POST['user_password_repeat']) {
+    	    $feedback['msg'] = "Please make sure that both passwords are similar.";
+    	} else if (!password_verify($_POST['user_password'], 
+            $_SESSION['user']->get_string_attribute('user_password_hash'))) {
+    	    $feedback['msg'] = "Your current password is not valid.";
+    	} else if (password_verify($_POST['user_password_new'], 
+            $_SESSION['user']->get_string_attribute('user_password_hash'))) {
+            $feedback['msg'] = "Your new password must differ from the current one";
+        } else if (strlen($_POST['user_password_new']) < 6 ) {
+            $feedback['msg'] = "Password has a minimum length of 6 characters";
+        } else {
+            $feedback['msg'] = "Unknown error, please try again";
+        }
+        $feedback['status'] = false;
+        $_SESSION['feedback'] = $feedback;
+        return false;    
+    }
+    
+    
+    /**
+     * 
+     * Save input new password into db
+     **/ 
+    function save_user_pwd () {
+        if (check_user_pwd()){
+            $feedback = array ();
+            // Retrieve datas from form
+            /* information in user object are already utf8-encoded so no need here 
+             to decode and encode again */
+            $user_name = $_SESSION['user']->get_string_attribute('user_name');
+            //$user_password = $_POST['user_password'];
+            $user_email = $_SESSION['user']->get_string_attribute('user_email');
+            $user_birthday = $_SESSION['user']->get_string_attribute('user_birthday');
+            $user_nationality = utf8_encode($_SESSION['user']->get_string_attribute('user_nationality'));
+            $user_lastname = utf8_encode($_SESSION['user']->get_string_attribute('user_lastname'));
+            $user_firstname = utf8_encode($_SESSION['user']->get_string_attribute('user_firstname'));
+            $user_password_hash = password_hash($_POST['user_password_new'],
+                 PASSWORD_DEFAULT);          
+            	
+            //Create an user object with datas
+            $parameters =  array ('user_id' =>
+            $_SESSION['user']->get_string_attribute('user_id'),
+				'user_name' => $user_name,
+				'user_email' => $user_email,
+				'user_birthday' => $user_birthday,
+				'user_nationality' => $user_nationality,
+				'user_lastname' => $user_lastname,
+				'user_firstname' => $user_firstname,
+                'user_password_hash' => $user_password_hash);
+            $user = new User ($parameters);
+            	
+            // save new datas in database;
+            if ($user->update_user_data()) {
+                // Save them in the user session
+                $_SESSION['user'] = $user;
+                $feedback ['msg'] = 'Your password has been successfully changed';
+                $feedback ['status'] = true;
+                $_SESSION['feedback'] = $feedback;
+                return true;
+            } else {
+                $feedback ['msg'] = 'Your password update has failed';
+                $feedback ['status'] = false;
+                $_SESSION['feedback'] = $feedback;
+                return false;
+            }
+        }else {
+            return false;
+        }
+        
     }
 
     /**
      *
-     * Save event into db and Session
+     * Check if input event informations match the requirements
      */
-    private function SaveEventInformations ()
+    function check_event_info()
     {
-        if (!isset($_POST['createevent']) || (!isset ($_SESSION))) {
-            return False;
+        $feedback = array ();                
+        // validating the input
+        if (!empty($_POST['event_name'])
+        && (strlen($_POST['event_name']) > 3)
+        && preg_match('#[\w]+#', $_POST['event_name'])
+        && check_no_digit($_POST['event_type'], true)
+        && (!empty($_POST['event_zipcode']))
+        && check_no_digit($_POST['event_city'], true)
+        && check_no_digit($_POST['event_country_name'], true)
+        && data_validation($_POST['event_max_nb_participants'],
+            FILTER_SANITIZE_NUMBER_INT, true)
+        && check_and_valid_date($_POST['event_starting_date'], true)
+        && check_and_valid_date($_POST['event_ending_date'], true)
+        && (is_it_futur ($_POST['event_starting_date'].' '
+            .$_POST['event_starting_time']))
+        && (is_it_futur ($_POST['event_ending_date'].' '
+            .$_POST['event_ending_time']))
+        && check_and_valid_time($_POST['event_starting_time'], true)
+        && check_and_valid_time($_POST['event_ending_time'], true)
+        && data_validation($_POST['event_description'],
+            FILTER_SANITIZE_STRING, true)
+        && array_check_no_digit($_POST['event_spoken_languages'],true)) {
+            $feedback['status'] = true;
+            $_SESSION['feedback'] = $feedback;
+            return true;
+        } elseif (empty($_POST['event_name'])) {
+            $feedback ['msg'] = "Event name cannot be empty";
+        } elseif (strlen($_POST['event_name']) < 3) {
+            $feedback ['msg'] = "Event name must be at least 3 characters long";
+        } elseif (!check_no_digit($_POST['event_type'], true)) {
+            $feedback['msg'] = "Event type cannot be empty or contain digit";
+        } elseif (empty($_POST['event_address']) || empty($_POST['event_zipcode'])
+        || empty($_POST['event_city']) || empty($_POST['event_country_name'])) {
+            $feedback['msg'] = "Event location cannot be empty";
+        } elseif (!check_no_digit($_POST['event_city'], true)) {
+            $feedback['msg'] = "Event city is not a valid city";
+        } elseif (!check_no_digit($_POST['event_country_name'], true)) {
+            $feedback['msg'] = "Event country is not a valid country";
+        }elseif (!data_validation($_POST['event_max_nb_participants'],
+            FILTER_SANITIZE_NUMBER_INT, true)) {
+            $feedback['msg'] = "Maximum number of participant must be a digit";
+        } elseif (empty($_POST['event_starting_date'])) {
+            $feedback['msg'] = "Event check in cannot be empty";
+        } elseif (empty($_POST['event_ending_date'])) {
+            $feedback['msg'] = "Event check out cannot be empty";
+        } elseif (empty($_POST['event_description'])) {
+            $feedback['msg'] = "Event description cannot be empty";
+        } elseif (empty($_POST['event_spoken_languages'])) {
+            $feedback['msg'] = "Event languages spoken cannot be empty";
+        } elseif (empty($_POST['event_starting_time'])) {
+            $feedback['msg'] = "Event check in time cannot be empty";
+        } elseif (empty($_POST['event_ending_time'])) {
+            $feedback['msg'] = "Event check out time cannot be empty";
+        } elseif (!check_and_valid_date($_POST['event_starting_date'], true)){
+            $feedback['msg'] = "The event check in date doesn't match the field
+			requirements - mm/dd/yyyy - or is not a valid date";
+        } elseif (!check_and_valid_date($_POST['event_ending_date'], true)){
+            $feedback['msg'] = "The event check out date doesn't match the field
+			requirements - mm/dd/yyyy - or is not a valid date";
+        } elseif (!is_it_futur($_POST['event_starting_date'].' '
+        .$_POST['event_starting_time'], true)){
+            $feedback['msg'] = "I am not sure the time machine exists yet,
+			please make sure the event check in date is valid.";
+        } elseif (!is_it_futur($_POST['event_ending_date'].' '
+        .$_POST['event_ending_time'], true)){
+            $feedback['msg'] = "Well, you won't be able to end this event before
+			you started it, please make sure the event check out is valid.";
+        } elseif (!check_and_valid_time($_POST['event_starting_time'], true)){
+            $feedback['msg'] = "The event check in time doesn't match the field
+			requirements (hh:mm)";
+        } elseif (!check_and_valid_time($_POST['event_ending_time'], true)){
+            $feedback['msg'] = "The event check out time doesn't match the field
+			requirements (hh:mm)";
+        } elseif (!data_validation($_POST['event_description'],
+        FILTER_SANITIZE_STRING, true)){
+            $feedback['msg'] = "The event description does not match the field
+			requirements";
+        } elseif (!array_check_no_digit($_POST['event_spoken_languages'],true)){
+            $feedback['msg'] = "The event spoken languages does not match the field
+			requirements";
+        } else {
+            $feedback['msg'] = "An unknown error occurred.";
         }
-         
-        if ($this->checkEICorrectness()){
+        // default return
+        $feedback['status'] = false;
+        $_SESSION['feedback'] = $feedback;
+        return false;    
+    }
+    
+    
+    
+    /**
+     * 
+     * Save event information into db & session
+     **/ 
+    function save_event_info () {
+        if (check_event_info()){
+            $feedback = array ();
             // Retrieve datas from form
             $event_name = utf8_encode(filter_var($_POST['event_name'], 
                 FILTER_SANITIZE_STRING));
@@ -962,7 +1125,7 @@ class Login
                 FILTER_SANITIZE_STRING));
             $event_zipcode = utf8_encode(filter_var($_POST['event_zipcode'], 
                 FILTER_SANITIZE_STRING));
-            $event_city_name = utf8_encode(filter_var($_POST['event_city_name'], 
+            $event_city = utf8_encode(filter_var($_POST['event_city'], 
                 FILTER_SANITIZE_STRING));
             $event_country_name = filter_var($_POST['event_country_name'], 
                 FILTER_SANITIZE_STRING);
@@ -974,7 +1137,7 @@ class Login
             }
 
             //Get the user id to use as the holder_id
-            $event_holder_id = $_SESSION['user']->get_user_id();
+            $event_holders_ids = $_SESSION['user']->get_user_id();
              
             //Create an user object with it
             $parameters =  array ('event_name' => $event_name,
@@ -982,13 +1145,14 @@ class Login
 			'event_starting_date' => $event_starting_date,
 	    	'event_ending_date'=> $event_ending_date, 
 	    	'event_max_nb_participants' => intval($event_max_nb_participants), 
-	    	'event_holder_id' => $event_holder_id, 
+	    	'event_holders_ids' => $event_holders_ids, 
 	    	'event_languages' => $event_languages_spoken, 
 			'event_address' => $event_address,
 			'event_zipcode' => $event_zipcode,
-			'event_city_name' => $event_city_name,
+			'event_city_name' => $event_city,
 			'event_country_name' => $event_country_name,
 			'event_description' => $event_description);
+            /*TODO: add exception around the object creation (This is not the only one)*/
             $event = new Event ($parameters);
             	
             // save new datas in database;
@@ -1001,183 +1165,20 @@ class Login
                     $events =  $_SESSION['user_events'];
                 }
                 array_push($events, $event);
-                 $_SESSION['user_events'] = $events;
+                $_SESSION['user_events'] = $events;
+                $feedback['status'] = true;
+                $_SESSION['feedback'] = $feedback;
+                return true;
             }
             else {
-                $this->feedback = 'The event creation failed <br/>';
-            }
-        }
-         
-        //echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=register">Register new account</a>';
-         
-         
-    }
-
-    /**
-     *
-     * Check if input event informations match the requirements
-     */
-    private function checkEICorrectness()
-    {
-        // if no registration form submitted: exit the method
-        if (!isset($_POST['createevent'])) {
-            return False;
-        }
-                
-        // validating the input
-        if (!empty($_POST['event_name'])
-        && strlen($_POST['event_name'] > 3)
-        && preg_match('#[\w]+#', $_POST['event_name'])
-        && check_no_digit($_POST['event_type'], true)
-        && (!empty($_POST['event_zipcode']))
-        && check_no_digit($_POST['event_city_name'], true)
-        && check_no_digit($_POST['event_country_name'], true)
-        && data_validation($_POST['event_max_nb_participants'],
-            FILTER_SANITIZE_NUMBER_INT, true)
-        && check_and_valid_date($_POST['event_starting_date'], true)
-        && check_and_valid_date($_POST['event_ending_date'], true)
-        && (is_it_futur ($_POST['event_starting_date'].' '
-            .$_POST['event_starting_time']))
-        && (is_it_futur ($_POST['event_ending_date'].' '
-            .$_POST['event_ending_time']))
-        && check_and_valid_time($_POST['event_starting_time'], true)
-        && check_and_valid_time($_POST['event_ending_time'], true)
-        && data_validation($_POST['event_description'],
-            FILTER_SANITIZE_STRING, true)
-        && array_check_no_digit($_POST['event_spoken_languages'],true)) {
-            return true;
-        } elseif (empty($_POST['event_name'])) {
-            $this->feedback = "Event name cannot be empty";
-        } elseif (!check_no_digit($_POST['event_type'], true)) {
-            $this->feedback = "Event type cannot be empty or contain digit";
-        } elseif (empty($_POST['event_address']) || empty($_POST['event_zipcode'])
-        || empty($_POST['event_city_name']) || empty($_POST['event_country_name'])) {
-            $this->feedback = "Event location cannot be empty";
-        } elseif (!check_no_digit($_POST['event_city_name'], true)) {
-            $this->feedback = "Event city is not a valid city";
-        } elseif (!check_no_digit($_POST['event_country_name'], true)) {
-            $this->feedback = "Event country is not a valid country";
-        }elseif (!data_validation($_POST['event_max_nb_participants'],
-            FILTER_SANITIZE_NUMBER_INT, true)) {
-            $this->feedback = "Maximum number of participant must be a digit";
-        } elseif (empty($_POST['event_starting_date'])) {
-            $this->feedback = "Event check in cannot be empty";
-        } elseif (empty($_POST['event_ending_date'])) {
-            $this->feedback = "Event check out cannot be empty";
-        } elseif (empty($_POST['event_description'])) {
-            $this->feedback = "Event description cannot be empty";
-        } elseif (empty($_POST['event_spoken_languages'])) {
-            $this->feedback = "Event languages spoken cannot be empty";
-        } elseif (empty($_POST['event_starting_time'])) {
-            $this->feedback = "Event check in time cannot be empty";
-        } elseif (empty($_POST['event_ending_time'])) {
-            $this->feedback = "Event check out time cannot be empty";
-        } elseif (!check_and_valid_date($_POST['event_starting_date'], true)){
-            $this->feedback = "The event check in date doesn't match the field
-			requirements - mm/dd/yyyy - or is not a valid date";
-        } elseif (!check_and_valid_date($_POST['event_ending_date'], true)){
-            $this->feedback = "The event check out date doesn't match the field
-			requirements - mm/dd/yyyy - or is not a valid date";
-        } elseif (!is_it_futur($_POST['event_starting_date'].' '
-        .$_POST['event_starting_time'], true)){
-            $this->feedback = "I am not sure the time machine exists yet,
-			please make sure the event check in date is valid.";
-        } elseif (!is_it_futur($_POST['event_ending_date'].' '
-        .$_POST['event_ending_time'], true)){
-            $this->feedback = "Well, you won't be able to end this event before
-			you started it, please make sure the event check out is valid.";
-        } elseif (!check_and_valid_time($_POST['event_starting_time'], true)){
-            $this->feedback = "The event check in time doesn't match the field
-			requirements (hh:mm)";
-        } elseif (!check_and_valid_time($_POST['event_ending_time'], true)){
-            $this->feedback = "The event check out time doesn't match the field
-			requirements (hh:mm)";
-        } elseif (!data_validation($_POST['event_description'],
-        FILTER_SANITIZE_STRING, true)){
-            $this->feedback = "The event description does not match the field
-			requirements";
-        } elseif (!array_check_no_digit($_POST['event_spoken_languages'],true)){
-            $this->feedback = "The event spoken languages does not match the field
-			requirements";
-        } else {
-            $this->feedback = "An unknown error occurred.";
-        }
-        // default return
-        return false;
-    }
-
-
-    /**
-     *
-     * Check if input personal informations match the requirements
-     */
-    private function checkPICorrectness()
-    {
-        // if no registration form submitted: exit the method
-        if (!isset($_POST['saveuserinfo'])) {
-            return False;
-        }
-        // validation input password informations
-        $password_ok_flag = false;
-        if (isset($_POST['user_password'])) {
-            if (!empty($_POST['user_password_new']) && !empty($_POST['user_password_repeat'])
-            && ($_POST['user_password_new'] === $_POST['user_password_repeat'])
-            && password_verify($_POST['user_password'], 
-                $_SESSION['user']->get_string_attribute('user_password_hash'))
-            && strlen($_POST['user_password_new']) > 6 ) {
-                $password_ok_flag = true;
-            } else {
-                $this->feedback = "Please check your informations' passwords.";
+                $feedback['msg'] = 'The event creation failed <br/>';
+                $feedback['status'] = false;
+                $_SESSION['feedback'] = $feedback;
                 return false;
             }
-        } elseif (!isset($_POST['user_password'])) {
-            $password_ok_flag = true;
-        }
-        
-        // validating the input
-        if ($password_ok_flag && !empty($_POST['user_name'])
-        && strlen($_POST['user_email']) <= 64
-        && filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)
-        && check_no_digit($_POST['user_lastname'], false)
-        && strlen($_POST['user_lastname']) <= 64
-        && check_no_digit($_POST['user_firstname'], false)
-        && strlen($_POST['user_firstname']) <= 64
-        && check_no_digit($_POST['user_nationality'], false)
-        && check_and_valid_date($_POST['user_birthday'], False)        
-        && (!is_it_futur ($_POST['user_birthday']))) {
-            return true;     
-        } elseif (empty($_POST['user_email'])) {
-            $this->feedback = "Email cannot be empty";
-        } elseif (strlen($_POST['user_email']) > 64) {
-            $this->feedback = "Email cannot be longer than 64 characters";
-        } elseif (!filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)) {
-            $this->feedback = "Your email address is not in a valid email format";
-        } elseif (!check_no_digit($_POST['user_lastname'], false)){
-            $this->feedback = "Your lastname doesn't match the field requirements";
-        } elseif (strlen($_POST['user_lastname']) > 64) {
-            $this->feedback = "Your Lastname cannot be longer than 64 characters or 
-            shorter than 2 characters";
-        } elseif (!check_no_digit($_POST['user_firstname'], false)){
-            $this->feedback = "Your firstname doesn't match the field requirements";
-        } elseif (strlen($_POST['user_firstname']) > 64) {
-            $this->feedback = "Firstname cannot be longer than 64 characters";
-        } elseif (!check_and_valid_date($_POST['user_birthday'], 0)){
-            $this->feedback = "Your birthday doesn't match the field requirements
-             - mm/dd/yyyy - or is not a valid date";
-        } elseif (is_it_futur($_POST['user_birthday'], 0)){
-            $this->feedback = "You probably would not be using this website 
-            if you were not born :).";
-        } elseif (!check_no_digit($_POST['user_nationality'], false)){
-            $this->feedback = "Your nationality doesn't match the field requirements";
         } else {
-            $this->feedback = "An unknown error occurred.";
+            return false;
         }
-        // default return
-        return false;
     }
-
-}
-
-
-// runs the app
-//$login = new Login();
+     
+    

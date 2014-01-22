@@ -4,8 +4,8 @@ function display_row ($RowTitle, $RowHTMLInput)
 {
     $r = '';
     $r .= '<tr>';
-    $r .= '<td>'.$RowTitle .'<td>' ;
-    $r .= '<td>'.$RowHTMLInput .'<td>' ;
+    $r .= '<td class="rowtitle">'.$RowTitle .'</td>' ;
+    $r .= '<td class="rowinput">'.$RowHTMLInput .'</td>' ;
     $r .= '<tr>';
     return $r;
 }
@@ -19,22 +19,22 @@ function display_row ($RowTitle, $RowHTMLInput)
 function display_col ($Inputs)
 {
     $r = '';
-    $r .= '<tr>';
+    $r .= '</tr>';
     $biggest_array_size = 0;
     foreach ($Inputs as $ColTitle => $ArrayInput) {
-        $r .= '<th>'.$ColTitle .'<th>' ;
+        $r .= '<th>'.$ColTitle .'</th>' ;
         $biggest_array_size = ((sizeof($ArrayInput)>$biggest_array_size)? 
             sizeof($ArrayInput) : $biggest_array_size);
     }
-    $r .= '<tr>';
+    $r .= '</tr>';
     for ($i = 0 ; $i <= $biggest_array_size ; $i++) {
         $r .= '<tr>';
         foreach ($Inputs as $ColTitle => $ArrayInput) {
             if (isset($ArrayInput[$i])) {
-                $r .= '<td>'.$ArrayInput[$i] .'<td>' ;
+                $r .= '<td>'.$ArrayInput[$i] .'</td>' ;
             }
         }
-        $r .= '<tr>';
+        $r .= '</tr>';
     }
     
     return $r;
@@ -45,16 +45,26 @@ function display_advanced_row ($RowHTMLInputs)
     $r = '';
     $r .= '<tr>';
     foreach ($RowHTMLInputs as $RowHTMLInput) {
-        $r .= '<td>'.$RowHTMLInput .'<td>' ;
+        $r .= '<td>'.$RowHTMLInput .'</td>' ;
     }
+    $r .= '</tr>';
+    return $r;
+}
+
+function display_advanced_tr_row($RowHTMLInputs) {
+    $r = '';
     $r .= '<tr>';
+    foreach ($RowHTMLInputs as $RowHTMLInput) {
+        $r .= '<th>'.$RowHTMLInput .'</th>' ;
+    }
+    $r .= '</tr>';
     return $r;
 }
 
 
-function display_dropdownlist ($SelectParameters, $InputValues, $DefaultValue)
+function display_dropdownlist ($SelectParameters, $InputValues, $DefaultValue, $Class)
 {
-    $r = '<select';
+    $r = '<select class:"'.$Class.'" ';
     // Set up parameters for select input
     if (is_array ($SelectParameters))
     {

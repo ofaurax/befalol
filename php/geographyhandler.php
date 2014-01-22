@@ -831,6 +831,38 @@ class Language {
             return false;
         }
     }
+    
+    
+	/**
+     *
+     * Select and return an array of all languages spoken at a specific event
+     */
+    static public function select_languages_spoken ($event_id) {
+        // Get the database connection if it's not the case yet
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        if (empty($dbhandler)) {
+            echo 'Impossible to initiate communication with database </br>';
+            return false;
+        }
+        // Look for existing languages_name in the nationalities table
+        $sql = 'SELECT language_name FROM event_languages WHERE event_id = :event_id';
+                $query = $dbhandler->_db_connection->prepare($sql);
+        $query = $dbhandler->_db_connection->prepare($sql);
+        if ($query) {         
+            $languages = array ();
+            $query->bindValue(':event_id', $event_id, PDO::PARAM_INT);
+            $query->execute();
+            $languages_res = $query->fetchall();
+            foreach($languages_res as $language) {
+                array_push($languages, htmlentities($language['language_name']));
+            }
+            return $languages;
+        } else {
+            echo "The database request for selecting languages in the
+			'languages'	table could not be prepared.<br/>";
+            return false;
+        }
+    }
 
 }
 

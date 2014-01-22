@@ -311,7 +311,7 @@ Class User {
 
     /**
      *
-     * Select and return an array of user events
+     * Select and return an array of events holded by user
      */
     public function select_user_events () {
         // Get the database connection if it's not the case yet
@@ -321,56 +321,48 @@ Class User {
             return false;
         }
         // Look for events held by the event holder id in the events table
-        $sql = 'SELECT * FROM events WHERE event_holder_id = :event_holder_id';
+        $sql = 'SELECT * FROM events E LEFT OUTER JOIN event_holders EH 
+        	ON E.event_id = EH.event_id WHERE EH.user_id = :user_id';
         $query = $dbhandler->_db_connection->prepare($sql);
         if ($query) {
-            $query->bindValue(':event_holder_id', $this->_user_id, PDO::PARAM_INT);
+            $query->bindValue(':user_id', $this->_user_id, PDO::PARAM_INT);
             $query->execute();
             $events = array();
             $results = $query->fetchall();
             foreach ($results as $result_row) {
-                //then get the languages spoken at each event
-                $sql = 'SELECT language_name FROM event_languages
-					WHERE event_id = :event_id';
-                $query = $dbhandler->_db_connection->prepare($sql);
-                if ($query) {
-                    $query->bindValue(':event_id', $result_row['event_id'],
-                    PDO::PARAM_INT);
-                    $query->execute();
-                    $languages_res = $query->fetchall(PDO::FETCH_COLUMN);
-                    if ($languages_res) {
-                        $languages = array();
-                        foreach ($languages_res as $key=>$value) {
-                            array_push ($languages, html_entity_decode($value));
-                        }
-                    } else {
-                        echo 'There is no language spoken at this event <br/>';
-                        return false;
-                    }
-                }else {
-                    echo "The request for selecting spoken languages could not
-					be prepared. <br/>";
+                // look for all languages spoken
+                $languages = Language::select_languages_spoken ($result_row['event_id']);                                            
+                // Look for all event hosters
+                $holders_ids = Event::select_holders_ids($result_row['event_id']);
+                if ((empty($languages)) || (empty($holders_ids))) {
+                    echo 'Impossible to retrieve datas for event holded by ' . $this->_user_id;
                     return false;
-                }
+                }                
                 // bundle all input parameters
                 $parameters = array ('event_id' => intval($result_row['event_id']),
-				'event_name' => html_entity_decode($result_row['event_name']), 
-				'event_address' => html_entity_decode($result_row['event_address']),
-				'event_zipcode' => html_entity_decode($result_row['event_zipcode']), 
-				'event_city_name' => html_entity_decode($result_row['event_city_name']), 
-				'event_country_name' => html_entity_decode($result_row['event_country_name']), 
-				'event_type' => html_entity_decode($result_row['event_type']), 
-				'event_starting_date' => html_entity_decode($result_row['event_starting_date']),
-		    	'event_ending_date'=> html_entity_decode($result_row['event_ending_date']), 
-		    	'event_max_nb_participants' => intval($result_row['event_max_nb_of_participants']), 
-		    	'event_holder_id' => intval($result_row['event_holder_id']), 
-		    	'event_description' => html_entity_decode( $result_row['event_description']),
-				'event_languages' => $languages);
-                // create new object event with input parameters
+        		'event_name' => html_entity_decode($result_row['event_name']), 
+        		'event_address' => html_entity_decode($result_row['event_address']),
+        		'event_zipcode' => html_entity_decode($result_row['event_zipcode']), 
+        		'event_city_name' => html_entity_decode($result_row['event_city_name']), 
+        		'event_country_name' => html_entity_decode($result_row['event_country_name']), 
+        		'event_type' => html_entity_decode($result_row['event_type']),
+                'event_holders_ids' => $holders_ids,
+        		'event_starting_date' => html_entity_decode($result_row['event_starting_date']),
+            	'event_ending_date'=> html_entity_decode($result_row['event_ending_date']), 
+            	'event_max_nb_participants' => intval($result_row['event_max_nb_of_participants']), 
+            	'event_description' => html_entity_decode( $result_row['event_description']),
+        		'event_languages' => $languages);
+                
+                //TODO add a try/catch here
+                // create new object event with input parameters    
                 $event = new Event ($parameters);
                 if (!empty($event)) {
                     // create an array of event objects
                     array_push ($events, $event);
+                }
+                else {
+                    echo 'The request to get events of user ' . $this->_user_id. 'failed';
+                    return false;
                 }
             }
             // return the array of events objects;

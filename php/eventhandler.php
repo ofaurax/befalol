@@ -12,7 +12,7 @@ require_once ('basicerrorhandling.php');
  * 'type' => string,
  * 'starting_date' => date,
  * 'ending_date' => date,
- * 'holder_id' => Member,
+ * 'holders_ids' => Member,
  * 'max_nb_participants' => integer,
  * 'Participants' => array (UserX, UserY, UserW,..)
  * 'languages' => string or array of strings,
@@ -29,7 +29,7 @@ Class Event {
     protected $_type = '';
     protected $_starting_date = '';
     protected $_ending_date = '';
-    protected $_holder_id = '';
+    protected $_holders_ids = array();
     protected $_max_nb_participants = 0;
     protected $_participants = array();
     protected $_languages = array();
@@ -76,8 +76,8 @@ Class Event {
                     case 'event_ending_date':
                         $this->set_ending_date ($value);
                         break;
-                    case 'event_holder_id':
-                        $this->set_holder_id ($value);
+                    case 'event_holders_ids':
+                        $this->set_holders_ids ($value);
                         break;
                     case 'event_max_nb_participants':
                         $this->set_max_nb_participants ($value);
@@ -112,7 +112,7 @@ Class Event {
         $this->_parameters_list = array ('event_name', 'event_address',
 		'event_zipcode', 'event_city_name', 'event_country_name', 'event_type',
 		'event_starting_date', 'event_ending_date', 'event_max_nb_participants',
-		'event_holder_id', 'event_languages', 'event_description');
+		'event_holders_ids', 'event_languages', 'event_description');
         return true;
     }
 
@@ -229,6 +229,10 @@ Class Event {
             .$this->_event_city_name.', '
             .$this->_event_country_name);
         } else {
+            echo $this->_event_address.'<br/>';
+            echo $this->_event_city_name.'<br/>';
+            echo $this->_event_zipcode.'<br/>';
+            echo $this->_event_country_name.'<br/>';
             trigger_error('One of the location parameters is empty', E_USER_ERROR);
             return E_USER_ERROR;
         }
@@ -329,29 +333,60 @@ Class Event {
     /**
      *
      * Set the holder id parameter
-     * @param integer $holder_id
+     * @param integer $holders_ids
      */
-    protected  function set_holder_id($holder_id) {
-        if (!empty($holder_id) && is_int($holder_id)) {
-            $this->_holder_id = $holder_id;
-            return False;
-        } else {
-            trigger_error('The holder id parameter of the '.get_class($this)
-            .' must be an integer', E_USER_ERROR);
+    protected  function set_holders_ids($id_list) {
+        $participant = '';
+        // if participants_list does not exist
+        if (!$id_list) {
+            trigger_error("The participants parameter of the '.get_class($this)
+            .' must either be a list of strings or a string", E_USER_ERROR);
             return E_USER_ERROR;
+        }
+        // but if Participantlist exists and it's an array, treat it like an array
+        elseif (is_array($id_list)) {
+            foreach ($id_list as $id) {
+                if (is_int($id)) {
+                    array_push ($this->_holders_ids, $id);
+                } else {
+                    echo $id;
+                    trigger_error('The id parameter of the '. get_class($this)
+                    .' must either be a integer', E_USER_ERROR);
+                    return E_USER_ERROR;
+                }
+            }
+            return FALSE;
+        }
+        // and if it's not an array, treat it like it's not
+        else {
+            $id = $id_list;
+            if (is_int($id)) {
+                array_push ($this->_holders_ids, $id);
+                return False;
+            } else {
+                trigger_error('The id parameter of the '.get_class($this)
+                    .' must either be an integer', E_USER_ERROR);
+                return E_USER_ERROR;
+            }
         }
     }
 
+    
     /**
      *
-     * Get the holder id parameter
+     * Get the holders ids list
      */
-    public  function get_holder_id () {
-        if ($this->_holder_id && is_int($this->_holder_id)) {
-            return $this->_holder_id;
+    public  function get_holders_ids () {
+        if (empty($this->_holders_ids)) {
+            return False;
         } else {
-            trigger_error('The holder parameter of the '.get_class($this)
-            .' should have been an integer', E_USER_ERROR);
+            return $this->_holders_ids;
+        }
+        if ($this->_holders_ids && is_int($this->_holders_ids)) {
+            return $this->_holders_ids;
+        } else {
+            trigger_error('The id parameter of the '.get_class($this)
+            .' must be an integer', E_USER_ERROR);
             return E_USER_ERROR;
         }
     }
@@ -392,7 +427,6 @@ Class Event {
      * @param array of participants $participants_list
      */
     public  function set_participants ($participants_list) {
-        $participant = '';
         // if participants_list does not exist
         if (!$participants_list) {
             trigger_error('The participants parameter of the '.get_class($this)
@@ -435,7 +469,7 @@ Class Event {
      * Get members registered to the event
      */
     public  function get_participants () {
-        if ($this->_participants == 0) {
+        if (empty($this->_participants)) {
             return False;
         } else {
             return $this->_participants;
@@ -535,9 +569,18 @@ Class Event {
         $r .= 'Type: '. $this->get_type() . '<br />';
         $r .= 'starting_date: '. $this->get_starting_date() . '<br />';
         $r .= 'ending_date: '. $this->get_ending_date() . '<br />';
-        $r .= 'holder_id: '. $this->get_holder_id()->get_name() . '<br />';
         $r .= 'max_nb_participants: '. $this->get_max_nb_participants() . '<br />';
         $r .= 'description: '. $this->get_description() . '<br />';
+        $r .= 'holders_ids: ';
+        if (is_array ($this->get_holders_ids())) {
+            foreach ($this->get_holders_ids() as $holder_id)	{
+                $r .= $holder_id . ', ';
+            }
+        } else {
+            $r .= $this->get_holders_ids() . ', ';
+        }
+        $r.= '<br />';
+        
         $r .= 'participants: ';
         if (is_array ($this->get_participants())) {
             foreach ($this->get_participants() as $Participant)	{
@@ -615,19 +658,20 @@ Class Event {
         $event_type = htmlentities($this->_type, ENT_QUOTES);
         $event_checkin = htmlentities($this->_starting_date, ENT_QUOTES);
         $event_checkout = htmlentities($this->_ending_date, ENT_QUOTES);
-        $event_holder_id = htmlentities($this->_holder_id, ENT_QUOTES);
         $event_max_nb_participants = $this->_max_nb_participants;
         $event_description = htmlentities($this->_description, ENT_QUOTES);
         $event_address = htmlentities($this->_event_address, ENT_QUOTES);
         $event_zipcode = htmlentities($this->_event_zipcode, ENT_QUOTES);
         $event_city_name = htmlentities($this->_event_city_name, ENT_QUOTES);
+        /* uncomment the line below will create key constraint pb
+        $event_country_name = htmlentities( $this->_event_country_name, ENT_QUOTES);*/
         $event_country_name = $this->_event_country_name;
         
         
-        $sql = 'INSERT INTO events (event_name, event_type, event_holder_id,
-		event_max_nb_of_participants, event_starting_date, event_ending_date, 
+        $sql = 'INSERT INTO events (event_name, event_type, 
+        event_max_nb_of_participants, event_starting_date, event_ending_date, 
 		event_description, event_address, event_zipcode, event_city_name, 
-		event_country_name) VALUES(:event_name, :event_type, :event_holder_id, 
+		event_country_name) VALUES(:event_name, :event_type, 
 		:event_max_nb_participants, :event_starting_date, :event_ending_date, 
 		:event_description, :event_address, :event_zipcode, :event_city_name, 
 		:event_country_name)';
@@ -637,7 +681,6 @@ Class Event {
             $query->bindValue(':event_type', $event_type, PDO::PARAM_STR);
             $query->bindValue(':event_starting_date', $event_checkin, PDO::PARAM_STR);
             $query->bindValue(':event_ending_date', $event_checkout, PDO::PARAM_STR);
-            $query->bindValue(':event_holder_id', $event_holder_id, PDO::PARAM_INT);
             $query->bindValue(':event_max_nb_participants',
             $event_max_nb_participants, PDO::PARAM_INT);
             $query->bindValue(':event_description', $event_description, PDO::PARAM_STR);
@@ -653,11 +696,17 @@ Class Event {
                 $event_id = intval($dbhandler->_db_connection->lastInsertId());
                 if ($this->set_id($event_id)) {
                     if ($this->insert_spoken_languages()) {
-                        echo "$event_name has been successfuly inserted in the
-						'event' table. <br/>";
-                        return $event_id;
+                        if ($this->insert_event_holders()) {
+                            echo "$event_name has been successfuly inserted in the
+    						'event' table. <br/>";
+                            return $event_id;
+                        }else {
+                            //TODO remove what have been inserted;
+                            return false;
+                        }
                     }
                     else {
+                        //TODO remove what have been inserted;
                         return false;
                     }
                 }else {
@@ -669,7 +718,7 @@ Class Event {
 				'events' table. <br/>";
                 print_r ($query->errorInfo()).'<br/>';
                 print_r (array ($event_name, $event_type, $event_checkin, 
-                $event_checkout, $event_holder_id, $event_max_nb_participants, 
+                $event_checkout, $event_max_nb_participants, 
                 $event_description, $event_address, $event_zipcode, $event_city_name,
                 $event_country_name)).'<br/>';
                 return false;
@@ -694,6 +743,8 @@ Class Event {
         }
         $event_id = $this->_id;
         foreach ($this->_languages as $language) {
+            /* uncomment the line below will create key constraint pb
+            $language = htmlentities($language, ENT_QUOTES);*/
             $sql = 'INSERT INTO event_languages (event_id, language_name)
 			VALUES (:event_id, :language_name)';
             $query = $dbhandler->_db_connection->prepare($sql);
@@ -722,6 +773,51 @@ Class Event {
         }
         return true;
     }
+    
+    
+/**
+     *
+     * Insert a new event holder in the db return false
+     * if failure or true in case of success
+     */
+    protected function insert_event_holders () {
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        if (empty($dbhandler)) {
+            echo 'Impossible to initiate communication with database </br>';
+            return false;
+        }
+        $event_id = $this->_id;
+        foreach ($this->_holders_ids as $holder_id) {
+            $sql = 'INSERT INTO event_holders (event_id, user_id)
+			VALUES (:event_id, :holder_id)';
+            $query = $dbhandler->_db_connection->prepare($sql);
+            if ($query) {
+                $query->bindValue(':event_id', $event_id, PDO::PARAM_INT);
+                $query->bindValue(':holder_id', $holder_id, PDO::PARAM_INT);
+                // PDO's execute() gives back TRUE when successful,
+                // false when not
+                $registration_success_state = $query->execute();
+                if ($registration_success_state) {
+                    echo "User $holder_id has been successfuly inserted in the
+					'event_holders' table for the event id $event_id. <br/>";
+                } else {
+                    echo "User $holder_id failed to be inserted as an holder of
+                    the event id $event_id. <br/>";
+                    print_r ($query->errorInfo());
+                    echo '<br/>';
+                    return false;
+                }
+            } else {
+                echo "The database request for inserting User $holder_id
+				in the 'event_holders' table for the event id $event_id 
+				could not be prepared.<br/>";
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    
     
 	/**
 	 * 
@@ -807,6 +903,30 @@ Class Event {
     					be prepared. <br/>";
                         return false;
                     }
+                    // Retrieve event holders
+                    $sql = 'SELECT user_id FROM event_holders
+    					WHERE event_id = :event_id';
+                    $query = $dbhandler->_db_connection->prepare($sql);
+                    if ($query) {
+                        $query->bindValue(':event_id', $result_row['event_id'],
+                        PDO::PARAM_INT);
+                        $query->execute();
+                        $holders_res = $query->fetchall(PDO::FETCH_COLUMN);
+                        if ($holders_res) {
+                            $holders_ids = array();
+                            foreach ($holders_res as $key=>$value) {
+                                // as it is an integer, no need for decoding
+                                array_push ($holders_ids, intval($value));
+                            }
+                        } else {
+                            echo 'There is no holder for this event <br/>';
+                            return false;
+                        }
+                    }else {
+                        echo "The request for selecting event holders could not
+    					be prepared. <br/>";
+                        return false;
+                    }
                     $parameters = array ('event_id' => intval($result_row['event_id']),
     				'event_name' => html_entity_decode($result_row['event_name']), 
     				'event_address' => html_entity_decode($result_row['event_address']),
@@ -817,7 +937,7 @@ Class Event {
     				'event_starting_date' => html_entity_decode($result_row['event_starting_date']),
     		    	'event_ending_date'=> html_entity_decode($result_row['event_ending_date']), 
     		    	'event_max_nb_participants' => intval($result_row['event_max_nb_of_participants']), 
-    		    	'event_holder_id' => intval($result_row['event_holder_id']), 
+    		    	'event_holders_ids' => $holders_ids, 
     		    	'event_description' => html_entity_decode( $result_row['event_description']),
     				'event_languages' => $languages);
                     // create new object event with input parameters
@@ -839,9 +959,39 @@ Class Event {
         }
     }
 
+    
+	/**
+     *
+     * Select and return an array of all users holding specific event
+     */
+    static public function select_holders_ids ($event_id) {
+        // Get the database connection if it's not the case yet
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        if (empty($dbhandler)) {
+            echo 'Impossible to initiate communication with database </br>';
+            return false;
+        }
+        // Look for existing languages_name in the nationalities table
+        $sql = 'SELECT user_id FROM event_holders WHERE event_id = :event_id';
+        $query = $dbhandler->_db_connection->prepare($sql);
+        if ($query) {
+            $query->bindValue(':event_id', $event_id, PDO::PARAM_INT);
+            $query->execute();
+            $id_results = $query->fetchall();
+            $holders_ids = array ();
+            foreach($id_results as $id) {
+                array_push($holders_ids, intval($id['user_id']));
+            }
+            return $holders_ids;
+        }else {
+             echo "The database request for selecting event holders in the
+				'event_holders' table could not be prepared.<br/>";
+                 return false;
+        }                      
+    }
 
     public function display_event_information () {
-        $event_holder_id = $this->get_holder_id();
+        $event_holders_ids = $this->get_holders_ids();
         $event_name = utf8_decode($this->get_name());
         $event_type = $this->get_type();
         $event_starting_date = $this->get_starting_date();
@@ -865,11 +1015,12 @@ Class Event {
         $r .= display_row('Maximal number of participants:',
         $event_max_nb_participants);
         $r .= display_row('Languages spoken :',
-        display_dropdownlist('', $event_languages, 0));
+        display_dropdownlist('', $event_languages, 0, ''));
         $r .= display_row('Description:', $event_description);
         $r .= display_row('Participants:', display_dropdownlist('',
-        $event_participants, 0));
-        $r .= display_row('Holder id:', $event_holder_id);
+        $event_participants, 0,''));
+        $r .= display_row('Holder id:', display_dropdownlist('',
+        $event_holders_ids, 0,''));
         $r .= '<table/>';
         return $r;
     }

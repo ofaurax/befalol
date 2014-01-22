@@ -9,44 +9,13 @@ require_once('dbhandler.php');
 require_once('formhandler.php');
 require_once('userhandler.php');
 require_once('libraries/tools.php');
+require_once('menu.php');
 require_once('login.php');
 
 if(!empty($_SERVER ['DOCUMENT_ROOT'])) {
     define ('_SERVER_DIR', $_SERVER ['DOCUMENT_ROOT']);
     define ('_INI_FILE_DIR', _SERVER_DIR."/befalol/database/config.ini" );
 }
-
 session_start();
-
-?>
-<!DOCTYPE html>
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="css/style.css">
-<title>Befalol Index</title>
-</head>
-<h1>Welcome to Befalol!</h1>
-<p>
-<?php echo date(DATE_RFC2822);  ?>
-</p>
-
-<?php
-    /*$geocoder = new \Geocoder\Geocoder();
-     $adapter  = new \Geocoder\HttpAdapter\BuzzHttpAdapter();
-     $chain = new \Geocoder\Provider\ChainProvider(array(
-     new \Geocoder\Provider\FreeGeoIpProvider($adapter),
-     new \Geocoder\Provider\HostIpProvider($adapter),
-     new \Geocoder\Provider\GoogleMapsProvider($adapter, 'fr_FR', 'France', true),
-     new \Geocoder\Provider\BingMapsProvider($adapter, '<API_KEY>'),
-    
-     ));
-     $geocoder->registerProvider($chain);
-    
-     try {
-         $geocode = $geocoder->geocode('78.228.245.112');
-         var_export($geocode);
-     } catch (Exception $e) {
-     echo $e->getMessage();
-     }*/
-     $login = new Login();
+$login = new Login();
 ?>
