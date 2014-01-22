@@ -3,7 +3,7 @@
 // error reporting config
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-require_once ('./php/dbhandler.php');
+require_once ('./php/libraries/dbhandler.php');
 //require_once ('./vendor/autoload.php');
 
 define ('_SERVER_DIR', getcwd());

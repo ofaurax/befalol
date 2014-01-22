@@ -1,9 +1,9 @@
 <?php 
 
-require_once ('./php/eventhandler.php');
-require_once ('./php/geographyhandler.php');
-require_once ('./php/dbhandler.php');
-require_once ('./php/userhandler.php');
+require_once ('./php/libraries/eventhandler.php');
+require_once ('./php/libraries/geographyhandler.php');
+require_once ('./php/libraries/dbhandler.php');
+require_once ('./php/libraries/userhandler.php');
 require_once ('./php/libraries/tools.php');
 require_once ('./php/libraries/password_compatibility_library.php');
 

@@ -220,12 +220,14 @@ class Login
      */
     private function doLogout()
     {
-        $user_name = $_SESSION['user']->get_string_attribute('user_name');
-        $_SESSION = null;
-        session_unset();
-        session_destroy();
-        $this->user_is_logged_in = false;
-        $this->feedback = '<p id="goodbye">See you soon ' . $user_name .'</p>' ;
+        if (isset($_SESSION['user'])) {
+            $user_name = $_SESSION['user']->get_string_attribute('user_name');
+            $_SESSION = null;
+            session_unset();
+            session_destroy();
+            $this->user_is_logged_in = false;
+            $this->feedback = '<p id="goodbye">See you soon ' . $user_name .'</p>' ;
+        }
     }
 
     /**
@@ -777,11 +779,9 @@ class Login
         echo '<div id="content">'; 
         echo 'Hello ' . $_SESSION['user']->get_string_attribute('user_name') . ', you are logged in.<br/><br/>';
         echo '<a href="/befalol/php/userpage.php">Profile Page</a>'.'<br/>';
-        echo '<a href=/befalol/php/event.php">Post a new Event</a>'.'<br/>';
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeyourevents">List of your events</a>'.'<br/>';
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeallevents">List of all events</a>'.'<br/>';
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeallusers">List of members</a>'.'<br/>';
-        echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=logout">Log out</a><br/>';
+        echo '<a href="/befalol/php/event.php">Post an Event</a>'.'<br/>';
+        echo '<a href="/befalol/php/events.php">List of all events</a>'.'<br/>';
+        echo '<a href="/befalol/index.php?action=logout">Log out</a><br/>';
         echo '</div>'; //end content
         echo '</div>'; //end container
         echo '</body>';

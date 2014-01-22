@@ -2,13 +2,12 @@
     ini_set('display_errors', 1);
     error_reporting(E_ALL);
     set_include_path('./php/:'.get_include_path());
-    require_once('eventhandler.php');
-    require_once('geographyhandler.php');
-    require_once('dbhandler.php');
-    require_once('formhandler.php');
-    require_once('userhandler.php');
+    require_once('libraries/eventhandler.php');
+    require_once('libraries/geographyhandler.php');
+    require_once('libraries/dbhandler.php');
+    require_once('libraries/userhandler.php');
     require_once('libraries/tools.php');
-    require_once('menu.php');
+    require_once('libraries/htmlhandler.php');
     require_once('login.php');
     
     if(!empty($_SERVER ['DOCUMENT_ROOT'])) {
@@ -84,7 +83,6 @@
     $r .= '<a href="/befalol/php/userpage.php">Profile Page</a>'.'<br/>';
     $r .= '<a href="/befalol/php/event.php">Post an Event</a>'.'<br/>';
     $r .= '<a href="/befalol/php/events.php">List of all events</a>'.'<br/>';
-    $r .= '<a href="' . $_SERVER['SCRIPT_NAME'] . '?action=seeallusers">List of members</a>'.'<br/>';
     $r .= '<a href="/befalol/index.php?action=logout">Log out</a><br/>';
 
 ?>
@@ -92,7 +90,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<link rel="stylesheet" type="text/css" href="../css/style2.css">
+	<link rel="stylesheet" type="text/css" href="../css/backstyle.css">
 	<title>Befalol Index</title>
 </head>
 	<body>
@@ -103,4 +101,4 @@
     		</div> <!-- end content -->
     	</div> <!-- end container -->
 	</body>
-	<?php  //echo get_footer();?>
+	<?php  echo get_footer();?>

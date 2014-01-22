@@ -1,6 +1,6 @@
 <?php 
 
-require_once ('./php/eventhandler.php');
+require_once ('./php/libraries/eventhandler.php');
 require_once ('./php/libraries/tools.php');
 require_once 'vendor/autoload.php';
 
