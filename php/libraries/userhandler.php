@@ -14,6 +14,7 @@ Class User {
     protected $_user_birthday = '';
     protected $_user_nationality = '';
     protected $_user_firstname = '';
+    protected $_user_gender = '';
     protected $_user_lastname = '';
     protected $_user_password_hash = '';
     protected $_db_connection = NULL;
@@ -36,6 +37,7 @@ Class User {
                     case 'user_lastname':
                     case 'user_firstname':
                     case 'user_password_hash':
+                    case 'user_gender':
                         $errno = $this->set_string_attribute 
                                             (array($key => $value)) && $errno;
                         break;
@@ -178,6 +180,7 @@ Class User {
         $user_nationality = $this->_user_nationality;
         $user_name = htmlentities($this->_user_name, ENT_QUOTES);
         $user_email = htmlentities($this->_user_email, ENT_QUOTES);
+        $user_gender = htmlentities($this->_user_gender, ENT_QUOTES);
         $user_lastname = htmlentities($this->_user_lastname, ENT_QUOTES | ENT_SUBSTITUTE, $encoding = 'UTF-8');
         $user_firstname = htmlentities($this->_user_firstname, ENT_QUOTES | ENT_SUBSTITUTE, $encoding = 'UTF-8');
         $user_birthday = htmlentities($this->_user_birthday, ENT_QUOTES);
@@ -186,8 +189,8 @@ Class User {
         $sql = 'UPDATE users
 		SET user_email = :user_email, user_lastname = :user_lastname, 
 		user_firstname = :user_firstname, user_nationality = :user_nationality,
-		user_birthday = :user_birthday, user_password_hash = :user_password_hash 
-		WHERE user_id = :user_id AND user_name = :user_name';
+		user_birthday = :user_birthday, user_password_hash = :user_password_hash,
+		user_gender = :user_gender WHERE user_id = :user_id AND user_name = :user_name';
         $query = $dbhandler->_db_connection->prepare($sql);
         if ($query) {
             $query->bindValue(':user_email', $user_email, PDO::PARAM_STR);
@@ -197,6 +200,8 @@ Class User {
             $query->bindValue(':user_birthday', $user_birthday, PDO::PARAM_STR);
             $query->bindValue(':user_lastname', $user_lastname, PDO::PARAM_STR);
             $query->bindValue(':user_firstname', $user_firstname,
+            PDO::PARAM_STR);
+            $query->bindValue(':user_gender', $user_gender,
             PDO::PARAM_STR);
             $query->bindValue(':user_password_hash', $user_password_hash, 
             PDO::PARAM_STR);
@@ -211,7 +216,7 @@ Class User {
                 echo "$user_name failed to be updated. <br/>";
                 print_r ($query->errorInfo());
                 print_r (array($user_id, $user_nationality, $user_name, $user_email, $user_lastname,
-                $user_firstname, $user_birthday, $user_password_hash));
+                $user_firstname, $user_birthday, $user_password_hash, $user_gender));
                 return false;
             }
         } else {
@@ -403,6 +408,7 @@ Class User {
 				'user_nationality' => $results['user_nationality'],
 				'user_lastname' => html_entity_decode($results['user_lastname']),
 				'user_firstname' => html_entity_decode($results['user_firstname']),
+                'user_gender' => html_entity_decode($results['user_gender']),
                 'user_password_hash' => $results['user_password_hash']);
                 $user = new User ($parameters);
                 return $user;
@@ -414,6 +420,80 @@ Class User {
         } else {
             echo "The database request for selecting users $user_id in the
 			'users'	table could not be prepared.<br/>";
+            return false;
+        }
+    }
+    
+	/**
+	 * 
+	 * Insert a gender type  in the db return false
+     * if failure or true in case of success
+	 * @param string $gender_type
+	 */
+    public static function insert_gender_type ($gender_type) {
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        if (empty($dbhandler)) {
+            echo 'Impossible to initiate communication with database </br>';
+            return false;
+        }
+        $gender_type = htmlentities($gender_type);
+        $sql = 'INSERT INTO genders (gender_type)
+		VALUES (:gender_type)';
+        $query = $dbhandler->_db_connection->prepare($sql);
+        if ($query) {
+            $query->bindValue(':gender_type', $gender_type, PDO::PARAM_STR);
+            // PDO's execute() gives back TRUE when successful,
+            // false when not
+            $registration_success_state = $query->execute();
+            if ($registration_success_state) {
+                echo "$gender_type has been successfuly inserted in the
+				'genders' table. <br/>";
+            } else {
+                echo "$gender_type failed to be inserted in the
+				'genders' table. <br/>";
+                print_r ($query->errorInfo());
+                echo '<br/>';
+                return false;
+            }
+        } else {
+            echo "The database request for inserting $gender_type
+			in the 'genders' table could not be prepared.<br/>";
+            return false;
+        }
+        return true;
+    }
+    
+    
+     /**
+     *
+     * Select all gender types in database and return them as an array
+     */
+    static public function get_all_gender_types(){
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        if (empty($dbhandler)) {
+            echo 'Impossible to initiate communication with database </br>';
+            return false;
+        }
+
+        // Look for all event types in the event types table
+        $sql = 'SELECT * FROM genders';
+        $query = $dbhandler->_db_connection->prepare($sql);
+        if ($query) {
+            $query->execute();
+            $results = $query->fetchall(PDO::FETCH_COLUMN);
+            if ($results) {
+                $gender_types = array();
+                foreach ($results as $key=>$value) {
+                    array_push ($gender_types, html_entity_decode($value));
+                }
+                return $gender_types;
+            } else {
+                echo "There is no gender types in the 'genders' table.<br/>";
+                return false;
+            }
+        } else {
+            echo "The database request for selecting gender types in the
+			'genders' table could not be prepared.<br/>";
             return false;
         }
     }

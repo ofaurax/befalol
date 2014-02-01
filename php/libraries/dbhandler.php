@@ -158,6 +158,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
         $errno = $this->create_event_languages_table () && $errno;
         $errno = $this->create_users_table () && $errno;
         $errno = $this->create_events_table () && $errno;
+        $errno = $this->create_genders_table  () && $errno;
         $errno = $this->create_event_participants_table () && $errno;
         $errno = $this->create_event_holders_table () && $errno;
         $errno = $this->create_visited_countries_table () && $errno;
@@ -186,6 +187,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
         $errno = $this->delete_table ('event_languages') && $errno;
         $errno = $this->delete_table ('users') && $errno;
         $errno = $this->delete_table ('events') && $errno;
+        $errno = $this->delete_table ('genders') && $errno;
         $errno = $this->delete_table ('event_participants') && $errno;
         $errno = $this->delete_table ('event_holders') && $errno;
         $errno = $this->delete_table ('visited_countries_by_users') && $errno;
@@ -438,6 +440,8 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
 				user_nationality TEXT,
 				user_lastname TEXT,
 				user_firstname TEXT,
+				user_gender TEXT,
+				FOREIGN KEY (user_gender) REFERENCES genders (gender_type),
 				FOREIGN KEY (user_nationality) REFERENCES nationalities (nationality_name));
 				CREATE UNIQUE INDEX user_name_UNIQUE ON users (user_name);';
         	
@@ -475,6 +479,21 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
         // (if table does not already exist)
         $sql = 'CREATE TABLE IF NOT EXISTS nationalities (
 				nationality_name TEXT NOT NULL PRIMARY KEY
+				);';
+        	
+        // prepare and execute the sqlite request
+        // return false if no connection with db
+        return $this->prepare_and_execute_query ($sql);
+   }
+   
+ 	/**
+     * Create table for genders
+     */
+    function create_genders_table () {
+        // create new empty table inside the database
+        // (if table does not already exist)
+        $sql = 'CREATE TABLE IF NOT EXISTS genders (
+				gender_type TEXT NOT NULL PRIMARY KEY
 				);';
         	
         // prepare and execute the sqlite request

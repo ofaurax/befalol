@@ -23,7 +23,9 @@
         
         $nationalities = NULL;
         $nationalities = Nationality::select_all_nationalities();
-        // if the member is not the user then we reading only on the user informatio
+        $genders = NULL;
+        $genders = User::get_all_gender_types();
+        // if the member is not the user then we reading only on the user information
         // no form
         if (isset($_GET['id'])) {
             try {
@@ -48,6 +50,7 @@
                 $dump_r .= '<caption data-icon="u"> Profile Information </caption>';
                 $dump_r .= display_row('Birthday:', $member->get_string_attribute('user_birthday'));
                 $dump_r .= display_row('Nationality:', $member->get_string_attribute('user_nationality'));
+                $dump_r .= display_row('Gender:', $member->get_string_attribute('user_gender'));
                 $dump_r .= '</table>';                       
                 
                 // add the form to the existing html stream
@@ -65,6 +68,7 @@
             $user_firstname = utf8_decode($_SESSION['user']->get_string_attribute('user_firstname'));
             $user_birthday = $_SESSION['user']->get_string_attribute('user_birthday');
             $user_nationality = $_SESSION['user']->get_string_attribute('user_nationality');
+            $user_gender = $_SESSION['user']->get_string_attribute('user_gender');
             
             //we check if forms have been sent
             if (isset($_POST['changeuserinfo'])) {
@@ -77,6 +81,7 @@
                     $user_firstname = utf8_decode($_SESSION['user']->get_string_attribute('user_firstname'));
                     $user_birthday = $_SESSION['user']->get_string_attribute('user_birthday');
                     $user_nationality = $_SESSION['user']->get_string_attribute('user_nationality');
+                    $user_gender = $_SESSION['user']->get_string_attribute('user_gender');
                 // and if it is not, signal the user;
                 }else {            
                     /*TODO  we should refill the form with datas*/
@@ -91,7 +96,6 @@
                 }
             }
                
-            
             // Build the page
             // Profile picture  and left pannel
             $r .= get_div('left_panel', '<div id="picture_frame"> <img src="../images/avatar.jpg"
@@ -124,6 +128,9 @@
                 $dump_r .= display_row('Nationality:', display_dropdownlist
                 (array('name' => 'user_nationality', 'multiple' => FALSE,
                 	'required' => False) , $nationalities, $user_nationality, 'nationalities'));
+                $dump_r .= display_row('Gender:', display_dropdownlist
+                (array('name' => 'user_gender', 'multiple' => FALSE,
+                	'required' => False) , $genders, $user_gender, 'genders'));
                 $dump_r .= display_row('', '<input type="submit"  name="changeuserinfo" value="Save" />');
                 $dump_r .= '</table>';
                 $dump_r .= '</form>';

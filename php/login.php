@@ -295,6 +295,7 @@ class Login
                 	'user_nationality' => html_entity_decode($result_row->user_nationality),
                 	'user_lastname' => html_entity_decode($result_row->user_lastname),
                 	'user_firstname' => html_entity_decode($result_row->user_firstname),
+                	'user_gender' => html_entity_decode($result_row->user_gender),
                 	'user_password_hash' => $result_row->user_password_hash);
                 $user = New User ($parameters);
                 $_SESSION['user'] = $user;
@@ -810,6 +811,7 @@ class Login
     && check_no_digit($_POST['user_firstname'], false)
     && strlen($_POST['user_firstname']) <= 64
     && check_no_digit($_POST['user_nationality'], false)
+    && check_no_digit($_POST['user_gender'], false)
     && check_and_valid_date($_POST['user_birthday'], False)        
     && (!is_it_futur ($_POST['user_birthday']))) {
         $feedback['status'] = true;
@@ -838,6 +840,8 @@ class Login
         if you were not born :).";
     } elseif (!check_no_digit($_POST['user_nationality'], false)){
         $feedback['msg'] = "Your nationality doesn't match the field requirements";
+    } elseif (!check_no_digit($_POST['user_gender'], false)){
+        $feedback['msg'] = "Your gender is incorrect";
     } else {
         $feedback['msg'] = "An unknown error occurred.";
     }
@@ -870,6 +874,8 @@ class Login
             FILTER_SANITIZE_STRING));
             $user_firstname = utf8_encode(filter_var($_POST['user_firstname'], 
             FILTER_SANITIZE_STRING));
+            $user_gender = utf8_encode(filter_var($_POST['user_gender'], 
+            FILTER_SANITIZE_STRING));
             $user_password_hash = 
                 $_SESSION['user']->get_string_attribute('user_password_hash');
            
@@ -890,7 +896,8 @@ class Login
 				'user_nationality' => $user_nationality,
 				'user_lastname' => $user_lastname,
 				'user_firstname' => $user_firstname,
-                'user_password_hash' => $user_password_hash);
+                'user_password_hash' => $user_password_hash,
+            	'user_gender' => $user_gender);
             $user = new User ($parameters);
             	
             // save new datas in database;
@@ -969,6 +976,7 @@ class Login
             $user_nationality = utf8_encode($_SESSION['user']->get_string_attribute('user_nationality'));
             $user_lastname = utf8_encode($_SESSION['user']->get_string_attribute('user_lastname'));
             $user_firstname = utf8_encode($_SESSION['user']->get_string_attribute('user_firstname'));
+            $user_gender = utf8_encode($_SESSION['user']->get_string_attribute('user_gender'));
             $user_password_hash = password_hash($_POST['user_password_new'],
                  PASSWORD_DEFAULT);          
             	
@@ -981,7 +989,8 @@ class Login
 				'user_nationality' => $user_nationality,
 				'user_lastname' => $user_lastname,
 				'user_firstname' => $user_firstname,
-                'user_password_hash' => $user_password_hash);
+                'user_password_hash' => $user_password_hash,
+            	'user_gender' => $user_gender);
             $user = new User ($parameters);
             	
             // save new datas in database;
