@@ -27,7 +27,7 @@
         $genders = User::get_all_gender_types();
         // if the member is not the user then we reading only on the user information
         // no form
-        if (isset($_GET['id'])) {
+        if (isset($_GET['id']) && ($_SESSION['user']->get_user_id() != $_GET['id'])) {
             try {
                 $member_id = $_GET["id"];
                 $member = User::get_user_from_id($member_id);
@@ -169,6 +169,7 @@
 
     $r .= '<a href="/befalol/php/userpage.php">Profile Page</a>'.'<br/>';
     $r .= '<a href="/befalol/php/eventposting.php">Post an Event</a>'.'<br/>';
+    $r .= '<a href="/befalol/php/myevents.php">My events</a>'.'<br/>';
     $r .= '<a href="/befalol/php/events.php">List of all events</a>'.'<br/>';
     $r .= '<a href="/befalol/index.php?action=logout">Log out</a><br/>';
 

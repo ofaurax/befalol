@@ -99,6 +99,7 @@
     
     $r .= '<a href="/befalol/php/userpage.php">Profile Page</a>'.'<br/>';
     $r .= '<a href="/befalol/php/event.php">Post an Event</a>'.'<br/>';
+    $r .= '<a href="/befalol/php/myevents.php">My events</a>'.'<br/>';
     $r .= '<a href="/befalol/php/events.php">List of all events</a>'.'<br/>';
     $r .= '<a href="/befalol/index.php?action=logout">Log out</a><br/>';
 

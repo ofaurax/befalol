@@ -781,6 +781,7 @@ class Login
         echo 'Hello ' . $_SESSION['user']->get_string_attribute('user_name') . ', you are logged in.<br/><br/>';
         echo '<a href="/befalol/php/userpage.php">Profile Page</a>'.'<br/>';
         echo '<a href="/befalol/php/eventposting.php">Post an Event</a>'.'<br/>';
+        echo '<a href="/befalol/php/myevents.php">My events</a>'.'<br/>';
         echo '<a href="/befalol/php/events.php">List of all events</a>'.'<br/>';
         echo '<a href="/befalol/index.php?action=logout">Log out</a><br/>';
         echo '</div>'; //end content
