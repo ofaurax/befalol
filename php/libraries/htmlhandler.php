@@ -1,11 +1,11 @@
 <?php
 
-function display_row ($RowTitle, $RowHTMLInput)
+function display_row ($RowTitle, $row_HTML_input)
 {
     $r = '';
     $r .= '<tr>';
     $r .= '<td class="rowtitle">'.$RowTitle .'</td>' ;
-    $r .= '<td class="rowinput">'.$RowHTMLInput .'</td>' ;
+    $r .= '<td class="rowinput">'.$row_HTML_input .'</td>' ;
     $r .= '<tr>';
     return $r;
 }
@@ -40,12 +40,12 @@ function display_col ($Inputs)
     return $r;
 }
 
-function display_advanced_row ($RowHTMLInputs)
+function display_advanced_row ($row_HTML_inputs)
 {
     $r = '';
     $r .= '<tr>';
-    foreach ($RowHTMLInputs as $RowHTMLInput) {
-        $r .= '<td>'.$RowHTMLInput .'</td>' ;
+    foreach ($row_HTML_inputs as $row_HTML_input) {
+        $r .= '<td>'.$row_HTML_input .'</td>' ;
     }
     $r .= '</tr>';
     return $r;
@@ -56,6 +56,18 @@ function display_advanced_tr_row($RowHTMLInputs) {
     $r .= '<tr>';
     foreach ($RowHTMLInputs as $RowHTMLInput) {
         $r .= '<th>'.$RowHTMLInput .'</th>' ;
+    }
+    $r .= '</tr>';
+    return $r;
+}
+
+function display_advanced_row_and_title ($title, $row_HTML_inputs)
+{
+    $r = '';
+    $r .= '<tr>';
+    $r .= '<td>'.$title .'</td>' ;
+    foreach ($row_HTML_inputs as $row_HTML_input) {
+        $r .= '<td>'.$row_HTML_input .'</td>' ;
     }
     $r .= '</tr>';
     return $r;

@@ -279,7 +279,7 @@ Class User {
      *
      * Select and return an array of all user names exisisting in the table
      */
-    static public function select_all_user () {
+    static public function select_all_user_names () {
         // Get the database connection if it's not the case yet
         $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
         if (empty($dbhandler)) {
@@ -373,5 +373,50 @@ Class User {
             return false;
         }
     }
+    
+	/**
+	 * 
+	 *  Select user from user_id. Return an user object
+	 * @param integer $user_id
+	 */
+    static public function get_user_from_id ($user_id) {
+        // Get the database connection if it's not the case yet
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        if (empty($dbhandler)) {
+            echo 'Impossible to initiate communication with database </br>';
+            return false;
+        }
+        // Look for existing nationality_name in the nationalities table
+        $sql = 'SELECT * FROM users WHERE user_id=:user_id';
+        $query = $dbhandler->_db_connection->prepare($sql);
+        if ($query) {
+            $query->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+            $query->execute();
+            $results = $query->fetchall();
+            if ($results) {
+                $results = $results[0];
+                //Create an user object with it
+                $parameters =  array ('user_id'=>intval($results['user_id']),
+				'user_name' => html_entity_decode($results['user_name']),
+				'user_email' => html_entity_decode($results['user_email']),
+				'user_birthday' => html_entity_decode($results['user_birthday']),
+				'user_nationality' => $results['user_nationality'],
+				'user_lastname' => html_entity_decode($results['user_lastname']),
+				'user_firstname' => html_entity_decode($results['user_firstname']),
+                'user_password_hash' => $results['user_password_hash']);
+                $user = new User ($parameters);
+                return $user;
+            } else {
+                echo "There is no users with the id $user_id in the 'users' 
+                	table.<br/>";
+                return false;
+            }
+        } else {
+            echo "The database request for selecting users $user_id in the
+			'users'	table could not be prepared.<br/>";
+            return false;
+        }
+    }
+    
 }
 ?>

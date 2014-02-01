@@ -569,7 +569,7 @@ class Login
             // we ll get all the events informations in order to retrieve information
             // of the one we want to display    
             } else { 
-                $events = Event::select_all_events();
+                $events = Event::get_all_events();
                 foreach ($events as $event) {
                     if ($event->get_id() === $_GET['id']) {
                         echo $event->display_event_information();
@@ -596,7 +596,7 @@ class Login
             $r = '<h2>Members</h2>';
             //build it
             $users = NULL;
-            $users = User::select_all_user();
+            $users = User::select_all_user_names();
             if (!empty($users)) {
                 $r .= '<table>';
                 foreach ($users as $user) {
@@ -624,7 +624,7 @@ class Login
         if (isset($_SESSION['user'])) {
             $r = '<h2>Events</h2>';
             //retrieve the user from session
-            $events = Event::select_all_events();
+            $events = Event::get_all_events();
             $_SESSION['events'] = $events;
             if (!empty($events)) {
                 $event_types = Event::select_all_event_types();
@@ -779,7 +779,7 @@ class Login
         echo '<div id="content">'; 
         echo 'Hello ' . $_SESSION['user']->get_string_attribute('user_name') . ', you are logged in.<br/><br/>';
         echo '<a href="/befalol/php/userpage.php">Profile Page</a>'.'<br/>';
-        echo '<a href="/befalol/php/event.php">Post an Event</a>'.'<br/>';
+        echo '<a href="/befalol/php/eventposting.php">Post an Event</a>'.'<br/>';
         echo '<a href="/befalol/php/events.php">List of all events</a>'.'<br/>';
         echo '<a href="/befalol/index.php?action=logout">Log out</a><br/>';
         echo '</div>'; //end content

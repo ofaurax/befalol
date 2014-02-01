@@ -36,12 +36,11 @@
             }
         }
         // Build the page
-        // Profile picture  and left pannel
-        // Profile picture  and left pannel
+        // Left pannel
         $r .= get_div('left_panel', '<h1>Filters</h1>'. 
             get_div('left_panel_box', 'Event types >') . get_div('left_panel_box', 'Distance >')
             . get_div('left_panel_box', 'Dates/Times >') .get_div('left_panel_box', 'Languages spoken >'));
-        $events = Event::select_all_events();
+        $events = Event::get_all_events();
         $event_types = Event::select_all_event_types();
         $_SESSION['events'] = $events;
         if (!empty($events) && (!empty($event_types))) {
@@ -56,12 +55,15 @@
             $dump_r .= '<caption data-icon="v"> Event Information </caption>';
             $dump_r .= display_advanced_tr_row(array('Name', 'Type', 'Country', 'Check in', 'Check out'));
             foreach ($events as $event) {
+                $event_id = $event->get_id();
                 $event_name = utf8_decode($event->get_name());
                 $event_type = utf8_decode($event->get_type());
                 $event_country_name = utf8_decode($event->get_location());
                 $event_starting_date = utf8_decode($event->get_starting_date());
                 $event_ending_date = utf8_decode($event->get_ending_date());
-                $dump_r .= display_advanced_row (array ($event_name, $event_type, $event_country_name, $event_starting_date, $event_ending_date));
+                $dump_r .= display_advanced_row (array (
+                '<a href="/befalol/php/event.php?id='.$event_id.'">'.$event_name.'</a>', 
+                $event_type, $event_country_name, $event_starting_date, $event_ending_date));
             }
             $dump_r .= '</table>';
             // add the form to the existing html stream
@@ -81,7 +83,7 @@
         $r .= $this->feedback . "<br/><br/>";
     }*/
     $r .= '<a href="/befalol/php/userpage.php">Profile Page</a>'.'<br/>';
-    $r .= '<a href="/befalol/php/event.php">Post an Event</a>'.'<br/>';
+    $r .= '<a href="/befalol/php/eventposting.php">Post an Event</a>'.'<br/>';
     $r .= '<a href="/befalol/php/events.php">List of all events</a>'.'<br/>';
     $r .= '<a href="/befalol/index.php?action=logout">Log out</a><br/>';
 

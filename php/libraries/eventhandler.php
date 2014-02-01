@@ -475,6 +475,18 @@ Class Event {
             return $this->_participants;
         }
     }
+    
+	/**
+     *
+     * Get nb of participants registered at the event
+     */
+    public  function get_current_participants_nb () {
+        if (empty($this->_participants)) {
+            return False;
+        } else if (is_array($this->_participants)) {
+            return count($this->_participants);
+        } else return 1;
+    }
 
     /**
      *
@@ -864,7 +876,7 @@ Class Event {
      *
      * Select all events in databse and return them as an array
      */
-    static public function select_all_events(){
+    static public function get_all_events(){
         $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
@@ -959,6 +971,101 @@ Class Event {
         }
     }
 
+    
+/**
+     *
+     * Get event information from event id and return an event object
+     */
+    static public function get_event_from_id($event_id){
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        if (empty($dbhandler)) {
+            echo 'Impossible to initiate communication with database </br>';
+            return false;
+        }
+
+        // Look for all event types in the event types table
+        $sql = 'SELECT * FROM events WHERE event_id=:event_id';
+        $query = $dbhandler->_db_connection->prepare($sql);
+        if ($query) {
+            $query->bindValue(':event_id', $event_id, PDO::PARAM_INT);
+            $query->execute();
+            $results = $query->fetchall();
+            if ($results) {
+                $results = $results[0];
+                //then get the languages spoken at each event
+                $sql = 'SELECT language_name FROM event_languages
+					WHERE event_id = :event_id';
+                $query = $dbhandler->_db_connection->prepare($sql);
+                if ($query) {
+                    $query->bindValue(':event_id', $event_id,
+                    PDO::PARAM_INT);
+                    $query->execute();
+                    $languages_res = $query->fetchall(PDO::FETCH_COLUMN);
+                    if ($languages_res) {
+                        $languages = array();
+                        foreach ($languages_res as $key=>$value) {
+                            array_push ($languages, html_entity_decode($value));
+                        }
+                    } else {
+                        echo 'There is no language spoken at this event <br/>';
+                        return false;
+                    }
+                }else {
+                    echo "The request for selecting spoken languages could not
+					be prepared. <br/>";
+                    return false;
+                }
+                // Retrieve event holders
+                $sql = 'SELECT user_id FROM event_holders
+					WHERE event_id = :event_id';
+                $query = $dbhandler->_db_connection->prepare($sql);
+                if ($query) {
+                    $query->bindValue(':event_id', $event_id,
+                    PDO::PARAM_INT);
+                    $query->execute();
+                    $holders_res = $query->fetchall(PDO::FETCH_COLUMN);
+                    if ($holders_res) {
+                        $holders_ids = array();
+                        foreach ($holders_res as $key=>$value) {
+                            // as it is an integer, no need for decoding
+                            array_push ($holders_ids, intval($value));
+                        }
+                    } else {
+                        echo 'There is no holder for this event <br/>';
+                        return false;
+                    }
+                }else {
+                    echo "The request for selecting event holders could not
+					be prepared. <br/>";
+                    return false;
+                }
+                $parameters = array ('event_id' => intval($results['event_id']),
+				'event_name' => html_entity_decode($results['event_name']), 
+				'event_address' => html_entity_decode($results['event_address']),
+				'event_zipcode' => html_entity_decode($results['event_zipcode']), 
+				'event_city_name' => html_entity_decode($results['event_city_name']), 
+				'event_country_name' => html_entity_decode($results['event_country_name']), 
+				'event_type' => html_entity_decode($results['event_type']), 
+				'event_starting_date' => html_entity_decode($results['event_starting_date']),
+		    	'event_ending_date'=> html_entity_decode($results['event_ending_date']), 
+		    	'event_max_nb_participants' => intval($results['event_max_nb_of_participants']), 
+		    	'event_holders_ids' => $holders_ids, 
+		    	'event_description' => html_entity_decode( $results['event_description']),
+				'event_languages' => $languages);
+                // create new object event with input parameters
+                $event = new Event ($parameters);
+                return $event;
+            } else {
+                echo "There is no event types with the $event_id in the 
+                'event_types' table.<br/>";
+                return false;
+            }
+        } else {
+            echo "The database request for selecting event types in the
+			'event_types' table could not be prepared.<br/>";
+            return false;
+        }
+    }
     
 	/**
      *

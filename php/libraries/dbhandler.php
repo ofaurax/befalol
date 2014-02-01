@@ -281,7 +281,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
         // create new empty table inside the database
         // (if table does not already exist)
         $sql = 'CREATE TABLE IF NOT EXISTS event_types (
-				event_type_name TEXT PRIMARY KEY
+				event_type_name TEXT NOT NULL PRIMARY KEY
 				);';	
         	
         // prepare and execute the sqlite request
@@ -329,7 +329,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
         // create new empty table inside the database
         // (if table does not already exist)
         $sql = 'CREATE TABLE IF NOT EXISTS  languages (
-				language_name TEXT PRIMARY KEY
+				language_name TEXT NOT NULL PRIMARY KEY
 				);';
         	
         // prepare and execute the sqlite request
