@@ -890,59 +890,21 @@ Class Event {
             if ($results) {
                 $events = array();
                 foreach ($results as $result_row) {
-                    //then get the languages spoken at each event
-                    $sql = 'SELECT language_name FROM event_languages
-    					WHERE event_id = :event_id';
-                    $query = $dbhandler->_db_connection->prepare($sql);
-                    if ($query) {
-                        $query->bindValue(':event_id', $result_row['event_id'],
-                        PDO::PARAM_INT);
-                        $query->execute();
-                        $languages_res = $query->fetchall(PDO::FETCH_COLUMN);
-                        if ($languages_res) {
-                            $languages = array();
-                            foreach ($languages_res as $key=>$value) {
-                                array_push ($languages, html_entity_decode($value));
-                            }
-                        } else {
-                            echo 'There is no language spoken at this event <br/>';
-                            return false;
-                        }
-                    }else {
-                        echo "The request for selecting spoken languages could not
-    					be prepared. <br/>";
-                        return false;
-                    }
-                    // Retrieve event holders
-                    $sql = 'SELECT user_id FROM event_holders
-    					WHERE event_id = :event_id';
-                    $query = $dbhandler->_db_connection->prepare($sql);
-                    if ($query) {
-                        $query->bindValue(':event_id', $result_row['event_id'],
-                        PDO::PARAM_INT);
-                        $query->execute();
-                        $holders_res = $query->fetchall(PDO::FETCH_COLUMN);
-                        if ($holders_res) {
-                            $holders_ids = array();
-                            foreach ($holders_res as $key=>$value) {
-                                // as it is an integer, no need for decoding
-                                array_push ($holders_ids, intval($value));
-                            }
-                        } else {
-                            echo 'There is no holder for this event <br/>';
-                            return false;
-                        }
-                    }else {
-                        echo "The request for selecting event holders could not
-    					be prepared. <br/>";
-                        return false;
-                    }
-                    
                     try {
-                    $event_location = Location::get_location_from_id($result_row['event_location_id']);
+                        // get event location
+                        $event_location = Location::get_location_from_id($result_row['event_location_id']);
+                        // get all languages spoken
+                        $languages = Language::select_languages_spoken ($result_row['event_id']);                                            
+                        // get all event hosters
+                        $holders_ids = Event::select_holders_ids($result_row['event_id']);
                     } catch (Exception $e) {
                         echo $e->getMessage();
                     }
+                    
+                    if ((empty($languages)) || (empty($holders_ids)) || (empty($event_location)) ) {
+                        echo 'Impossible to retrieve datas for event ' . $result_row['event_id'];
+                        return false;
+                    }       
                     $parameters = array ('event_id' => intval($result_row['event_id']),
     				'event_name' => html_entity_decode($result_row['event_name']), 
     				'event_location' => $event_location, 

@@ -11,15 +11,17 @@
     require_once('libraries/locationhandler.php');
     require_once('login.php');
     
-    if(!empty($_SERVER ['DOCUMENT_ROOT'])) {
-        define ('_SERVER_DIR', $_SERVER ['DOCUMENT_ROOT']);
-        define ('_INI_DB_CONFIG_FILE', _SERVER_DIR."/befalol/ini/db_config.ini");
-        define ('_INI_GEO_KEYS_CONFIG', _SERVER_DIR."/befalol/ini/geoloc_keys.ini");
+    session_start();
+    define ('_SERVER_DIR', $_SESSION['_SERVER_DIR']);
+    define ('_URL_PATH', $_SESSION['_URL_PATH']);
+    define ('_INI_DB_CONFIG_FILE', $_SESSION['_INI_DB_CONFIG_FILE'] );
+    define ('_INI_GEO_KEYS_CONFIG', $_SESSION['_INI_GEO_KEYS_CONFIG']);
+    define ('_COMPOSER_FLAG', $_SESSION['_COMPOSER_FLAG']);
+    
+    if (_COMPOSER_FLAG == true) {
+        require_once _SERVER_DIR.'/vendor/autoload.php';
     }
     
-    require_once _SERVER_DIR .'/befalol/vendor/autoload.php';
-    
-    session_start();
     $r = '';
     // if session initiated
     if (isset($_SESSION['user']))
@@ -46,7 +48,7 @@
                         $event_admin = User::get_user_from_id($admin_id);
                         //create a link to admins pages
                         array_push($admins_names, 
-                        '<a href="/befalol/php/userpage.php?id='.$admin_id.'">'
+                        '<a href="userpage.php?id='.$admin_id.'">'
                         .$event_admin->get_string_attribute('user_name').'</a>');
                     }
                 } catch (Expection $e) {
@@ -92,7 +94,7 @@
 		$dump_r .= display_row('<label> Event Admins </label>', implode(', ',$admins_names));
 		$dump_r .= display_row('Description:', $event->get_description());
 		if ($admin_flag == True) {
-		    $dump_r .= display_row('', '<a href="/befalol/php/myevents.php?id='.$event_id.'">
+		    $dump_r .= display_row('', '<a href="myevents.php?id='.$event_id.'">
 		    <input type="submit" value="Edit Event" name="editevent"/></a>');
 		}
         $dump_r .= '</table>';
@@ -103,11 +105,11 @@
     }
     
     
-    $r .= '<a href="/befalol/php/userpage.php">Profile Page</a>'.'<br/>';
-    $r .= '<a href="/befalol/php/event.php">Post an Event</a>'.'<br/>';
-    $r .= '<a href="/befalol/php/myevents.php">My events</a>'.'<br/>';
-    $r .= '<a href="/befalol/php/events.php">List of all events</a>'.'<br/>';
-    $r .= '<a href="/befalol/index.php?action=logout">Log out</a><br/>';
+    $r .= '<a href="userpage.php">Profile Page</a>'.'<br/>';
+    $r .= '<a href="eventposting.php">Post an Event</a>'.'<br/>';
+    $r .= '<a href="myevents.php">My events</a>'.'<br/>';
+    $r .= '<a href="events.php">List of all events</a>'.'<br/>';
+    $r .= '<a href="../index.php?action=logout">Log out</a><br/>';
 
 ?>
 

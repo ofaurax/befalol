@@ -83,7 +83,7 @@ class Login
     private function performMinimumRequirementsCheck()
     {
         if (version_compare(PHP_VERSION, '5.3.7', '<')) {
-            echo "Sorry, Simple PHP Login does not run on a PHP version older than 5.3.7 !";
+            echo "Sorry, Befalol does not run on a PHP version older than 5.3.7 !";
         } elseif (version_compare(PHP_VERSION, '5.5.0', '<')) {
             require_once("libraries/password_compatibility_library.php");
             return true;
@@ -159,6 +159,11 @@ class Login
     {
         if (!isset ($_SESSION)){
             session_start();
+            $_SESSION['_INI_GEO_KEYS_CONFIG'] = _INI_GEO_KEYS_CONFIG;
+            $_SESSION['_SERVER_DIR'] = _SERVER_DIR;
+            $_SESSION['_URL_PATH'] = _URL_PATH;
+            $_SESSION['_INI_DB_CONFIG_FILE'] = _INI_DB_CONFIG_FILE;
+            $_SESSION['_COMPOSER_FLAG'] = _COMPOSER_FLAG;
         }
     }
 
@@ -485,19 +490,18 @@ class Login
 
         echo '<div id="content">'; 
         echo 'Hello ' . $_SESSION['user']->get_string_attribute('user_name') . ', you are logged in.<br/><br/>';
-        echo '<a href="/befalol/php/userpage.php">Profile Page</a>'.'<br/>';
-        echo '<a href="/befalol/php/eventposting.php">Post an Event</a>'.'<br/>';
-        echo '<a href="/befalol/php/myevents.php">My events</a>'.'<br/>';
-        echo '<a href="/befalol/php/events.php">List of all events</a>'.'<br/>';
-        echo '<a href="/befalol/index.php?action=logout">Log out</a><br/>';
+        echo '<a href="php/userpage.php">Profile Page</a>'.'<br/>';
+        echo '<a href="php/eventposting.php">Post an Event</a>'.'<br/>';
+        echo '<a href="php/myevents.php">My events</a>'.'<br/>';
+        echo '<a href="php/events.php">List of all events</a>'.'<br/>';
+        echo '<a href="?action=logout">Log out</a><br/>';
         echo '</div>'; //end content
         echo '</div>'; //end container
         echo '</body>';
         //echo $r;
         echo get_footer();
     }
-    
-        
+  
 }
 
 

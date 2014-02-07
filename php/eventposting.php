@@ -9,18 +9,19 @@
     require_once('libraries/tools.php');
     require_once('libraries/htmlhandler.php');
     require_once('libraries/locationhandler.php');
-    
     require_once('login.php');
     
-    if(!empty($_SERVER ['DOCUMENT_ROOT'])) {
-        define ('_SERVER_DIR', $_SERVER ['DOCUMENT_ROOT']);
-        define ('_INI_DB_CONFIG_FILE', _SERVER_DIR."/befalol/ini/db_config.ini");
-        define ('_INI_GEO_KEYS_CONFIG', _SERVER_DIR."/befalol/ini/geoloc_keys.ini");
+    session_start();
+    define ('_SERVER_DIR', $_SESSION['_SERVER_DIR']);
+    define ('_URL_PATH', $_SESSION['_URL_PATH']);
+    define ('_INI_DB_CONFIG_FILE', $_SESSION['_INI_DB_CONFIG_FILE'] );
+    define ('_INI_GEO_KEYS_CONFIG', $_SESSION['_INI_GEO_KEYS_CONFIG']);
+    define ('_COMPOSER_FLAG', $_SESSION['_COMPOSER_FLAG']);
+    
+    if (_COMPOSER_FLAG == true) {
+        require_once _SERVER_DIR.'/vendor/autoload.php';
     }
     
-    require_once _SERVER_DIR .'/befalol/vendor/autoload.php';
-    
-    session_start();
     $r = '';
     // if session initiated
     if (isset($_SESSION['user']))
@@ -119,11 +120,11 @@
         $r .= $this->feedback . "<br/><br/>";
     }*/
 
-    $r .= '<a href="/befalol/php/userpage.php">Profile Page</a>'.'<br/>';
-    $r .= '<a href="/befalol/php/event.php">Post an Event</a>'.'<br/>';
-    $r .= '<a href="/befalol/php/myevents.php">My events</a>'.'<br/>';
-    $r .= '<a href="/befalol/php/events.php">List of all events</a>'.'<br/>';
-    $r .= '<a href="/befalol/index.php?action=logout">Log out</a><br/>';
+    $r .= '<a href="userpage.php">Profile Page</a>'.'<br/>';
+    $r .= '<a href="eventposting.php">Post an Event</a>'.'<br/>';
+    $r .= '<a href="myevents.php">My events</a>'.'<br/>';
+    $r .= '<a href="events.php">List of all events</a>'.'<br/>';
+    $r .= '<a href="../index.php?action=logout">Log out</a><br/>';
 
 ?>
 

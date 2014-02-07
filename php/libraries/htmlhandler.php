@@ -120,7 +120,7 @@ function display_dropdownlist ($SelectParameters, $InputValues, $DefaultValue, $
 
 function get_header () {
 
-    if ((isset($_SESSION) && !empty($_SESSION))) {
+    if ((isset($_SESSION) && !empty($_SESSION['user']))) {
         return '<!DOCTYPE html> <html>
 		<head>
         <link rel="stylesheet" type="text/css" href="css/backstyle.css">
@@ -175,7 +175,7 @@ function toprightbar_user() {
                         <a href="#">Settings</a>
                     </li>
                     <li>
-                        <a href="/befalol/index.php?action=logout">Log out</a>
+                        <a href="index.php?action=logout">Log out</a>
                     </li>
             	</ul>
 			</div>';

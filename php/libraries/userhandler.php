@@ -335,29 +335,32 @@ Class User {
             $events = array();
             $results = $query->fetchall();
             foreach ($results as $result_row) {
-                // look for all languages spoken
-                $languages = Language::select_languages_spoken ($result_row['event_id']);                                            
-                // Look for all event hosters
-                $holders_ids = Event::select_holders_ids($result_row['event_id']);
-                if ((empty($languages)) || (empty($holders_ids))) {
-                    echo 'Impossible to retrieve datas for event holded by ' . $this->_user_id;
+                try {
+                    // get event location
+                    $event_location = Location::get_location_from_id($result_row['event_location_id']);
+                    // get all languages spoken
+                    $languages = Language::select_languages_spoken ($result_row['event_id']);                                            
+                    // get all event hosters
+                    $holders_ids = Event::select_holders_ids($result_row['event_id']);
+                } catch (Exception $e) {
+                    echo $e->getMessage();
+                }
+                if ((empty($languages)) || (empty($holders_ids)) || (empty($event_location)) ) {
+                    echo 'Impossible to retrieve datas for event ' . $result_row['event_id'];
                     return false;
-                }                
-                // bundle all input parameters
+                }
                 $parameters = array ('event_id' => intval($result_row['event_id']),
-        		'event_name' => html_entity_decode($result_row['event_name']), 
-        		'event_address' => html_entity_decode($result_row['event_address']),
-        		'event_zipcode' => html_entity_decode($result_row['event_zipcode']), 
-        		'event_city_name' => html_entity_decode($result_row['event_city_name']), 
-        		'event_country_name' => html_entity_decode($result_row['event_country_name']), 
-        		'event_type' => html_entity_decode($result_row['event_type']),
-                'event_holders_ids' => $holders_ids,
-        		'event_starting_date' => html_entity_decode($result_row['event_starting_date']),
-            	'event_ending_date'=> html_entity_decode($result_row['event_ending_date']), 
-            	'event_max_nb_participants' => intval($result_row['event_max_nb_of_participants']), 
-            	'event_description' => html_entity_decode( $result_row['event_description']),
-        		'event_languages' => $languages);
-                
+    				'event_name' => html_entity_decode($result_row['event_name']), 
+    				'event_location' => $event_location, 
+    				'event_type' => html_entity_decode($result_row['event_type']), 
+    				'event_starting_date' => html_entity_decode($result_row['event_starting_date']),
+    		    	'event_ending_date'=> html_entity_decode($result_row['event_ending_date']), 
+    		    	'event_max_nb_participants' => intval($result_row['event_max_nb_of_participants']), 
+    		    	'event_holders_ids' => $holders_ids, 
+    		    	'event_description' => html_entity_decode( $result_row['event_description']),
+    				'event_languages' => $languages);
+                    // create new object event with input parameters
+                              
                 //TODO add a try/catch here
                 // create new object event with input parameters    
                 $event = new Event ($parameters);
