@@ -11,8 +11,9 @@
     require_once('login.php');
     
     if(!empty($_SERVER ['DOCUMENT_ROOT'])) {
-    define ('_SERVER_DIR', $_SERVER ['DOCUMENT_ROOT']);
-    define ('_INI_FILE_DIR', _SERVER_DIR."/befalol/database/config.ini" );    
+        define ('_SERVER_DIR', $_SERVER ['DOCUMENT_ROOT']);
+        define ('_INI_DB_CONFIG_FILE', _SERVER_DIR."/befalol/ini/db_config.ini");
+        define ('_INI_GEO_KEYS_CONFIG', _SERVER_DIR."/befalol/ini/geoloc_keys.ini");
     }
     
     session_start();

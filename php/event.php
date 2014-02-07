@@ -8,12 +8,16 @@
     require_once('libraries/userhandler.php');
     require_once('libraries/tools.php');
     require_once('libraries/htmlhandler.php');
+    require_once('libraries/locationhandler.php');
     require_once('login.php');
     
     if(!empty($_SERVER ['DOCUMENT_ROOT'])) {
-    define ('_SERVER_DIR', $_SERVER ['DOCUMENT_ROOT']);
-    define ('_INI_FILE_DIR', _SERVER_DIR."/befalol/database/config.ini" );    
+        define ('_SERVER_DIR', $_SERVER ['DOCUMENT_ROOT']);
+        define ('_INI_DB_CONFIG_FILE', _SERVER_DIR."/befalol/ini/db_config.ini");
+        define ('_INI_GEO_KEYS_CONFIG', _SERVER_DIR."/befalol/ini/geoloc_keys.ini");
     }
+    
+    require_once _SERVER_DIR .'/befalol/vendor/autoload.php';
     
     session_start();
     $r = '';
@@ -70,12 +74,14 @@
         $dump_r .= '<span class="title">'.$event->get_name().'</span>';
         $dump_r .= '<hr/>';
         // Form
-              
+        $event_location = $event->get_location()->get_location_infos();
         // Table
         $dump_r .= '<table>';
         $dump_r .= '<caption data-icon="v"> Event Information </caption>';
         $dump_r .= display_row('<label> Location </label>',
-        	'<label>'.$event->get_location().'</label>');
+        	'<label>'.implode(', ', array ($event_location['street_name'], 
+            $event_location['zipcode'], $event_location['city'], 
+            $event_location['country'])).'</label>');
         $dump_r .= display_row('<label> Check in date </label>',
         	'<label>'.$event->get_starting_date().'</label>');
         $dump_r .= display_row('<label> Check out date </label>',

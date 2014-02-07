@@ -34,10 +34,8 @@ Class Event {
     protected $_participants = array();
     protected $_languages = array();
     protected $_description = '';
-    protected $_event_address = '';
-    protected $_event_zipcode = '';
-    protected $_event_city_name = '';
-    protected $_event_country_name = '';
+    protected $_location = null;
+
 
     // Define different types of events allowed
     static public $_type_range = array('Visits', 'Activities', 'Journeys', 'Parties');
@@ -55,12 +53,6 @@ Class Event {
             }
             foreach ($parameters as $key=>$value) {
                 switch ($key){
-                    case 'event_address':
-                    case 'event_zipcode':
-                    case 'event_city_name':
-                    case 'event_country_name':
-                        $this->set_string_attribute (array($key=>$value));
-                        break;
                     case 'event_name':
                         $this->set_name($value);
                         break;
@@ -91,6 +83,9 @@ Class Event {
                     case 'event_participants':
                         $this->set_participants ($value);
                         break;
+                    case 'event_location':
+                        $this->set_location ($value);
+                        break;
                     default:
                         echo "This parameter $key does not exist";
                         break;
@@ -109,10 +104,9 @@ Class Event {
      * Set the parameterlist defaut value
      */
     protected function set_up() {
-        $this->_parameters_list = array ('event_name', 'event_address',
-		'event_zipcode', 'event_city_name', 'event_country_name', 'event_type',
+        $this->_parameters_list = array ('event_name', 'event_type',
 		'event_starting_date', 'event_ending_date', 'event_max_nb_participants',
-		'event_holders_ids', 'event_languages', 'event_description');
+		'event_holders_ids', 'event_languages', 'event_description', 'event_location');
         return true;
     }
 
@@ -123,7 +117,7 @@ Class Event {
      * be the name of the attribute and value its value
      * @param array $parameter
      */
-    public function set_string_attribute ($parameter) {
+    /*public function set_string_attribute ($parameter) {
         if (is_array($parameter))
         {
             foreach ($parameter as $key => $value){
@@ -147,9 +141,46 @@ Class Event {
             return FALSE;
         }
     }
+	*/
 
+     /**
+     *
+     * Set event location. The input parameters must be an object from the geocodinghandler
+     * @param array $location_parameters
+     */
+    public function set_location ($location_parameters) {
+        if (!empty($location_parameters) && 
+            (get_class($location_parameters) == 'Location'))
+        {
+           $this->_location = $location_parameters;
+           return true;
+        }
+        else {
+            echo 'The input parameters must be an object from the Location
+             class <br/>';
+            return FALSE;
+        }
+    }
 
-
+    
+    /**
+     *
+     * Set event location. The input parameters must be an object from the geocodinghandler
+     * @param array $location_parameters
+     */
+    public function get_location () {
+        if (!empty($this->_location) && (get_class($this->_location)=='Location'))
+        {
+           return $this->_location;
+        }
+        else {
+            echo 'The location parameters should have been an object from the Location
+             class <br/>';
+            return FALSE;
+        }
+    }
+    
+    
     /**
      *
      * Set the id parameter
@@ -215,29 +246,7 @@ Class Event {
     }
 
 
-    /**
-     *
-     * Get the location parameter
-     */
-    public  function get_location ()
-    {
-        // HERE : Check if it's really a location and not bullshit
-        if (!empty($this->_event_address) && !empty($this->_event_zipcode) &&
-        !empty($this->_event_city_name) && !empty($this->_event_country_name)) {
-            return ($this->_event_address.', '
-            .$this->_event_zipcode.' '
-            .$this->_event_city_name.', '
-            .$this->_event_country_name);
-        } else {
-            echo $this->_event_address.'<br/>';
-            echo $this->_event_city_name.'<br/>';
-            echo $this->_event_zipcode.'<br/>';
-            echo $this->_event_country_name.'<br/>';
-            trigger_error('One of the location parameters is empty', E_USER_ERROR);
-            return E_USER_ERROR;
-        }
-    }
-
+    
     /**
      *
      * Set the type parameter
@@ -621,7 +630,7 @@ Class Event {
      * Select all event types in databse and return them as an array
      */
     static public function select_all_event_types(){
-        $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -657,7 +666,7 @@ Class Event {
      * event if success
      */
     public function insert_event (){
-        $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -672,21 +681,14 @@ Class Event {
         $event_checkout = htmlentities($this->_ending_date, ENT_QUOTES);
         $event_max_nb_participants = $this->_max_nb_participants;
         $event_description = htmlentities($this->_description, ENT_QUOTES);
-        $event_address = htmlentities($this->_event_address, ENT_QUOTES);
-        $event_zipcode = htmlentities($this->_event_zipcode, ENT_QUOTES);
-        $event_city_name = htmlentities($this->_event_city_name, ENT_QUOTES);
-        /* uncomment the line below will create key constraint pb
-        $event_country_name = htmlentities( $this->_event_country_name, ENT_QUOTES);*/
-        $event_country_name = $this->_event_country_name;
+        $event_location_id = $this->_location->get_location_id();
         
         
         $sql = 'INSERT INTO events (event_name, event_type, 
         event_max_nb_of_participants, event_starting_date, event_ending_date, 
-		event_description, event_address, event_zipcode, event_city_name, 
-		event_country_name) VALUES(:event_name, :event_type, 
+		event_description, event_location_id) VALUES(:event_name, :event_type, 
 		:event_max_nb_participants, :event_starting_date, :event_ending_date, 
-		:event_description, :event_address, :event_zipcode, :event_city_name, 
-		:event_country_name)';
+		:event_description, :event_location_id)';
         $query = $dbhandler->_db_connection->prepare($sql);
         if ($query) {
             $query->bindValue(':event_name', $event_name, PDO::PARAM_STR);
@@ -696,10 +698,7 @@ Class Event {
             $query->bindValue(':event_max_nb_participants',
             $event_max_nb_participants, PDO::PARAM_INT);
             $query->bindValue(':event_description', $event_description, PDO::PARAM_STR);
-            $query->bindValue(':event_address', $event_address, PDO::PARAM_STR);
-            $query->bindValue(':event_zipcode', $event_zipcode, PDO::PARAM_STR);
-            $query->bindValue(':event_city_name', $event_city_name, PDO::PARAM_STR);
-            $query->bindValue(':event_country_name', $event_country_name, PDO::PARAM_STR);
+            $query->bindValue(':event_location_id', $event_location_id, PDO::PARAM_INT);
             	
             // PDO's execute() gives back TRUE when successful,
             // false when not
@@ -731,8 +730,7 @@ Class Event {
                 print_r ($query->errorInfo()).'<br/>';
                 print_r (array ($event_name, $event_type, $event_checkin, 
                 $event_checkout, $event_max_nb_participants, 
-                $event_description, $event_address, $event_zipcode, $event_city_name,
-                $event_country_name)).'<br/>';
+                $event_description, $event_location_id)).'<br/>';
                 return false;
             }
         } else {
@@ -748,7 +746,7 @@ Class Event {
      * if failure or true in case of success
      */
     protected function insert_spoken_languages () {
-        $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -793,7 +791,7 @@ Class Event {
      * if failure or true in case of success
      */
     protected function insert_event_holders () {
-        $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -838,7 +836,7 @@ Class Event {
 	 * @param string $event_type
 	 */
     public static function insert_event_type ($event_type) {
-        $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -877,7 +875,7 @@ Class Event {
      * Select all events in databse and return them as an array
      */
     static public function get_all_events(){
-        $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -939,12 +937,15 @@ Class Event {
     					be prepared. <br/>";
                         return false;
                     }
+                    
+                    try {
+                    $event_location = Location::get_location_from_id($result_row['event_location_id']);
+                    } catch (Exception $e) {
+                        echo $e->getMessage();
+                    }
                     $parameters = array ('event_id' => intval($result_row['event_id']),
     				'event_name' => html_entity_decode($result_row['event_name']), 
-    				'event_address' => html_entity_decode($result_row['event_address']),
-    				'event_zipcode' => html_entity_decode($result_row['event_zipcode']), 
-    				'event_city_name' => html_entity_decode($result_row['event_city_name']), 
-    				'event_country_name' => html_entity_decode($result_row['event_country_name']), 
+    				'event_location' => $event_location, 
     				'event_type' => html_entity_decode($result_row['event_type']), 
     				'event_starting_date' => html_entity_decode($result_row['event_starting_date']),
     		    	'event_ending_date'=> html_entity_decode($result_row['event_ending_date']), 
@@ -972,12 +973,12 @@ Class Event {
     }
 
     
-/**
+	/**
      *
      * Get event information from event id and return an event object
      */
     static public function get_event_from_id($event_id){
-        $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -1039,12 +1040,14 @@ Class Event {
 					be prepared. <br/>";
                     return false;
                 }
+                try {
+                    $event_location = Location::get_location_from_id($results['event_location_id']);
+                } catch (Exception $e) {
+                    echo $e->getMessage();
+                }
                 $parameters = array ('event_id' => intval($results['event_id']),
 				'event_name' => html_entity_decode($results['event_name']), 
-				'event_address' => html_entity_decode($results['event_address']),
-				'event_zipcode' => html_entity_decode($results['event_zipcode']), 
-				'event_city_name' => html_entity_decode($results['event_city_name']), 
-				'event_country_name' => html_entity_decode($results['event_country_name']), 
+				'event_location' => $event_location, 
 				'event_type' => html_entity_decode($results['event_type']), 
 				'event_starting_date' => html_entity_decode($results['event_starting_date']),
 		    	'event_ending_date'=> html_entity_decode($results['event_ending_date']), 
@@ -1073,7 +1076,7 @@ Class Event {
      */
     static public function select_holders_ids ($event_id) {
         // Get the database connection if it's not the case yet
-        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -1095,41 +1098,6 @@ Class Event {
 				'event_holders' table could not be prepared.<br/>";
                  return false;
         }                      
-    }
-
-    public function display_event_information () {
-        $event_holders_ids = $this->get_holders_ids();
-        $event_name = utf8_decode($this->get_name());
-        $event_type = $this->get_type();
-        $event_starting_date = $this->get_starting_date();
-        $event_ending_date = $this->get_ending_date();
-        $event_location = utf8_decode($this->get_location());
-        $event_max_nb_participants = $this->get_max_nb_participants();
-        $event_languages = $this->get_languages();
-        $event_participants = array ();
-        foreach ($this->get_participants() as $participant) {
-            array_push($event_participants, utf8_decode($participant));
-        }
-        $event_description = utf8_decode($this->get_description());
-        
-        $r = '<h2>'.$event_name.'</h2>';
-        //build it
-        $r .= '<table>';
-        $r .= display_row('Type', $event_type);
-        $r .= display_row('Location:', $event_location);
-        $r .= display_row('Check in:', $event_starting_date);
-        $r .= display_row('Check out date:', $event_ending_date);
-        $r .= display_row('Maximal number of participants:',
-        $event_max_nb_participants);
-        $r .= display_row('Languages spoken :',
-        display_dropdownlist('', $event_languages, 0, ''));
-        $r .= display_row('Description:', $event_description);
-        $r .= display_row('Participants:', display_dropdownlist('',
-        $event_participants, 0,''));
-        $r .= display_row('Holder id:', display_dropdownlist('',
-        $event_holders_ids, 0,''));
-        $r .= '<table/>';
-        return $r;
     }
 }
 

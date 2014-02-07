@@ -8,12 +8,17 @@
     require_once('libraries/userhandler.php');
     require_once('libraries/tools.php');
     require_once('libraries/htmlhandler.php');
+    require_once('libraries/locationhandler.php');
+    
     require_once('login.php');
     
     if(!empty($_SERVER ['DOCUMENT_ROOT'])) {
-    define ('_SERVER_DIR', $_SERVER ['DOCUMENT_ROOT']);
-    define ('_INI_FILE_DIR', _SERVER_DIR."/befalol/database/config.ini" );    
+        define ('_SERVER_DIR', $_SERVER ['DOCUMENT_ROOT']);
+        define ('_INI_DB_CONFIG_FILE', _SERVER_DIR."/befalol/ini/db_config.ini");
+        define ('_INI_GEO_KEYS_CONFIG', _SERVER_DIR."/befalol/ini/geoloc_keys.ini");
     }
+    
+    require_once _SERVER_DIR .'/befalol/vendor/autoload.php';
     
     session_start();
     $r = '';

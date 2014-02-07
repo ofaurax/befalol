@@ -8,12 +8,16 @@
     require_once('libraries/userhandler.php');
     require_once('libraries/tools.php');
     require_once('libraries/htmlhandler.php');
+    require_once('libraries/locationhandler.php');
     require_once('login.php');
     
     if(!empty($_SERVER ['DOCUMENT_ROOT'])) {
-    define ('_SERVER_DIR', $_SERVER ['DOCUMENT_ROOT']);
-    define ('_INI_FILE_DIR', _SERVER_DIR."/befalol/database/config.ini" );    
+        define ('_SERVER_DIR', $_SERVER ['DOCUMENT_ROOT']);
+        define ('_INI_DB_CONFIG_FILE', _SERVER_DIR."/befalol/ini/db_config.ini");
+        define ('_INI_GEO_KEYS_CONFIG', _SERVER_DIR."/befalol/ini/geoloc_keys.ini");
     }
+    
+    require_once _SERVER_DIR .'/befalol/vendor/autoload.php';
     
     session_start();
     $r = '';
@@ -43,12 +47,14 @@
             $event_id = $event->get_id();
             $event_name = utf8_decode($event->get_name());
             $event_type = utf8_decode($event->get_type());
-            $event_country_name = utf8_decode($event->get_location());
+            $event_location = $event->get_location();
             $event_starting_date = utf8_decode($event->get_starting_date());
             $event_ending_date = utf8_decode($event->get_ending_date());
+            $location_infos = $event_location->get_location_infos();
             $dump_r .= display_advanced_row (array (
             '<a href="/befalol/php/event.php?id='.$event_id.'">'.$event_name.'</a>', 
-            $event_type, $event_country_name, $event_starting_date, $event_ending_date));
+            $event_type, $location_infos['country'], $event_starting_date, 
+            $event_ending_date));
         }
         $dump_r .= '</table>';
         // add the form to the existing html stream

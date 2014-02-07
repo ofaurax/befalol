@@ -150,11 +150,13 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
     {
         $errno = true;
         $errno = $this->disable_foreign_keys () && $errno;
+        $errno = $this->create_bounds_table () && $errno;
         $errno = $this->create_countries_table () && $errno;
         $errno = $this->create_event_type_table () && $errno;
         /*$errno = $this->create_cities_table () && $errno;*/
         $errno = $this->create_languages_table () && $errno;
         $errno = $this->create_countries_languages_table () && $errno;
+        $errno = $this->create_locations_table() && $errno;
         $errno = $this->create_event_languages_table () && $errno;
         $errno = $this->create_users_table () && $errno;
         $errno = $this->create_events_table () && $errno;
@@ -179,11 +181,13 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
     {
         $errno = true;
         $errno = $this->disable_foreign_keys () && $errno;
+        $errno = $this->delete_table ('bounds') && $errno;
         $errno = $this->delete_table ('countries') && $errno;
         $errno = $this->delete_table ('event_types') && $errno;
         /*$errno = $this->delete_table ('cities') && $errno;*/
         $errno = $this->delete_table ('languages') && $errno;
         $errno = $this->delete_table ('countries_languages') && $errno;
+        $errno = $this->delete_table ('locations') && $errno;
         $errno = $this->delete_table ('event_languages') && $errno;
         $errno = $this->delete_table ('users') && $errno;
         $errno = $this->delete_table ('events') && $errno;
@@ -308,11 +312,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
 				event_starting_date TEXT NOT NULL,
 				event_ending_date TEXT NOT NULL,
 				event_description TEXT,
-				event_address TEXT NOT NULL,
-				event_zipcode TEXT NOT NULL,
-				event_city_name TEXT NOT NULL,
-				event_country_name TEXT NOT NULL,
-				FOREIGN KEY (event_country_name) REFERENCES countries (country_name),
+				event_location_id INTEGER NOT NULL,
 				FOREIGN KEY (event_type) REFERENCES event_types (event_type_name)
 				);';
         	
@@ -500,12 +500,58 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
         // return false if no connection with db
         return $this->prepare_and_execute_query ($sql);
     }
+    
+    
+	/**
+     * Create table for locations
+     */
+    function create_locations_table () {
+        // create new empty table inside the database
+        // (if table does not already exist)
+        $sql = 'CREATE TABLE IF NOT EXISTS locations (
+            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            latitude TEXT NOT NULL,
+            longitude TEXT NOT NULL,
+            bound_id INTEGER NOT NULL,
+            street_number TEXT,
+            street_name TEXT,
+            city_district TEXT,
+            city TEXT NOT NULL,
+            zipcode TEXT NOT NULL,
+            county TEXT,
+            county_code TEXT,
+            region TEXT,
+            region_code TEXT,
+            country TEXT NOT NULL,
+            country_index TEXT NOT NULL,
+            FOREIGN KEY (bound_id) REFERENCES bounds (id),
+            FOREIGN KEY (country) REFERENCES countries (country_name));
+		';
+        	
+        // prepare and execute the sqlite request
+        // return false if no connection with db
+        return $this->prepare_and_execute_query ($sql);
+    }
+    
+    
+	/**
+     * Create table for bounds locations
+     */
+    function create_bounds_table () {
+        // create new empty table inside the database
+        // (if table does not already exist)
+        $sql = 'CREATE TABLE IF NOT EXISTS bounds (
+            id INTEGER NOT NULL PRIMARY KEY  AUTOINCREMENT,
+            south TEXT NOT NULL,
+            west TEXT NOT NULL,
+            north TEXT NOT NULL,
+            east TEXT NOT NULL);
+		';
+        	
+        // prepare and execute the sqlite request
+        // return false if no connection with db
+        return $this->prepare_and_execute_query ($sql);
+    }
 }
-
-
-// parse configuration in the ini file
-//$dbhandler = new SqliteDbTableHanlder(db_parser (_INI_FILE_DIR,_SERVER_DIR));
-//$dbhandler->delete_all_tables();
-//$dbhandler->create_tables();
 
 ?>

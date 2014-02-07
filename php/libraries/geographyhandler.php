@@ -281,7 +281,7 @@ Class Country {
         if (!empty($city_name) && (!empty($country_name))) {
             if (empty ($this->_db_connection)) {
                 $dbhandler = new SqliteDbHanlder (
-                db_parser (_INI_FILE_DIR,_SERVER_DIR));
+                db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
                 $this->_db_connection = $dbhandler->get_connection_object();
             }
             $city_name = htmlentities($city_name, ENT_QUOTES);
@@ -329,7 +329,7 @@ Class Country {
         if (!empty($country_name) && (!empty($language_spoken))) {
             if (empty ($this->_db_connection)) {
                 $dbhandler = new SqliteDbHanlder (
-                db_parser (_INI_FILE_DIR,_SERVER_DIR));
+                db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
                 $this->_db_connection = $dbhandler->get_connection_object();
             }
             $language_spoken = htmlentities($language_spoken, ENT_QUOTES);
@@ -375,7 +375,7 @@ Class Country {
     static public function fetch_country_data ($country_name) {
         if (!empty($country_name)) {
             // Get the database connection if it's not the case yet
-            $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+            $dbhandler = New SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
             if (empty($dbhandler)) {
                 echo 'Impossible to initiate communication with database </br>';
                 return false;
@@ -422,7 +422,7 @@ Class Country {
             // Get the database connection if it's not the case yet
             if (empty ($this->_db_connection)) {
                 $dbhandler = new SqliteDbHanlder (
-                db_parser (_INI_FILE_DIR,_SERVER_DIR));
+                db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
                 $this->_db_connection = $dbhandler->get_connection_object();
             }
             // Look for existing language and country_name is the
@@ -480,7 +480,7 @@ Class Country {
             // Get the database connection if it's not the case yet
             if (empty ($this->_db_connection)) {
                 $dbhandler = new SqliteDbHanlder (
-                db_parser (_INI_FILE_DIR,_SERVER_DIR));
+                db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
                 $this->_db_connection = $dbhandler->get_connection_object();
             }
             // Look for existing city_name and country_name is the cities table
@@ -534,7 +534,7 @@ Class Country {
         // Get the database connection if it's not the case yet
         if (empty ($this->_db_connection)) {
             $dbhandler = new SqliteDbHanlder (
-            db_parser (_INI_FILE_DIR,_SERVER_DIR));
+            db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
             $this->_db_connection = $dbhandler->get_connection_object();
         }
         $country_name = htmlentities($this->_country_name, ENT_QUOTES);
@@ -621,7 +621,7 @@ Class Country {
      */
     static public function select_all_countries () {
         // Get the database connection if it's not the case yet
-        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -721,7 +721,7 @@ class Language {
             // Get the database connection if it's not the case yet
             if (empty ($this->_db_connection)) {
                 $dbhandler = new SqliteDbHanlder (
-                db_parser (_INI_FILE_DIR,_SERVER_DIR));
+                db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
                 $this->_db_connection = $dbhandler->get_connection_object();
             }
             $language_name2 = htmlentities($language_name, ENT_QUOTES);
@@ -763,7 +763,7 @@ class Language {
         // Get the database connection if it's not the case yet
         if (empty ($this->_db_connection)) {
             $dbhandler = new SqliteDbHanlder (
-            db_parser (_INI_FILE_DIR,_SERVER_DIR));
+            db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
             $this->_db_connection = $dbhandler->get_connection_object();
         }
         if (!$this->fetch_language_data ($this->_language_name)) {
@@ -804,7 +804,7 @@ class Language {
      */
     static public function select_all_languages () {
         // Get the database connection if it's not the case yet
-        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -839,7 +839,7 @@ class Language {
      */
     static public function select_languages_spoken ($event_id) {
         // Get the database connection if it's not the case yet
-        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -935,7 +935,7 @@ class Nationality {
     private function fetch_nationality_data ($nationality_name) {
         if (!empty($nationality_name)) {
             // Get the database connection if it's not the case yet
-            $dbhandler = new SqliteDbHanlder ( db_parser (_INI_FILE_DIR,_SERVER_DIR));
+            $dbhandler = new SqliteDbHanlder ( db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
             $nationality_name = htmlentities($nationality_name, ENT_QUOTES);
             // Look for existing nationality_name in the nationalities table
             $sql = 'SELECT * FROM nationalities WHERE nationality_name = :nationality_name';
@@ -972,7 +972,7 @@ class Nationality {
      */
     static public function select_all_nationalities () {
         // Get the database connection if it's not the case yet
-        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -1010,7 +1010,7 @@ class Nationality {
         // Get the database connection if it's not the case yet
         if (empty ($this->_db_connection)) {
             $dbhandler = new SqliteDbHanlder (
-            db_parser (_INI_FILE_DIR,_SERVER_DIR));
+            db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
             $this->_db_connection = $dbhandler->get_connection_object();
         }
         if (!$this->fetch_nationality_data ($this->_nationality_name)) {

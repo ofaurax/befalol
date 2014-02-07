@@ -171,7 +171,7 @@ Class User {
     {
         // Get the database connection if it's not the case yet
         $dbhandler = Null;
-        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler))  {
             echo 'Impossible to initiate communication with database </br>';
             return False;
@@ -234,7 +234,7 @@ Class User {
     public function insert_new_user () {
     // Get the database connection if it's not the case yet
         $dbhandler = Null;
-        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler))  {
             echo 'Impossible to initiate communication with database </br>';
             return False;
@@ -286,7 +286,7 @@ Class User {
      */
     static public function select_all_user_names () {
         // Get the database connection if it's not the case yet
-        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -320,7 +320,7 @@ Class User {
      */
     public function select_user_events () {
         // Get the database connection if it's not the case yet
-        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -386,7 +386,7 @@ Class User {
 	 */
     static public function get_user_from_id ($user_id) {
         // Get the database connection if it's not the case yet
-        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -431,7 +431,7 @@ Class User {
 	 * @param string $gender_type
 	 */
     public static function insert_gender_type ($gender_type) {
-        $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -469,7 +469,7 @@ Class User {
      * Select all gender types in database and return them as an array
      */
     static public function get_all_gender_types(){
-        $dbhandler = New SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
