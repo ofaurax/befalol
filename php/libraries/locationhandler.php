@@ -1,14 +1,10 @@
 <?php 
 
-/****** REQUIRES FAKER LIBRARY ********/
-// Uncomment the line above if you have installed willdurand/geocoder library using
-// composer
-// willdurand/geocoder
-// This won't work without the library
-/***********************************/
 /**
  * 
- * Enter description here ...
+ * This class allows to handle geocoding informations. Contains an array with all
+ * geocoding information, and an id refering to the database, so information can be 
+ * retrieved
  * @author Aldeen Berluti
  *
  */
@@ -19,7 +15,7 @@ Class Location  {
     
     /**
      *
-     * Instanciate the user object
+     * Instanciate the Location object
      * @param array('key' => 'value',..) $parameters
      */
     function __construct($parameters) {
@@ -54,7 +50,7 @@ Class Location  {
      * @param unknown_type $geocoded_location
      */
     private function set_location_infos ($geocoded_location) {
-        //TODO Check that field are strings
+        //TODO Check that fields are strings
         if ( !empty ($geocoded_location['latitude']) 
             && !empty ($geocoded_location['longitude']) 
             && !empty ($geocoded_location['bounds']) 
@@ -193,6 +189,8 @@ Class Location  {
         }
     }
         
+    
+    
     /**
      * 
      * Insert location information into the database and return the location id
@@ -292,7 +290,7 @@ Class Location  {
     
 	/**
 	 * 
-	 * Get location informations from location id and return a location object
+	 * Get location informations from location id and return a Location object
 	 * @param integer $location_id
 	 */
     static public function get_location_from_id($location_id){
@@ -450,25 +448,16 @@ Class Location  {
       
 }
 
-function distance($lat1, $lng1, $lat2, $lng2, $miles = true)
-{
-	$pi80 = M_PI / 180;
-	$lat1 *= $pi80;
-	$lng1 *= $pi80;
-	$lat2 *= $pi80;
-	$lng2 *= $pi80;
 
-	$r = 6372.797; // mean radius of Earth in km
-	$dlat = $lat2 - $lat1;
-	$dlng = $lng2 - $lng1;
-	$a = sin($dlat / 2) * sin($dlat / 2) + cos($lat1) * cos($lat2) * sin($dlng / 2) * sin($dlng / 2);
-	$c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-	$km = $r * $c;
-
-	return ($miles ? ($km * 0.621371192) : $km);
-}
-
-
+/**
+ * 
+ * Compute km/miles distance between two geocoded locations
+ * @param integer $lat1
+ * @param integer $lng1
+ * @param integer $lat2
+ * @param integer $lng2
+ * @param boolean $miles
+ */
 function distance2($lat1, $lng1, $lat2, $lng2, $miles = true)
 {
 	$pi80 = M_PI / 180;

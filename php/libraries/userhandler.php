@@ -68,7 +68,7 @@ Class User {
      * be the name of the attribute and value its value
      * @param array $parameter
      */
-    public function set_string_attribute ($parameter) {
+    private function set_string_attribute ($parameter) {
         if (is_array($parameter))
         {
             foreach ($parameter as $key => $value){
@@ -99,7 +99,7 @@ Class User {
      * Set the user id
      * @param integer $id
      */
-    public function set_user_id ($id)
+    private function set_user_id ($id)
     {
         if (!empty($id) && is_int($id)){
             $this->_user_id = $id;
@@ -132,7 +132,7 @@ Class User {
      * Set the user birthday date
      * @param date $birthday
      */
-    public function set_user_birthday ($birthday)
+    private function set_user_birthday ($birthday)
     {
         if (!empty($birthday) && check_and_valid_date ($birthday, true)){
             $this->_user_birthday = $birthday;
@@ -166,7 +166,10 @@ Class User {
 
     }
 
-
+    /**
+     * 
+     * Update database information with information of the current user object
+     */
     public function update_user_data ()
     {
         // Get the database connection if it's not the case yet
@@ -229,7 +232,7 @@ Class User {
     
 	/**
      *
-     * Insert a new user in the table
+     * Insert a new user in the database
      */
     public function insert_new_user () {
     // Get the database connection if it's not the case yet
@@ -429,8 +432,7 @@ Class User {
     
 	/**
 	 * 
-	 * Insert a gender type  in the db return false
-     * if failure or true in case of success
+	 * Insert a gender type  in the db return false if failure or true in case of success
 	 * @param string $gender_type
 	 */
     public static function insert_gender_type ($gender_type) {

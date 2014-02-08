@@ -403,7 +403,7 @@ class Login
     {
         echo get_header();
         echo '<body>';
-        echo topbar_public();
+        echo topbar_index();
         
         echo '<div id="container">';
         if ($this->feedback) {
@@ -438,7 +438,7 @@ class Login
     {
         echo get_header();
         echo '<body>';
-        echo topbar_public();
+        echo topbar_index();
         echo '<div id="container">';
         if ($this->feedback) {
             echo $this->feedback . "<br/><br/>";
@@ -481,7 +481,7 @@ class Login
          /* Display page */
         echo get_header();
         echo '<body>';
-        echo topbar_user();
+        echo topbar_index_logged();
         echo '<div id="container">';
         
         if ($this->feedback) {

@@ -13,7 +13,7 @@ require_once('libraries/locationhandler.php');
 require_once('login.php');
 
 define ('_SERVER_DIR', getcwd());
-define ('_URL_PATH', $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']);
+define ('_URL_PATH', $_SERVER['SERVER_NAME'].trim($_SERVER['REQUEST_URI'], 'index.php'));
 define ('_INI_DB_CONFIG_FILE', _SERVER_DIR."/ini/db_config.ini" );
 define ('_INI_GEO_KEYS_CONFIG', _SERVER_DIR."/ini/geoloc_keys.ini");
 
@@ -26,6 +26,5 @@ if (_COMPOSER_FLAG == true) {
 }
 
 /** MAKE SURE YOU HAVE INSTALLED WILLDURAND/GEOCODER LIBRARY **/
-
 $login = new Login();
 ?>

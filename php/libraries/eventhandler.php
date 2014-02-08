@@ -8,7 +8,7 @@ require_once ('basicerrorhandling.php');
  * Class allowing to handle an event
  * @input : variable type (key=>Value) ; array(
  * 'id'=> string,
- * 'location' => string,
+ * 'location' => Location object,
  * 'type' => string,
  * 'starting_date' => date,
  * 'ending_date' => date,
@@ -38,6 +38,7 @@ Class Event {
 
 
     // Define different types of events allowed
+    //TODO: Change that to get values from database only once. Load them in memory
     static public $_type_range = array('Visits', 'Activities', 'Journeys', 'Parties');
 
 
@@ -785,7 +786,7 @@ Class Event {
     }
     
     
-/**
+	/**
      *
      * Insert a new event holder in the db return false
      * if failure or true in case of success
@@ -936,9 +937,10 @@ Class Event {
 
     
 	/**
-     *
-     * Get event information from event id and return an event object
-     */
+	 * 
+	 * Get event information from event id and return an event object
+	 * @param integer $event_id
+	 */
     static public function get_event_from_id($event_id){
         $dbhandler = New SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
@@ -1033,9 +1035,10 @@ Class Event {
     }
     
 	/**
-     *
-     * Select and return an array of all users holding specific event
-     */
+	 * 
+	 * Select and return an array of all users holding specific event
+	 * @param integer $event_id
+	 */
     static public function select_holders_ids ($event_id) {
         // Get the database connection if it's not the case yet
         $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
