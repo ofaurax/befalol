@@ -54,7 +54,7 @@ function handle_basic_errors ($errno,$errstr,$errfile,$errline)
     //"SESSION:".(isset($_SESSION)? serialize($_SESSION) : "Undefined");
 
     // Open error file
-    $handle = fopen("Errlog.txt", "a");
+    $handle = fopen("../../logs/Errlog.txt", "a");
 
     // We write error messages and informations
     if ($handle)

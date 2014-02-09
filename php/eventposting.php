@@ -9,7 +9,8 @@
     require_once('libraries/tools.php');
     require_once('libraries/htmlhandler.php');
     require_once('libraries/locationhandler.php');
-    require_once('login.php');
+    require_once('libraries/processing.php');
+    
     
     session_start();
     define ('_SERVER_DIR', $_SESSION['_SERVER_DIR']);

@@ -10,7 +10,8 @@ require_once('libraries/userhandler.php');
 require_once('libraries/tools.php');
 require_once('libraries/htmlhandler.php');
 require_once('libraries/locationhandler.php');
-require_once('login.php');
+require_once('libraries/login.php');
+require_once('libraries/processing.php');
 
 define ('_SERVER_DIR', getcwd());
 define ('_URL_PATH', $_SERVER['SERVER_NAME'].trim($_SERVER['REQUEST_URI'], 'index.php'));
