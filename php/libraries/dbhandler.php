@@ -136,7 +136,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      * Return false if one of the methods fails. The running order can be
      * changed as long as the foreign keys are not enable on the database
      */
-    private function create_tables ()
+    public function create_tables ()
     {
         $errno = true;
         $errno = $this->disable_foreign_keys () && $errno;
@@ -167,7 +167,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      * Return false if one of the methods fails. The running order can be
      * changed as long as the foreign keys are not enable on the database
      */
-    private function delete_all_tables ()
+    public function delete_all_tables ()
     {
         $errno = true;
         $errno = $this->disable_foreign_keys () && $errno;
@@ -514,6 +514,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
             region_code TEXT,
             country TEXT NOT NULL,
             country_index TEXT NOT NULL,
+            timezone TEXT,
             FOREIGN KEY (bound_id) REFERENCES bounds (id),
             FOREIGN KEY (country) REFERENCES countries (country_name));
 		';

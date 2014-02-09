@@ -183,8 +183,7 @@ Class Location  {
             }
         }else {
             echo "The bound location parameter does not match the requirement, the
-            	insertion could not have been done.' 
-                	table has failed";
+            	insertion could not have been done.";
             return false;
         }
     }
@@ -226,14 +225,15 @@ Class Location  {
                 $region_code = htmlentities($this->_geocoded_location['regionCode'], ENT_QUOTES);
                 $country = htmlentities($this->_geocoded_location['country'], ENT_QUOTES);
                 $country_code = htmlentities($this->_geocoded_location['countryCode'], ENT_QUOTES);
+                $timezone = htmlentities($this->_geocoded_location['timezone'], ENT_QUOTES);
                   
                       
                 $sql = 'INSERT INTO locations (latitude, longitude, bound_id, street_number, 
                 street_name, city_district, city, zipcode, county, county_code, region,
-                region_code, country, country_index) 
+                region_code, country, country_index, timezone) 
                 VALUES(:latitude, :longitude, :bound_id, :street_number, :street_name, 
                 :city_district, :city, :zipcode, :county, :county_code, :region, :region_code,
-                :country, :country_index )';
+                :country, :country_index, :timezone)';
                 $query = $dbhandler->_db_connection->prepare($sql);
                 if ($query) {
                     $query->bindValue(':latitude', $latitude, PDO::PARAM_STR);
@@ -250,6 +250,7 @@ Class Location  {
                     $query->bindValue(':region_code', $region, PDO::PARAM_STR);
                     $query->bindValue(':country', $country, PDO::PARAM_STR);
                     $query->bindValue(':country_index', $country_code, PDO::PARAM_STR);
+                    $query->bindValue(':timezone', $timezone, PDO::PARAM_STR);
                     // PDO's execute() gives back TRUE when successful,
                     // false when not
                     $registration_success_state = $query->execute();
@@ -345,7 +346,8 @@ Class Location  {
 		    	'region' => html_entity_decode($results['region']), 
 		    	'region_code' => html_entity_decode($results['region_code']),
 				'country' => html_entity_decode( $results['country']),
-                'country_index' => html_entity_decode($results['country_index'])
+                'country_index' => html_entity_decode($results['country_index']),
+                'timezone' => html_entity_decode($results['timezone'])
                 ));
                 // create new object location with input parameters
                 try { 

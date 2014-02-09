@@ -699,8 +699,7 @@ Class Event {
             $query->bindValue(':event_max_nb_participants',
             $event_max_nb_participants, PDO::PARAM_INT);
             $query->bindValue(':event_description', $event_description, PDO::PARAM_STR);
-            $query->bindValue(':event_location_id', $event_location_id, PDO::PARAM_INT);
-            	
+            $query->bindValue(':event_location_id', $event_location_id, PDO::PARAM_INT);	
             // PDO's execute() gives back TRUE when successful,
             // false when not
             $registration_success_state = $query->execute();
@@ -907,15 +906,15 @@ Class Event {
                         return false;
                     }       
                     $parameters = array ('event_id' => intval($result_row['event_id']),
-    				'event_name' => html_entity_decode($result_row['event_name']), 
-    				'event_location' => $event_location, 
+    				'event_name' => html_entity_decode($result_row['event_name']),
     				'event_type' => html_entity_decode($result_row['event_type']), 
     				'event_starting_date' => html_entity_decode($result_row['event_starting_date']),
     		    	'event_ending_date'=> html_entity_decode($result_row['event_ending_date']), 
     		    	'event_max_nb_participants' => intval($result_row['event_max_nb_of_participants']), 
     		    	'event_holders_ids' => $holders_ids, 
     		    	'event_description' => html_entity_decode( $result_row['event_description']),
-    				'event_languages' => $languages);
+    				'event_languages' => $languages,
+                    'event_location' => $event_location);
                     // create new object event with input parameters
                     $event = new Event ($parameters);
                     if (!empty($event)) {
@@ -1010,15 +1009,15 @@ Class Event {
                     echo $e->getMessage();
                 }
                 $parameters = array ('event_id' => intval($results['event_id']),
-				'event_name' => html_entity_decode($results['event_name']), 
-				'event_location' => $event_location, 
+				'event_name' => html_entity_decode($results['event_name']),
 				'event_type' => html_entity_decode($results['event_type']), 
 				'event_starting_date' => html_entity_decode($results['event_starting_date']),
 		    	'event_ending_date'=> html_entity_decode($results['event_ending_date']), 
 		    	'event_max_nb_participants' => intval($results['event_max_nb_of_participants']), 
 		    	'event_holders_ids' => $holders_ids, 
 		    	'event_description' => html_entity_decode( $results['event_description']),
-				'event_languages' => $languages);
+				'event_languages' => $languages,
+                'event_location' => $event_location);
                 // create new object event with input parameters
                 $event = new Event ($parameters);
                 return $event;
