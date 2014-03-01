@@ -14,6 +14,7 @@ Class User {
     protected $_user_birthday = '';
     protected $_user_nationality = '';
     protected $_user_firstname = '';
+    protected $_user_gender = '';
     protected $_user_lastname = '';
     protected $_user_password_hash = '';
     protected $_db_connection = NULL;
@@ -36,6 +37,7 @@ Class User {
                     case 'user_lastname':
                     case 'user_firstname':
                     case 'user_password_hash':
+                    case 'user_gender':
                         $errno = $this->set_string_attribute 
                                             (array($key => $value)) && $errno;
                         break;
@@ -66,7 +68,7 @@ Class User {
      * be the name of the attribute and value its value
      * @param array $parameter
      */
-    public function set_string_attribute ($parameter) {
+    private function set_string_attribute ($parameter) {
         if (is_array($parameter))
         {
             foreach ($parameter as $key => $value){
@@ -97,7 +99,7 @@ Class User {
      * Set the user id
      * @param integer $id
      */
-    public function set_user_id ($id)
+    private function set_user_id ($id)
     {
         if (!empty($id) && is_int($id)){
             $this->_user_id = $id;
@@ -130,7 +132,7 @@ Class User {
      * Set the user birthday date
      * @param date $birthday
      */
-    public function set_user_birthday ($birthday)
+    private function set_user_birthday ($birthday)
     {
         if (!empty($birthday) && check_and_valid_date ($birthday, true)){
             $this->_user_birthday = $birthday;
@@ -164,12 +166,15 @@ Class User {
 
     }
 
-
+    /**
+     * 
+     * Update database information with information of the current user object
+     */
     public function update_user_data ()
     {
         // Get the database connection if it's not the case yet
         $dbhandler = Null;
-        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler))  {
             echo 'Impossible to initiate communication with database </br>';
             return False;
@@ -178,6 +183,7 @@ Class User {
         $user_nationality = $this->_user_nationality;
         $user_name = htmlentities($this->_user_name, ENT_QUOTES);
         $user_email = htmlentities($this->_user_email, ENT_QUOTES);
+        $user_gender = htmlentities($this->_user_gender, ENT_QUOTES);
         $user_lastname = htmlentities($this->_user_lastname, ENT_QUOTES | ENT_SUBSTITUTE, $encoding = 'UTF-8');
         $user_firstname = htmlentities($this->_user_firstname, ENT_QUOTES | ENT_SUBSTITUTE, $encoding = 'UTF-8');
         $user_birthday = htmlentities($this->_user_birthday, ENT_QUOTES);
@@ -186,8 +192,8 @@ Class User {
         $sql = 'UPDATE users
 		SET user_email = :user_email, user_lastname = :user_lastname, 
 		user_firstname = :user_firstname, user_nationality = :user_nationality,
-		user_birthday = :user_birthday, user_password_hash = :user_password_hash 
-		WHERE user_id = :user_id AND user_name = :user_name';
+		user_birthday = :user_birthday, user_password_hash = :user_password_hash,
+		user_gender = :user_gender WHERE user_id = :user_id AND user_name = :user_name';
         $query = $dbhandler->_db_connection->prepare($sql);
         if ($query) {
             $query->bindValue(':user_email', $user_email, PDO::PARAM_STR);
@@ -197,6 +203,8 @@ Class User {
             $query->bindValue(':user_birthday', $user_birthday, PDO::PARAM_STR);
             $query->bindValue(':user_lastname', $user_lastname, PDO::PARAM_STR);
             $query->bindValue(':user_firstname', $user_firstname,
+            PDO::PARAM_STR);
+            $query->bindValue(':user_gender', $user_gender,
             PDO::PARAM_STR);
             $query->bindValue(':user_password_hash', $user_password_hash, 
             PDO::PARAM_STR);
@@ -211,7 +219,7 @@ Class User {
                 echo "$user_name failed to be updated. <br/>";
                 print_r ($query->errorInfo());
                 print_r (array($user_id, $user_nationality, $user_name, $user_email, $user_lastname,
-                $user_firstname, $user_birthday, $user_password_hash));
+                $user_firstname, $user_birthday, $user_password_hash, $user_gender));
                 return false;
             }
         } else {
@@ -224,12 +232,12 @@ Class User {
     
 	/**
      *
-     * Insert a new user in the table
+     * Insert a new user in the database
      */
     public function insert_new_user () {
     // Get the database connection if it's not the case yet
         $dbhandler = Null;
-        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler))  {
             echo 'Impossible to initiate communication with database </br>';
             return False;
@@ -279,9 +287,9 @@ Class User {
      *
      * Select and return an array of all user names exisisting in the table
      */
-    static public function select_all_user () {
+    static public function select_all_user_names () {
         // Get the database connection if it's not the case yet
-        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -315,7 +323,7 @@ Class User {
      */
     public function select_user_events () {
         // Get the database connection if it's not the case yet
-        $dbhandler = new SqliteDbHanlder (db_parser (_INI_FILE_DIR,_SERVER_DIR));
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
         if (empty($dbhandler)) {
             echo 'Impossible to initiate communication with database </br>';
             return false;
@@ -330,29 +338,32 @@ Class User {
             $events = array();
             $results = $query->fetchall();
             foreach ($results as $result_row) {
-                // look for all languages spoken
-                $languages = Language::select_languages_spoken ($result_row['event_id']);                                            
-                // Look for all event hosters
-                $holders_ids = Event::select_holders_ids($result_row['event_id']);
-                if ((empty($languages)) || (empty($holders_ids))) {
-                    echo 'Impossible to retrieve datas for event holded by ' . $this->_user_id;
+                try {
+                    // get event location
+                    $event_location = Location::get_location_from_id($result_row['event_location_id']);
+                    // get all languages spoken
+                    $languages = Language::select_languages_spoken ($result_row['event_id']);                                            
+                    // get all event hosters
+                    $holders_ids = Event::select_holders_ids($result_row['event_id']);
+                } catch (Exception $e) {
+                    echo $e->getMessage();
+                }
+                if ((empty($languages)) || (empty($holders_ids)) || (empty($event_location)) ) {
+                    echo 'Impossible to retrieve datas for event ' . $result_row['event_id'];
                     return false;
-                }                
-                // bundle all input parameters
+                }
                 $parameters = array ('event_id' => intval($result_row['event_id']),
-        		'event_name' => html_entity_decode($result_row['event_name']), 
-        		'event_address' => html_entity_decode($result_row['event_address']),
-        		'event_zipcode' => html_entity_decode($result_row['event_zipcode']), 
-        		'event_city_name' => html_entity_decode($result_row['event_city_name']), 
-        		'event_country_name' => html_entity_decode($result_row['event_country_name']), 
-        		'event_type' => html_entity_decode($result_row['event_type']),
-                'event_holders_ids' => $holders_ids,
-        		'event_starting_date' => html_entity_decode($result_row['event_starting_date']),
-            	'event_ending_date'=> html_entity_decode($result_row['event_ending_date']), 
-            	'event_max_nb_participants' => intval($result_row['event_max_nb_of_participants']), 
-            	'event_description' => html_entity_decode( $result_row['event_description']),
-        		'event_languages' => $languages);
-                
+    				'event_name' => html_entity_decode($result_row['event_name']), 
+    				'event_location' => $event_location, 
+    				'event_type' => html_entity_decode($result_row['event_type']), 
+    				'event_starting_date' => html_entity_decode($result_row['event_starting_date']),
+    		    	'event_ending_date'=> html_entity_decode($result_row['event_ending_date']), 
+    		    	'event_max_nb_participants' => intval($result_row['event_max_nb_of_participants']), 
+    		    	'event_holders_ids' => $holders_ids, 
+    		    	'event_description' => html_entity_decode( $result_row['event_description']),
+    				'event_languages' => $languages);
+                    // create new object event with input parameters
+                              
                 //TODO add a try/catch here
                 // create new object event with input parameters    
                 $event = new Event ($parameters);
@@ -373,5 +384,124 @@ Class User {
             return false;
         }
     }
+    
+	/**
+	 * 
+	 *  Select user from user_id. Return an user object
+	 * @param integer $user_id
+	 */
+    static public function get_user_from_id ($user_id) {
+        // Get the database connection if it's not the case yet
+        $dbhandler = new SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
+        if (empty($dbhandler)) {
+            echo 'Impossible to initiate communication with database </br>';
+            return false;
+        }
+        // Look for existing nationality_name in the nationalities table
+        $sql = 'SELECT * FROM users WHERE user_id=:user_id';
+        $query = $dbhandler->_db_connection->prepare($sql);
+        if ($query) {
+            $query->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+            $query->execute();
+            $results = $query->fetchall();
+            if ($results) {
+                $results = $results[0];
+                //Create an user object with it
+                $parameters =  array ('user_id'=>intval($results['user_id']),
+				'user_name' => html_entity_decode($results['user_name']),
+				'user_email' => html_entity_decode($results['user_email']),
+				'user_birthday' => html_entity_decode($results['user_birthday']),
+				'user_nationality' => $results['user_nationality'],
+				'user_lastname' => html_entity_decode($results['user_lastname']),
+				'user_firstname' => html_entity_decode($results['user_firstname']),
+                'user_gender' => html_entity_decode($results['user_gender']),
+                'user_password_hash' => $results['user_password_hash']);
+                $user = new User ($parameters);
+                return $user;
+            } else {
+                echo "There is no users with the id $user_id in the 'users' 
+                	table.<br/>";
+                return false;
+            }
+        } else {
+            echo "The database request for selecting users $user_id in the
+			'users'	table could not be prepared.<br/>";
+            return false;
+        }
+    }
+    
+	/**
+	 * 
+	 * Insert a gender type  in the db return false if failure or true in case of success
+	 * @param string $gender_type
+	 */
+    public static function insert_gender_type ($gender_type) {
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
+        if (empty($dbhandler)) {
+            echo 'Impossible to initiate communication with database </br>';
+            return false;
+        }
+        $gender_type = htmlentities($gender_type);
+        $sql = 'INSERT INTO genders (gender_type)
+		VALUES (:gender_type)';
+        $query = $dbhandler->_db_connection->prepare($sql);
+        if ($query) {
+            $query->bindValue(':gender_type', $gender_type, PDO::PARAM_STR);
+            // PDO's execute() gives back TRUE when successful,
+            // false when not
+            $registration_success_state = $query->execute();
+            if ($registration_success_state) {
+                echo "$gender_type has been successfuly inserted in the
+				'genders' table. <br/>";
+            } else {
+                echo "$gender_type failed to be inserted in the
+				'genders' table. <br/>";
+                print_r ($query->errorInfo());
+                echo '<br/>';
+                return false;
+            }
+        } else {
+            echo "The database request for inserting $gender_type
+			in the 'genders' table could not be prepared.<br/>";
+            return false;
+        }
+        return true;
+    }
+    
+    
+     /**
+     *
+     * Select all gender types in database and return them as an array
+     */
+    static public function get_all_gender_types(){
+        $dbhandler = New SqliteDbHanlder (db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR));
+        if (empty($dbhandler)) {
+            echo 'Impossible to initiate communication with database </br>';
+            return false;
+        }
+
+        // Look for all event types in the event types table
+        $sql = 'SELECT * FROM genders';
+        $query = $dbhandler->_db_connection->prepare($sql);
+        if ($query) {
+            $query->execute();
+            $results = $query->fetchall(PDO::FETCH_COLUMN);
+            if ($results) {
+                $gender_types = array();
+                foreach ($results as $key=>$value) {
+                    array_push ($gender_types, html_entity_decode($value));
+                }
+                return $gender_types;
+            } else {
+                echo "There is no gender types in the 'genders' table.<br/>";
+                return false;
+            }
+        } else {
+            echo "The database request for selecting gender types in the
+			'genders' table could not be prepared.<br/>";
+            return false;
+        }
+    }
+    
 }
 ?>

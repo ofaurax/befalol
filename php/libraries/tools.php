@@ -1,5 +1,23 @@
 <?php
 
+
+// Parse the file config for keys geoloc API
+function geoconfig_parser($filepath, $setting) {
+    $parse = parse_ini_file ($filepath , true );
+    if (strtoupper($setting) == "ALL") {
+        return $parse['keys'];
+    } else 
+    {
+        try {
+            return $parse['keys'][setting];
+        }catch (Exception $e) {
+            echo $e->getMessage();
+            return null;
+        }
+    }
+}
+
+
 // Parse the config.ini file in order to return database informations
 function db_parser ($ini,$server_path)
 {

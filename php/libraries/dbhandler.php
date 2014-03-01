@@ -22,17 +22,7 @@ Class SqliteDbHanlder {
     }
 
 
-    function __wakeup()
-    {
-        $this->dbh = new PDO($parameters['dsn']);
-    }
-
-    function __sleep()
-    {
-        return array('data');
-    }
-
-
+  
     /**
      *
      *  Init database connection
@@ -146,18 +136,21 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      * Return false if one of the methods fails. The running order can be
      * changed as long as the foreign keys are not enable on the database
      */
-    function create_tables ()
+    private function create_tables ()
     {
         $errno = true;
         $errno = $this->disable_foreign_keys () && $errno;
+        $errno = $this->create_bounds_table () && $errno;
         $errno = $this->create_countries_table () && $errno;
         $errno = $this->create_event_type_table () && $errno;
         /*$errno = $this->create_cities_table () && $errno;*/
         $errno = $this->create_languages_table () && $errno;
         $errno = $this->create_countries_languages_table () && $errno;
+        $errno = $this->create_locations_table() && $errno;
         $errno = $this->create_event_languages_table () && $errno;
         $errno = $this->create_users_table () && $errno;
         $errno = $this->create_events_table () && $errno;
+        $errno = $this->create_genders_table  () && $errno;
         $errno = $this->create_event_participants_table () && $errno;
         $errno = $this->create_event_holders_table () && $errno;
         $errno = $this->create_visited_countries_table () && $errno;
@@ -174,18 +167,21 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      * Return false if one of the methods fails. The running order can be
      * changed as long as the foreign keys are not enable on the database
      */
-    function delete_all_tables ()
+    private function delete_all_tables ()
     {
         $errno = true;
         $errno = $this->disable_foreign_keys () && $errno;
+        $errno = $this->delete_table ('bounds') && $errno;
         $errno = $this->delete_table ('countries') && $errno;
         $errno = $this->delete_table ('event_types') && $errno;
         /*$errno = $this->delete_table ('cities') && $errno;*/
         $errno = $this->delete_table ('languages') && $errno;
         $errno = $this->delete_table ('countries_languages') && $errno;
+        $errno = $this->delete_table ('locations') && $errno;
         $errno = $this->delete_table ('event_languages') && $errno;
         $errno = $this->delete_table ('users') && $errno;
         $errno = $this->delete_table ('events') && $errno;
+        $errno = $this->delete_table ('genders') && $errno;
         $errno = $this->delete_table ('event_participants') && $errno;
         $errno = $this->delete_table ('event_holders') && $errno;
         $errno = $this->delete_table ('visited_countries_by_users') && $errno;
@@ -201,7 +197,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      * Delete the table whose name has been given as Input parameter
      * @param string $table_name
      */
-    function delete_table ($table_name)
+    private function delete_table ($table_name)
     {
         $errno = true;
         // Delete the table in the database
@@ -223,7 +219,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      *
      *  Create table for countries
      */
-    function create_countries_table ()
+    private function create_countries_table ()
     {
         // create new empty table inside the database
         // (if table does not already exist)
@@ -257,7 +253,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      *
      * 	 Create table for cities
      */
-    /*function create_cities_table ()
+    /*private function create_cities_table ()
     {
         // create new empty table inside the database
         // (if table does not already exist)
@@ -276,12 +272,12 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      *
      * Create table for event type
      */
-    function create_event_type_table ()
+    private function create_event_type_table ()
     {
         // create new empty table inside the database
         // (if table does not already exist)
         $sql = 'CREATE TABLE IF NOT EXISTS event_types (
-				event_type_name TEXT PRIMARY KEY
+				event_type_name TEXT NOT NULL PRIMARY KEY
 				);';	
         	
         // prepare and execute the sqlite request
@@ -294,7 +290,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      *
      * Create table for events
      */
-    function create_events_table ()
+    private function create_events_table ()
     {
         // create new empty table inside the database
         //(if table does not already exist)
@@ -306,11 +302,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
 				event_starting_date TEXT NOT NULL,
 				event_ending_date TEXT NOT NULL,
 				event_description TEXT,
-				event_address TEXT NOT NULL,
-				event_zipcode TEXT NOT NULL,
-				event_city_name TEXT NOT NULL,
-				event_country_name TEXT NOT NULL,
-				FOREIGN KEY (event_country_name) REFERENCES countries (country_name),
+				event_location_id INTEGER NOT NULL,
 				FOREIGN KEY (event_type) REFERENCES event_types (event_type_name)
 				);';
         	
@@ -324,12 +316,12 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      *
      *  Create table for languages
      */
-    function create_languages_table ()
+    private function create_languages_table ()
     {
         // create new empty table inside the database
         // (if table does not already exist)
         $sql = 'CREATE TABLE IF NOT EXISTS  languages (
-				language_name TEXT PRIMARY KEY
+				language_name TEXT NOT NULL PRIMARY KEY
 				);';
         	
         // prepare and execute the sqlite request
@@ -343,7 +335,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      *
      * Create table for languages that will be spoken at an event
      */
-    function create_event_languages_table ()
+    private function create_event_languages_table ()
     {
         // create new empty table inside the database
         // (if table does not already exist)
@@ -363,7 +355,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      *
      * Create table for languages
      */
-    function create_countries_languages_table ()
+    private function create_countries_languages_table ()
     {
         // create new empty table inside the database
         // (if table does not already exist)
@@ -383,7 +375,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      *
      * Create table for users that will be participating to an event
      */
-    function create_event_participants_table ()
+    private function create_event_participants_table ()
     {
         // create new empty table inside the database
         // (if table does not already exist)
@@ -404,7 +396,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      *
      * Create table for users that hold the event
      */
-    function create_event_holders_table ()
+    private function create_event_holders_table ()
     {
         // create new empty table inside the database
         // (if table does not already exist)
@@ -425,7 +417,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      *
      * Create table for users
      */
-    function create_users_table ()
+    private function create_users_table ()
     {
         // create new empty table inside the database
         // (if table does not already exist)
@@ -438,6 +430,8 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
 				user_nationality TEXT,
 				user_lastname TEXT,
 				user_firstname TEXT,
+				user_gender TEXT,
+				FOREIGN KEY (user_gender) REFERENCES genders (gender_type),
 				FOREIGN KEY (user_nationality) REFERENCES nationalities (nationality_name));
 				CREATE UNIQUE INDEX user_name_UNIQUE ON users (user_name);';
         	
@@ -451,7 +445,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
      *
      * Create table for countries that a user has already visited
      */
-    function create_visited_countries_table ()
+    private function create_visited_countries_table ()
     {
         // create new empty table inside the database
         // (if table does not already exist)
@@ -470,7 +464,7 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
     /**
      * Create table for all nationalities
      */
-    function create_nationalities_table () {
+    private function create_nationalities_table () {
         // create new empty table inside the database
         // (if table does not already exist)
         $sql = 'CREATE TABLE IF NOT EXISTS nationalities (
@@ -480,13 +474,74 @@ Class SqliteDbTableHanlder extends SqliteDbHanlder {
         // prepare and execute the sqlite request
         // return false if no connection with db
         return $this->prepare_and_execute_query ($sql);
+   }
+   
+ 	/**
+     * Create table for genders
+     */
+    private function create_genders_table () {
+        // create new empty table inside the database
+        // (if table does not already exist)
+        $sql = 'CREATE TABLE IF NOT EXISTS genders (
+				gender_type TEXT NOT NULL PRIMARY KEY
+				);';
+        	
+        // prepare and execute the sqlite request
+        // return false if no connection with db
+        return $this->prepare_and_execute_query ($sql);
+    }
+    
+    
+	/**
+     * Create table for locations
+     */
+    private function create_locations_table () {
+        // create new empty table inside the database
+        // (if table does not already exist)
+        $sql = 'CREATE TABLE IF NOT EXISTS locations (
+            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            latitude TEXT NOT NULL,
+            longitude TEXT NOT NULL,
+            bound_id INTEGER NOT NULL,
+            street_number TEXT,
+            street_name TEXT,
+            city_district TEXT,
+            city TEXT NOT NULL,
+            zipcode TEXT NOT NULL,
+            county TEXT,
+            county_code TEXT,
+            region TEXT,
+            region_code TEXT,
+            country TEXT NOT NULL,
+            country_index TEXT NOT NULL,
+            FOREIGN KEY (bound_id) REFERENCES bounds (id),
+            FOREIGN KEY (country) REFERENCES countries (country_name));
+		';
+        	
+        // prepare and execute the sqlite request
+        // return false if no connection with db
+        return $this->prepare_and_execute_query ($sql);
+    }
+    
+    
+	/**
+     * Create table for bounds locations
+     */
+    private function create_bounds_table () {
+        // create new empty table inside the database
+        // (if table does not already exist)
+        $sql = 'CREATE TABLE IF NOT EXISTS bounds (
+            id INTEGER NOT NULL PRIMARY KEY  AUTOINCREMENT,
+            south TEXT NOT NULL,
+            west TEXT NOT NULL,
+            north TEXT NOT NULL,
+            east TEXT NOT NULL);
+		';
+        	
+        // prepare and execute the sqlite request
+        // return false if no connection with db
+        return $this->prepare_and_execute_query ($sql);
     }
 }
-
-
-// parse configuration in the ini file
-//$dbhandler = new SqliteDbTableHanlder(db_parser (_INI_FILE_DIR,_SERVER_DIR));
-//$dbhandler->delete_all_tables();
-//$dbhandler->create_tables();
 
 ?>

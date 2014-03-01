@@ -61,7 +61,7 @@ class Login
      * Init the internal variable
      */
     Private function init () {
-        $db_parameters = db_parser (_INI_FILE_DIR,_SERVER_DIR);
+        $db_parameters = db_parser (_INI_DB_CONFIG_FILE,_SERVER_DIR);
         if (!empty($db_parameters)) {
             $this->db_sqlite_path = $db_parameters['db_path'];
             return true;
@@ -83,7 +83,7 @@ class Login
     private function performMinimumRequirementsCheck()
     {
         if (version_compare(PHP_VERSION, '5.3.7', '<')) {
-            echo "Sorry, Simple PHP Login does not run on a PHP version older than 5.3.7 !";
+            echo "Sorry, Befalol does not run on a PHP version older than 5.3.7 !";
         } elseif (version_compare(PHP_VERSION, '5.5.0', '<')) {
             require_once("libraries/password_compatibility_library.php");
             return true;
@@ -113,39 +113,6 @@ class Login
             // show "page", according to user's login status
             if ($this->getUserLoginStatus()) {
                 $this->showHomePage();
-                if (isset($_GET["action"])) {
-                    switch ($_GET["action"]) {
-                        case 'setpersonalinfo':
-                        case 'setpersonalinfo&changepwd':
-                            echo 'You can change your personnal data here <br/>';
-                            $this->SaveUserInformations();
-                            $this->showPageUserInformation();
-                            break;
-                        case 'createnewevent':
-                            echo 'You can create your new event here <br/>';
-                            $this->SaveEventInformations();
-                            $this->showPageEventCreation();
-                            break;
-                        case 'seeallusers':
-                            echo 'Below is the list of all website members <br/>';
-                            $this->showPageAllUsers();
-                            break;
-                        case 'seeyourevents':
-                            echo 'Below is the list of all your events <br/>';
-                            $this->showPageYourEvents();
-                            break;
-                        case 'seeallevents':
-                            echo 'Below is the list of all events <br/>';
-                            $this->showAllEvents();
-                            break;
-                        case 'seeevent':
-                            $this->showPageEventInformation();
-                            break;
-                        default:
-                            echo 'This is an unknown action';
-                            break;
-                    }
-                }
             } else {
                 $this->showPageLoginForm();
             }
@@ -192,6 +159,11 @@ class Login
     {
         if (!isset ($_SESSION)){
             session_start();
+            $_SESSION['_INI_GEO_KEYS_CONFIG'] = _INI_GEO_KEYS_CONFIG;
+            $_SESSION['_SERVER_DIR'] = _SERVER_DIR;
+            $_SESSION['_URL_PATH'] = _URL_PATH;
+            $_SESSION['_INI_DB_CONFIG_FILE'] = _INI_DB_CONFIG_FILE;
+            $_SESSION['_COMPOSER_FLAG'] = _COMPOSER_FLAG;
         }
     }
 
@@ -295,6 +267,7 @@ class Login
                 	'user_nationality' => html_entity_decode($result_row->user_nationality),
                 	'user_lastname' => html_entity_decode($result_row->user_lastname),
                 	'user_firstname' => html_entity_decode($result_row->user_firstname),
+                	'user_gender' => html_entity_decode($result_row->user_gender),
                 	'user_password_hash' => $result_row->user_password_hash);
                 $user = New User ($parameters);
                 $_SESSION['user'] = $user;
@@ -413,7 +386,7 @@ class Login
     {
         echo get_header();
         echo '<body>';
-        echo topbar_public();
+        echo topbar_index();
         
         echo '<div id="container">';
         if ($this->feedback) {
@@ -448,7 +421,7 @@ class Login
     {
         echo get_header();
         echo '<body>';
-        echo topbar_public();
+        echo topbar_index();
         echo '<div id="container">';
         if ($this->feedback) {
             echo $this->feedback . "<br/><br/>";
@@ -485,274 +458,13 @@ class Login
         echo get_footer();      
     }
 
-
-
-    /**
-     *
-     * show the Event information
-     */
-    private function showPageEventInformation ()
-    {
-        if ($this->feedback) {
-            echo $this->feedback . "<br/><br/>";
-        }
-        $user_flag = false;
-        // if an event has been selectioned 
-        if (isset($_GET['id'])) {
-           // if it is one held by the session user then process happens
-            if (isset( $_SESSION['user_events']) || isset( $_SESSION['events'])) {
-                foreach ($_SESSION['user_events'] as $event) {
-                    if ($event->get_id() == $_GET['id']) {
-                        // tell us that this event is one of the user
-                        $user_flag = true;
-                        $event_name = utf8_decode($event->get_name());
-                        $event_type = $event->get_type();
-                        $event_starting_date = $event->get_starting_date();
-                        $event_ending_date = $event->get_ending_date();
-                        $event_location = utf8_decode($event->get_location());
-                        $event_max_nb_participants = $event->get_max_nb_participants();
-                        $event_languages = $event->get_languages();
-                        $event_participants = array ();
-                        foreach ($event->get_participants() as $participant) {
-                            array_push($event_participants, utf8_decode($participant));
-                        }
-                        $event_description = utf8_decode($event->get_description());
-                        
-                        $r = '<h2>'.$event_name . ' is one of your events </h2>';
-                        //build it
-                        $r .= '<table>';
-                        $r .= display_row('Type', $event_type);
-                        $r .= display_row('Location:', $event_location);
-                        $r .= display_row('Check in:', $event_starting_date);
-                        $r .= display_row('Check out date:', $event_ending_date);
-                        $r .= display_row('Maximal number of participants:',
-                        $event_max_nb_participants);
-                        $r .= display_row('Languages spoken :',
-                        display_dropdownlist('', $event_languages, 0));
-                        $r .= display_row('Description:', $event_description);
-                        $r .= display_row('Participants:', display_dropdownlist('',
-                        $event_participants, 0));
-                        $r .= '<table/>';
-                        echo $r;
-                        break;
-                    }
-                }
-                // if the event is not a user's one, then we will allow read only
-                // and display the holder information
-                if ($user_flag == false) {
-                    $events = $_SESSION['events'];
-                    foreach ($events as $event) {
-                        if ($event->get_id() == $_GET['id']) {
-                            echo $event->display_event_information();
-                            break;
-                        }
-                    }
-                }
-            // in case of the events array has been initialized in the session,
-            // we ll get all the events informations in order to retrieve information
-            // of the one we want to display    
-            } else { 
-                $events = Event::select_all_events();
-                foreach ($events as $event) {
-                    if ($event->get_id() === $_GET['id']) {
-                        echo $event->display_event_information();
-                        break;
-                    }
-                }
-            }
-        } else {
-            $this->feedback = 'Impossible to retrieve event informations'.'<br/>';
-        }
-    }
-
-    /**
-     *
-     * show all members of the website
-     */
-    private function showPageAllUsers ()
-    {
-        if ($this->feedback) {
-            echo $this->feedback . "<br/><br/>";
-        }
-        if (isset($_SESSION))
-        {
-            $r = '<h2>Members</h2>';
-            //build it
-            $users = NULL;
-            $users = User::select_all_user();
-            if (!empty($users)) {
-                $r .= '<table>';
-                foreach ($users as $user) {
-                    $r .= display_row($user, '');
-                }
-                $r .= '</table>';
-                echo $r;
-                echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
-            }else {
-                $this->feedback = "There are no members, so who are you?
-    			(please advise the webmaster if you face this message)";
-            }
-        }
-    }
-    
-	/**
-     *
-     * show all the user events
-     */
-    private function showAllEvents ()
-    {
-        if ($this->feedback) {
-            echo $this->feedback . "<br/><br/>";
-        }
-        if (isset($_SESSION['user'])) {
-            $r = '<h2>Events</h2>';
-            //retrieve the user from session
-            $events = Event::select_all_events();
-            $_SESSION['events'] = $events;
-            if (!empty($events)) {
-                $event_types = Event::select_all_event_types();
-                sort($event_types);
-                $array_type_one = array ();
-                $array_type_two = array ();
-                $array_type_three = array ();
-                $array_type_four = array ();
-                //sort all event by event types
-                foreach ($events as $event) {
-                    switch ($event->get_type()) {
-                        case $event_types[0]:
-                            array_push($array_type_one, '<a href="' . 
-                            $_SERVER['SCRIPT_NAME'] . 
-							'?action=seeevent&id=' . $event->get_id() . '">'
-							.utf8_decode($event->get_name()).'</a>');
-                            break;
-                        case $event_types[1]:
-                            array_push($array_type_two, '<a href="' . 
-                            $_SERVER['SCRIPT_NAME'] . 
-							'?action=seeevent&id=' . $event->get_id() . '">'
-							.utf8_decode($event->get_name()).'</a>');
-                            break;
-                        case $event_types[2]:
-                            array_push($array_type_three, '<a href="' . 
-                            $_SERVER['SCRIPT_NAME'] . 
-							'?action=seeevent&id=' . $event->get_id() . '">'
-							.utf8_decode($event->get_name()).'</a>');
-                            break;
-                        case $event_types[3]:
-                            array_push($array_type_four, '<a href="' . 
-                            $_SERVER['SCRIPT_NAME'] . 
-							'?action=seeevent&id=' . $event->get_id() . '">'
-							.utf8_decode($event->get_name()).'</a>');
-                           break;
-                        default:
-                            echo 'This event has an invalid event type <br/>';
-                            break;
-                    }
-                }
-                // diplay the events in the table
-                $r .= '<table>';
-                $r .= display_col(array($event_types[0] => $array_type_one, 
-                    $event_types[1] => $array_type_two, 
-                    $event_types[2] => $array_type_three, 
-                    $event_types[3] => $array_type_four));
-                $r .= '</table>';
-                echo $r;
-                echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
-            }else {
-                $this->feedback = "You have never created any event.";
-            }
-        }else {
-            $this->feedback = "You must log in to access this function.";
-            return false;
-        }
-    }
-
-    /**
-     *
-     * show all the user events
-     */
-    private function showPageYourEvents ()
-    {
-        if ($this->feedback) {
-            echo $this->feedback . "<br/><br/>";
-        }
-        if (isset($_SESSION))
-        {
-            if (isset($_SESSION['user']) && (!empty($_SESSION['user']))) {
-                $r = '<h2>Your events</h2>';
-                //retrieve the user from session
-                $user = $_SESSION['user'];
-                $events = NULL;
-                if (!isset( $_SESSION['user_events'])) {
-                    $events = $user->select_user_events();
-                    $_SESSION['user_events'] = $events;
-                }else {
-                    $events =  $_SESSION['user_events'];
-                }
-                if (!empty($events)) {
-                    $event_types = Event::select_all_event_types();
-                    sort($event_types);
-                    $array_type_one = array ();
-                    $array_type_two = array ();
-                    $array_type_three = array ();
-                    $array_type_four = array ();
-                    //sort all event by event types
-                    foreach ($events as $event) {
-                        switch ($event->get_type()) {
-                            case $event_types[0]:
-                                array_push($array_type_one, '<a href="' . 
-                                $_SERVER['SCRIPT_NAME'] . 
-    							'?action=seeevent&id=' . $event->get_id() . '">'
-    							.utf8_decode($event->get_name()).'</a>');
-                                break;
-                            case $event_types[1]:
-                                array_push($array_type_two, '<a href="' . 
-                                $_SERVER['SCRIPT_NAME'] . 
-    							'?action=seeevent&id=' . $event->get_id() . '">'
-    							.utf8_decode($event->get_name()).'</a>');
-                                break;
-                            case $event_types[2]:
-                                array_push($array_type_three, '<a href="' . 
-                                $_SERVER['SCRIPT_NAME'] . 
-    							'?action=seeevent&id=' . $event->get_id() . '">'
-    							.utf8_decode($event->get_name()).'</a>');
-                                break;
-                            case $event_types[3]:
-                                array_push($array_type_four, '<a href="' . 
-                                $_SERVER['SCRIPT_NAME'] . 
-    							'?action=seeevent&id=' . $event->get_id() . '">'
-    							.utf8_decode($event->get_name()).'</a>');
-                               break;
-                            default:
-                                echo 'This event has an invalid event type <br/>';
-                                break;
-                        }
-                    }
-                    // diplay the events in the table
-                    $r .= '<table>';
-                    $r .= display_col(array($event_types[0] => $array_type_one, 
-                        $event_types[1] => $array_type_two, 
-                        $event_types[2] => $array_type_three, 
-                        $event_types[3] => $array_type_four));
-                    $r .= '</table>';
-                    echo $r;
-                    echo '<a href="' . $_SERVER['SCRIPT_NAME'] . '">Homepage</a>';
-                }else {
-                    $this->feedback = "You have never created any event.";
-                }
-            }else {
-                $this->feedback = "You must log in to access this function.";
-                return false;
-            }
-        }
-    }
-
-
-       
+  
+	      
     private function showHomePage () {
          /* Display page */
         echo get_header();
         echo '<body>';
-        echo topbar_user();
+        echo topbar_index_logged();
         echo '<div id="container">';
         
         if ($this->feedback) {
@@ -761,18 +473,18 @@ class Login
 
         echo '<div id="content">'; 
         echo 'Hello ' . $_SESSION['user']->get_string_attribute('user_name') . ', you are logged in.<br/><br/>';
-        echo '<a href="/befalol/php/userpage.php">Profile Page</a>'.'<br/>';
-        echo '<a href="/befalol/php/event.php">Post an Event</a>'.'<br/>';
-        echo '<a href="/befalol/php/events.php">List of all events</a>'.'<br/>';
-        echo '<a href="/befalol/index.php?action=logout">Log out</a><br/>';
+        echo '<a href="php/userpage.php">Profile Page</a>'.'<br/>';
+        echo '<a href="php/eventposting.php">Post an Event</a>'.'<br/>';
+        echo '<a href="php/myevents.php">My events</a>'.'<br/>';
+        echo '<a href="php/events.php">List of all events</a>'.'<br/>';
+        echo '<a href="?action=logout">Log out</a><br/>';
         echo '</div>'; //end content
         echo '</div>'; //end container
         echo '</body>';
         //echo $r;
         echo get_footer();
     }
-    
-        
+  
 }
 
 
@@ -793,6 +505,7 @@ class Login
     && check_no_digit($_POST['user_firstname'], false)
     && strlen($_POST['user_firstname']) <= 64
     && check_no_digit($_POST['user_nationality'], false)
+    && check_no_digit($_POST['user_gender'], false)
     && check_and_valid_date($_POST['user_birthday'], False)        
     && (!is_it_futur ($_POST['user_birthday']))) {
         $feedback['status'] = true;
@@ -821,6 +534,8 @@ class Login
         if you were not born :).";
     } elseif (!check_no_digit($_POST['user_nationality'], false)){
         $feedback['msg'] = "Your nationality doesn't match the field requirements";
+    } elseif (!check_no_digit($_POST['user_gender'], false)){
+        $feedback['msg'] = "Your gender is incorrect";
     } else {
         $feedback['msg'] = "An unknown error occurred.";
     }
@@ -853,6 +568,8 @@ class Login
             FILTER_SANITIZE_STRING));
             $user_firstname = utf8_encode(filter_var($_POST['user_firstname'], 
             FILTER_SANITIZE_STRING));
+            $user_gender = utf8_encode(filter_var($_POST['user_gender'], 
+            FILTER_SANITIZE_STRING));
             $user_password_hash = 
                 $_SESSION['user']->get_string_attribute('user_password_hash');
            
@@ -873,7 +590,8 @@ class Login
 				'user_nationality' => $user_nationality,
 				'user_lastname' => $user_lastname,
 				'user_firstname' => $user_firstname,
-                'user_password_hash' => $user_password_hash);
+                'user_password_hash' => $user_password_hash,
+            	'user_gender' => $user_gender);
             $user = new User ($parameters);
             	
             // save new datas in database;
@@ -952,6 +670,7 @@ class Login
             $user_nationality = utf8_encode($_SESSION['user']->get_string_attribute('user_nationality'));
             $user_lastname = utf8_encode($_SESSION['user']->get_string_attribute('user_lastname'));
             $user_firstname = utf8_encode($_SESSION['user']->get_string_attribute('user_firstname'));
+            $user_gender = utf8_encode($_SESSION['user']->get_string_attribute('user_gender'));
             $user_password_hash = password_hash($_POST['user_password_new'],
                  PASSWORD_DEFAULT);          
             	
@@ -964,7 +683,8 @@ class Login
 				'user_nationality' => $user_nationality,
 				'user_lastname' => $user_lastname,
 				'user_firstname' => $user_firstname,
-                'user_password_hash' => $user_password_hash);
+                'user_password_hash' => $user_password_hash,
+            	'user_gender' => $user_gender);
             $user = new User ($parameters);
             	
             // save new datas in database;
@@ -1118,7 +838,38 @@ class Login
                 array_push($event_languages_spoken, filter_var($language, 
                 FILTER_SANITIZE_STRING));
             }
-
+            
+            $keys = geoconfig_parser(_INI_GEO_KEYS_CONFIG, 'all');
+            $geocoder = new \Geocoder\Geocoder();
+            $adapter  = new \Geocoder\HttpAdapter\BuzzHttpAdapter();
+            $chain    = new \Geocoder\Provider\ChainProvider(array(
+                new \Geocoder\Provider\FreeGeoIpProvider($adapter),
+                new \Geocoder\Provider\HostIpProvider($adapter),
+                new \Geocoder\Provider\GoogleMapsProvider($adapter, 'fr_FR', 'France', true),
+                new \Geocoder\Provider\BingMapsProvider($adapter, $keys['bing']),
+                // ...
+            ));
+            
+            $geocoder->registerProvider($chain);
+            // if location information is already in the database, no need
+            // to geolocalize again. Just get the location id from the database
+            $location_id = Location::get_location_from_address($event_address,
+                $event_zipcode, $event_city, $event_country_name);
+            // but if it is not, then we geolocalize and add the new location in the database
+            if (!$location_id) {
+                try {
+                    $address = implode(', ', array ($event_address, $event_zipcode, 
+                                $event_city, $event_country_name));
+                    $geocode = $geocoder->geocode($address);
+                    $event_location = new Location(array('geocoded'=>$geocode->toArray()));
+                    $location_id = $event_location->insert_location();
+                } catch (Exception $e) {
+                    echo $e->getMessage();
+                }
+            }else {
+                // retrieve all the geocoding infos
+                $event_location = Location::get_location_from_id($location_id);
+            }
             //Get the user id to use as the holder_id
             $event_holders_ids = $_SESSION['user']->get_user_id();
              
@@ -1130,10 +881,7 @@ class Login
 	    	'event_max_nb_participants' => intval($event_max_nb_participants), 
 	    	'event_holders_ids' => $event_holders_ids, 
 	    	'event_languages' => $event_languages_spoken, 
-			'event_address' => $event_address,
-			'event_zipcode' => $event_zipcode,
-			'event_city_name' => $event_city,
-			'event_country_name' => $event_country_name,
+			'event_location' => $event_location,
 			'event_description' => $event_description);
             /*TODO: add exception around the object creation (This is not the only one)*/
             $event = new Event ($parameters);
