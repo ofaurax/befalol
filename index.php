@@ -13,7 +13,7 @@ require_once('login.php');
 
 if(!empty($_SERVER ['DOCUMENT_ROOT'])) {
     define ('_SERVER_DIR', $_SERVER ['DOCUMENT_ROOT']);
-    define ('_INI_FILE_DIR', _SERVER_DIR."/befalol/database/config.ini" );
+    define ('_INI_FILE_DIR', "database/config.ini" );
 }
 
 $login = new Login();
